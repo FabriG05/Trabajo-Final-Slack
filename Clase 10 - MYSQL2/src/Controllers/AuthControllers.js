@@ -1,4 +1,4 @@
-import ENVIRONMENT from "../Config/environment.config.js";
+import ENVIRONMENT from "../Config/Environment.config.js";
 import mailer_transporter from "../Config/Mailer.config.js";
 import userRepository from "../Repositories/UserRepository.js"
 import { generateHash, compareHash } from "../Utils/bcrypt.js"

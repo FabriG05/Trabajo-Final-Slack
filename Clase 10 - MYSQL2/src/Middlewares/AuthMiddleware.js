@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import ENVIRONMENT from "../Config/environment.config.js"
+import ENVIRONMENT from "../Config/Environment.config.js"
 import ServerError from "../Utils/Error.Utils.js"
 
 function authMiddleware(request, response, next) {
