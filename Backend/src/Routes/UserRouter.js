@@ -1,16 +1,16 @@
 import express from 'express'
 import { getUserById, getUsers } from '../Controllers/UserControllers.js'
 
-const userRouter = express.Router()
+const user_router = express.Router()
 
-userRouter.get(
+user_router.get(
     '/',
     getUsers
 )
 
-userRouter.get(
+user_router.get(
     '/:user_id',
     getUserById
 )
 
-export default userRouter
+export default user_router

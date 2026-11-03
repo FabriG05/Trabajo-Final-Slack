@@ -1,10 +1,28 @@
-import express, { response } from 'express'
+import express from 'express'
 import workspaceRepository from '../Repositories/WorkSpaceRepository.js'
 import memberRepository from '../Repositories/MemberRepository.js'
 import authMiddleware from '../Middlewares/AuthMiddleware.js'
-import workspaceMiddleware from '../Middlewares/workspaceMiddleware.js'
+import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
+import channelRouter from './ChannelRouter.js'
+import ServerError from '../Utils/Error.Utils.js'
 
 const workspaceRouter = express.Router()
+
+workspaceRouter.get(
+    '/',
+    authMiddleware,
+    async (request, response) => {
+        const obtainedWorkspaces = await memberRepository.getAllWorkspaceByUserId(request.user.id)
+        return response.status(200).send({
+            ok: true,
+            message: "All data retrieved successfully",
+            status: 200,
+            data: {
+                obtainedWorkspaces
+            }
+        })
+    }
+)
 
 workspaceRouter.post(
     '/',
@@ -36,7 +54,7 @@ workspaceRouter.post(
 workspaceRouter.get(
     '/:workspace_id',
     authMiddleware,
-    workspaceMiddleware(['Owner', 'Admin']),
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
     async (request, response) => {
         return response.status(200).send({
             ok: true,
@@ -49,55 +67,40 @@ workspaceRouter.get(
 )
 
 workspaceRouter.delete(
-    "/api/workspace/:workspaceId",
+    "/:workspace_id",
     authMiddleware,
     workspaceMiddleware(['Owner']),
     async (request, response) => {
-        workspaceRepository.deleteById(request.workspace._id)
+        const deletedWorkspace = await workspaceRepository.deleteById(request.workspace._id)
         return response.status(200).send({
             ok: true,
             message: "Workspace deleted successfully",
             data: {
-                deletedWorkspace: request.workspace
+                deletedWorkspace
             }
         })
     }
 )
 
 workspaceRouter.put(
-    "/api/workspace/:workspaceId",
+    "/:workspace_id",
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin']),
     async (request, response) => {
-        workspaceRepository.updateById(request.workspace._id)
+        const { name, description } = request.body
+        const updatedWorkspace = await workspaceRepository.updateById(request.workspace._id, { name, description })
         return response.status(200).send({
             ok: true,
             message: "Workspace updated successfully",
             data: {
-                updatedWorkspace: request.workspace
+                updatedWorkspace
             }
         })
     }
 )
 
-/* Tarea:
-- (todos) get /api/workspace/:workspace_id/members
-- (owner, admin) DELETE /api/workspace/:workspace_id/members/:member_id
-- (owner, admin) POST /api/workspace/:workspace_id/members/invite
-    body: email (el email del usuario a invitar)
-    - Revisar que el rol con el que se crea sea 'admin' o 'user'
-    - Revisar que el usuario a invitar exista
-    - Revisar que no este ya agregado al workspace (que tenga una membresia)
-    - Crear la membresia con una propiedad 'invitacion_aceptada': false
-    - Enviar un mail con un link para "aceptar invitacion" (debe tener una expiracion y debe enviar un token)
-        - Ese link hara un GET hacia /api/workspace/:workspace_id/members/accept-invite/:invitation_token
-
-- (todos) Unauthentified /api/workspace/:workspace_id/members/accept-invite/:invitation_token
-    - Verifica que el invitation_token sea valido y edita la membersia para marcar que lo acepto
-*/
-
 workspaceRouter.get(
-    "/api/workspace/:workspaceId/members",
+    "/:workspace_id/members",
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin', 'User']),
     async (request, response) => {
@@ -113,16 +116,17 @@ workspaceRouter.get(
 )
 
 workspaceRouter.delete(
-    "/api/workspace/:workspaceId/members/:memberId",
+    "/:workspace_id/members/:member_id",
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin']),
     async (request, response) => {
-        memberRepository.deleteById(request.member._id)
+        const { member_id } = request.params
+        const deletedMember = await memberRepository.deleteById(member_id)
         return response.status(200).send({
             ok: true,
             message: "Member deleted successfully.",
             data: {
-                deletedMember: request.member
+                deletedMember
             }
         })
     }
@@ -147,7 +151,7 @@ workspaceRouter.get(
             throw new ServerError("Invitation was already accepted.", 400);
         }
 
-        if (invitation.invitationExpiresAt < new Date()) {
+        if (invitation.invitationExpiresAt && invitation.invitationExpiresAt < new Date()) {
             throw new ServerError("Invitation has expired.", 400);
         }
 
@@ -159,25 +163,6 @@ workspaceRouter.get(
     }
 );
 
-workspaceRouter.get(
-    '/',
-    authMiddleware,
-    async (request, response) => {
-        
-        const obtainedWorkspaces = await memberRepository.getAllWorkspaceByUserId(request.user.id)
-        return response.status(200).send({
-            ok:true,
-            message: "Obtenidos todos los datos",
-            status: 200,
-            data: {
-                obtainedWorkspaces
-            }
-        })
-    }
-)
-
+workspaceRouter.use('/:workspace_id/channels', channelRouter)
 
 export default workspaceRouter
-
-
-/* workspace.router('/:workspaceId/channel', channelRouter) */

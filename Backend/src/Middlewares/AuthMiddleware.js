@@ -46,7 +46,7 @@ function authMiddleware(request, response, next) {
                 }
             )
         }
-        
+
         //Es un error inesperado, error genérico.
         console.error('[Server Error]:', error.message)
         return response.status(500).send(

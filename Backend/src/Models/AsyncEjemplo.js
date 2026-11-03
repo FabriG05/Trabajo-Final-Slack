@@ -13,8 +13,8 @@ async function getUsers (){
                 method: 'GET'
             }
         )
-        const fetchedContent = await result.json()
-        console.log(fetchedContent) // Si no le ponemos await, estoy pidiendo la información de fetch en cosola sin que el fetch haya vuelto.
+        const contentFetch = await result.json()
+        console.log(contentFetch) // Si no le ponemos await, estoy pidiendo la información de fetch en cosola sin que el fetch haya vuelto.
     } catch (error) {
         console.error("There was an error: ", error.message)
     }

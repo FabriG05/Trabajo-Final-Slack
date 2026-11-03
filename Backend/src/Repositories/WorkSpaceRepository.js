@@ -1,46 +1,25 @@
-import pool from "../Config/MySQL.config.js"
-
+import Workspace from "../Models/WorkSpaceModel.js";
 
 class WorkspaceRepository {
-    async create(name, description, creatorUserId) {
-        try {
-            const sqlQuery = 'INSERT INTO workspaces (name, description, creator_user_id) VALUES (?, ?, ?)'
-            const [result] = await pool.execute(sqlQuery, [name, description, creatorUserId])
-            const createdWorkspace = {
-                _id: result.insertId,
-                name,
-                description,
-                creator_user_id: creatorUserId
-            }
-            console.log('Workspace created successfully:', createdWorkspace);
-            return createdWorkspace;
-        } catch (error) {
-            console.error('Error in WorkspaceRepository:', error.message);
-            throw error;
-        }
+    async create(name, description) {
+        return await this.createWorkspace(name, description);
     }
 
-    //Alias para mantener compatibilidad con WorkspaceRouter que llama a createWorkspace
-    async createWorkspace(name, description, creatorUserId) {
-        return this.create(name, description, creatorUserId)
+    async createWorkspace(name, description) {
+        try {
+            const createdWorkspace = await Workspace.create({ name, description });
+            console.log('Workspace created successfully:', createdWorkspace);
+            return createdWorkspace; 
+        } catch (error) {
+            console.error('Error in WorkspaceRepository:', error.message);
+            throw error; 
+        }
     }
 
     async getById(workspaceId) {
         try {
-            const sqlQuery = 'SELECT * FROM workspaces WHERE id = ?'
-            const [result] = await pool.execute(sqlQuery, [workspaceId])
-            if (result.length === 0) {
-                return null
-            }
-            const workspace = result[0]
-            return {
-                _id: workspace.id,
-                name: workspace.name,
-                description: workspace.description,
-                creator_user_id: workspace.creator_user_id,
-                created_at: workspace.created_at,
-                updated_at: workspace.updated_at
-            }
+            const workspace = await Workspace.findById(workspaceId);
+            return workspace;
         } catch (error) {
             console.error('Error in WorkspaceRepository:', error.message);
             throw error;
@@ -49,27 +28,42 @@ class WorkspaceRepository {
 
     async deleteById(workspaceId) {
         try {
-            const sqlQuery = 'DELETE FROM workspaces WHERE id = ?'
-            const [result] = await pool.execute(sqlQuery, [workspaceId])
-            console.log('Workspace deleted successfully, affected rows:', result.affectedRows);
-            return result
+            const deletedWorkspace = await Workspace.findByIdAndDelete(workspaceId);
+            console.log('Workspace deleted successfully:', deletedWorkspace);
+            return deletedWorkspace;
         } catch (error) {
             console.error('Error in WorkspaceRepository:', error.message);
             throw error;
         }
     }
 
-    async updateById(workspaceId, name, description) {
+    async updateById(workspaceId, nameOrData, description) {
         try {
-            const sqlQuery = 'UPDATE workspaces SET name = ?, description = ? WHERE id = ?'
-            const [result] = await pool.execute(sqlQuery, [name, description, workspaceId])
-            console.log('Workspace updated successfully, affected rows:', result.affectedRows);
-
-            //Retornamos el workspace actualizado
-            if (result.affectedRows === 0) {
-                return null
+            let updateFields = {};
+            if (typeof nameOrData === 'object' && nameOrData !== null) {
+                updateFields = nameOrData;
+            } else {
+                if (nameOrData !== undefined) updateFields.name = nameOrData;
+                if (description !== undefined) updateFields.description = description;
             }
-            return await this.getById(workspaceId)
+
+            const updatedWorkspace = await Workspace.findByIdAndUpdate(
+                workspaceId,
+                updateFields,
+                { new: true, runValidators: true }
+            );
+            console.log('Workspace updated successfully:', updatedWorkspace);
+            return updatedWorkspace;
+        } catch (error) {
+            console.error('Error in WorkspaceRepository:', error.message);
+            throw error;
+        }
+    }
+
+    async getAll() {
+        try {
+            const workspaces = await Workspace.find();
+            return workspaces;
         } catch (error) {
             console.error('Error in WorkspaceRepository:', error.message);
             throw error;
@@ -77,5 +71,5 @@ class WorkspaceRepository {
     }
 }
 
-const workspaceRepository = new WorkspaceRepository()
-export default workspaceRepository
+const WorkSpace_Repository = new WorkspaceRepository()
+export default WorkSpace_Repository

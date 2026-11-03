@@ -1,18 +1,14 @@
-import pool from "../Config/MySQL.config.js"
+import Member from "../Models/MemberModel.js";
 
 class MemberRepository {
-    async create(userId, workspaceId, role) {
+    async create(FK_id_user, FK_id_workspace, role, extraData = {}) {
         try {
-            const sqlQuery = 'INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)'
-            // Mapeamos los roles del modelo Mongoose a los ENUM de MySQL
-            const mysqlRole = this.#mapRole(role)
-            const [result] = await pool.execute(sqlQuery, [workspaceId, userId, mysqlRole])
-            const createdMember = {
-                _id: result.insertId,
-                user_id: userId,
-                workspace_id: workspaceId,
-                role: mysqlRole
-            }
+            const createdMember = await Member.create({
+                FK_id_user,
+                FK_id_workspace,
+                role,
+                ...extraData
+            });
             console.log('Member created successfully DB:', createdMember);
             return createdMember;
         } catch (error) {
@@ -21,27 +17,30 @@ class MemberRepository {
         }
     }
 
-    async deleteById(memberId) {
+    async deleteById(member_id) {
         try {
-            const sqlQuery = 'DELETE FROM workspace_members WHERE id = ?'
-            const [result] = await pool.execute(sqlQuery, [memberId])
-            console.log('Member deleted successfully from DB, affected rows:', result.affectedRows);
-            return result
+            const deletedMember = await Member.findByIdAndDelete(member_id);
+            console.log('Member deleted successfully from DB:', deletedMember);
+            return deletedMember;
         } catch (error) {
             console.error('Error in MemberRepository:', error.message);
             throw error;
         }
     }
 
-    async updateRoleById(memberId, role) {
-        try {
-            const mysqlRole = this.#mapRole(role)
-            const sqlQuery = 'UPDATE workspace_members SET role = ? WHERE id = ?'
-            const [result] = await pool.execute(sqlQuery, [mysqlRole, memberId])
-            console.log('Role updated successfully in DB, affected rows:', result.affectedRows);
+    async delteById(member_id) {
+        return await this.deleteById(member_id);
+    }
 
-            const [updated] = await pool.execute('SELECT * FROM workspace_members WHERE id = ?', [memberId]) //Retornamos el miembro actualizado.
-            return updated[0] || null
+    async updateRoleById(member_id, role) {
+        try {
+            const updatedMember = await Member.findByIdAndUpdate(
+                member_id,
+                { role },
+                { new: true, runValidators: true }
+            );
+            console.log('Role updated successfully in DB:', updatedMember);
+            return updatedMember;
         } catch (error) {
             console.error('Error in MemberRepository:', error.message);
             throw error;
@@ -49,51 +48,103 @@ class MemberRepository {
     }
 
     async getAllWorkspacesByUserId(userId) {
-        //Reemplaza el .populate() de Mongoose con un JOIN de SQL.
-        const sqlQuery = `
-            SELECT wm.*, w.name AS workspace_name, w.created_at AS workspace_created_at
-            FROM workspace_members wm
-            JOIN workspaces w ON wm.workspace_id = w.id
-            WHERE wm.user_id = ?
-        `
-        const [result] = await pool.execute(sqlQuery, [userId])
-        console.log(result)
-        return result
+        try {
+            const result = await Member
+                .find({ FK_id_user: userId })
+                .populate(
+                    'FK_id_workspace',
+                    'name created_at description'
+                );
+            console.log(result);
+            return result;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
+    }
+
+    async getAllWorkspaceByUserId(userId) {
+        return await this.getAllWorkspacesByUserId(userId);
     }
 
     async getAllMembershipsByWorkspaceId(workspaceId) {
-        //Reemplaza el .populate() de Mongoose con un JOIN de SQL.
-        const sqlQuery = `
-            SELECT wm.*, u.username AS name, u.email
-            FROM workspace_members wm
-            JOIN users u ON wm.user_id = u.id
-            WHERE wm.workspace_id = ?
-        `
-        const [result] = await pool.execute(sqlQuery, [workspaceId])
-        console.log('Members of the workspace: ', result)
-        return result
+        try {
+            const result = await Member
+                .find({ FK_id_workspace: workspaceId })
+                .populate(
+                    'FK_id_user',
+                    'name email active'
+                );
+            console.log('Members of the workspace: ', result);
+            return result;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
+    }
+
+    async getAllMembershipsByWorkspaceid(workspaceId) {
+        return await this.getAllMembershipsByWorkspaceId(workspaceId);
+    }
+
+    async getByWorkspaceId(workspaceId) {
+        return await this.getAllMembershipsByWorkspaceId(workspaceId);
     }
 
     async getMembershipByUserAndWorkspace(userId, workspaceId) {
-        const sqlQuery = 'SELECT * FROM workspace_members WHERE user_id = ? AND workspace_id = ?'
-        const [result] = await pool.execute(sqlQuery, [userId, workspaceId])
-        return result[0] || null
+        try {
+            const membership = await Member.findOne({
+                FK_id_user: userId,
+                FK_id_workspace: workspaceId
+            });
+            return membership;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
     }
 
-    //Método privado para mapear roles del modelo Mongoose a los ENUM de MySQL3.
-    #mapRole(role) {
-        const roleMap = {
-            'Owner': 'OWNER',
-            'Admin': 'ADMIN',
-            'User': 'MEMBER',
-            'OWNER': 'OWNER',
-            'ADMIN': 'ADMIN',
-            'MEMBER': 'MEMBER'
+    async getByWorkspaceAndInvitationToken(workspaceId, invitationToken) {
+        try {
+            const invitation = await Member.findOne({
+                FK_id_workspace: workspaceId,
+                invitation_token: invitationToken
+            });
+            return invitation;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
         }
-        return roleMap[role] || 'MEMBER'
+    }
+
+    async acceptInvitation(invitationId) {
+        try {
+            const accepted = await Member.findByIdAndUpdate(
+                invitationId,
+                {
+                    invitation_accepted: true,
+                    invitation_token: null
+                },
+                { new: true }
+            );
+            return accepted;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
+    }
+
+    async getById(memberId) {
+        try {
+            const member = await Member.findById(memberId);
+            return member;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
     }
 }
 
-const memberRepository = new MemberRepository()
+const Member_Repository = new MemberRepository()
 
-export default memberRepository;
+export default Member_Repository;

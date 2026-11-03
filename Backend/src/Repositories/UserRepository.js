@@ -1,4 +1,4 @@
-import pool from "../Config/MySQL.config.js"
+import User from "../Models/UserModel.js"
 
 /* 
 Un repository es donde manejamos la comunicación con nuestros datos --> Generalmente la DB  
@@ -7,120 +7,70 @@ Siempre que podamos, usemos filtros del lado de la base de datos. Son mucho más
 
 class UserRepository {
     async create(name, email, password) {
-        const sqlQuery = 'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)'
-        //Nos devuelve los valores a inyectar en la query y devuelve un array con el resultado y las tablas.
-        const [result] = await pool.execute(
-            sqlQuery,
-            [name, email, password]
-        )
-        console.log('[UserRepository.create]:', result)
-        //Retornamos el id del usuario insertado
-        return { id: result.insertId, username: name, email }
+        return await User.create({ name: name, email: email, password: password })
     }
-
+    
     async get() {
-        const [result] = await pool.execute('SELECT * FROM users')
-        const formattedUsers = result.map(
-            (user) => {
-                return {
-                    _id: user.id,
-                    name: user.username,
-                    email: user.email,
-                    password: user.password_hash,
-                    active: user.active
-                }
-            }
-        )
-        return formattedUsers
+        const result = await User.find()
+        console.log(result)
+        return result
     }
 
-    async getByCreationDate(minDate, maxDate) {
-        const sqlQuery = 'SELECT * FROM users WHERE created_at >= ? AND created_at < ?'
-        const [result] = await pool.execute(sqlQuery, [minDate, maxDate])
+    async getByCreationDate(min_date, max_date) {
+        const result = await User.find({
+            created_at: {
+                $gte: new Date(min_date), //Establece una fecha mínima
+                $lt: new Date(max_date) //Establece una fecha máxima
+            }
+        })
         console.log(result)
         return result
     }
 
     async getByName(name) {
-        const sqlQuery = 'SELECT * FROM users WHERE username = ? AND active = TRUE'
-        const [result] = await pool.execute(sqlQuery, [name])
+        const result = await User.find({ name: name, active: true })
         return result
     }
 
     async getBySearchTerm(term) {
-        const sqlQuery = 'SELECT * FROM users WHERE username LIKE ? AND active = TRUE'
-        const [result] = await pool.execute(sqlQuery, [`%${term}%`])
+        const result = await User.find({ name: { $regex: term }, active: true })
         return result
     }
 
-    async getById(userId) {
-        const sqlQuery = 'SELECT * FROM users WHERE id = ?'
-        const [result] = await pool.execute(sqlQuery, [userId])
-        if (result.length === 0) {
-            return null
-        }
-        const user = result[0]
-        return {
-            _id: user.id,
-            name: user.username,
-            email: user.email,
-            password: user.password_hash,
-            active: user.active
-        }
+    async getById(user_id) {
+        const result = await User.findById(user_id)
+        return result
     }
 
     async getByEmail(email) {
-        const sqlQuery = 'SELECT * FROM users WHERE email = ?'
-        const [result] = await pool.execute(sqlQuery, [email])
-        if (result.length === 0) {
-            return null //Te devuelve Null si no encuentra o un objeto con el resultado. 
-        }
-        const user = result[0]
-        return {
-            _id: user.id,
-            name: user.username,
-            email: user.email,
-            password: user.password_hash,
-            active: user.active,
-            verified_email: user.verified_email ?? false
-        }
-    }
-
-    async deleteById(userId) {
-        const sqlQuery = 'DELETE FROM users WHERE id = ?'
-        const [result] = await pool.execute(sqlQuery, [userId])
+        const result = await User.findOne({ email: email }) //Te devuelve Null si no encuentra o un onbjeto con el resultado. 
         return result
     }
 
-    async softDeleteById(userId) {
-        const sqlQuery = 'UPDATE users SET active = FALSE WHERE id = ?'
-        const [result] = await pool.execute(sqlQuery, [userId])
+    async deleteById(user_id) {
+        const result = await User.findByIdAndDelete(user_id)
         return result
     }
 
-    async updateById(userId, data) {
-        //Construimos el SET dinámicamente según los campos que vengan en data
-        const fields = []
-        const values = []
+    async delteById(user_id) {
+        return await this.deleteById(user_id)
+    }
 
-        if (data.verified_email !== undefined || data.verifyEmail !== undefined) {
-            fields.push('verified_email = ?')
-            values.push(true)
-        }
-
-        if (fields.length === 0) {
-            return null
-        }
-
-        values.push(userId)
-        const sqlQuery = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`
-        const [result] = await pool.execute(sqlQuery, values)
+    async softDeleteByID(user_id) {
+        const result = await User.findByIdAndUpdate(user_id, { active: false })
         return result
+    }
+
+    async updateById(user_id, updateData = { verified_email: true }) {
+        return await User.findByIdAndUpdate(
+            user_id,
+            updateData,
+            { new: true }
+        )
     }
 }
 
 //EL UserRepository es un singleton --> solo tiene una instancia (Lo escribís una vez y lo usás en varios lados desp.).
-const userRepository = new UserRepository()
+const user_repository = new UserRepository()
 
-export default userRepository
-
+export default user_repository

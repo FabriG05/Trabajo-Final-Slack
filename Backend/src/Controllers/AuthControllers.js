@@ -1,8 +1,9 @@
 import ENVIRONMENT from "../Config/Environment.config.js";
 import mailer_transporter from "../Config/Mailer.config.js";
-import userRepository from "../Repositories/UserRepository.js"
-import { generateHash, compareHash } from "../Utils/bcrypt.js"
-import ServerError from "../Utils/Error.Utils.js"
+import user_repository from "../Repositories/UserRepository.js";
+import { generateHash, compareHash } from "../Utils/bcrypt.js";
+import ServerError from "../Utils/Error.Utils.js";
+import jwt from 'jsonwebtoken';
 
 
 /* 
@@ -41,31 +42,31 @@ export async function register(request, response) {
         );
     }
 
-    const existingUser = await userRepository.getByEmail(
+    const userAlreadyExists = await user_repository.getByEmail(
         normalizedEmail
     );
-    if (existingUser) {
+    if (userAlreadyExists) {
         throw new ServerError(
             "Email is already used",
             400
         );
     }
 
-    const hashedPassword = await generateHash(password, 12);
+    const passwordHash = await generateHash(password, 12);
     try {
-        await userRepository.create(
+        await user_repository.create(
             normalizedUsername,
             normalizedEmail,
-            hashedPassword
+            passwordHash
         );
     } catch (error) {
-        if (error.code === 'ER_DUP_ENTRY') { //error.code === 'ER_DUP_ENTRY' detecta un error específico de MySQL: intentó guardar un valor duplicado en un campo que tiene UNIQUE.
+        if (error.code === 11000) { //error.code === 11000 detecta un error específico de MongoDB: intentó guardar un valor duplicado en un campo que tiene unique: true.
             throw new ServerError("Email is already used", 400);
         }
         throw error;
     }
 
-    const emailVerificationToken = jwt.sign(
+    const verifyEmailToken = jwt.sign(
         {
             email: email
         },
@@ -83,7 +84,7 @@ export async function register(request, response) {
                 <body>
                     <h1>Welcome to our platform</h1>
                     <p>We need you to verify your email</p>
-                    <a href='${ENVIRONMENT.URL_BACKEND}/api/auth/verify_mail/${emailVerificationToken}'>Click here to verify your email</a>
+                    <a href='${ENVIRONMENT.URL_BACKEND}/api/auth/verify-email/${verifyEmailToken}'>Click here to verify your email</a>
                 </body>
             `
         }
@@ -120,7 +121,7 @@ export async function login(request, response) {
         );
     }
 
-    const user = await userRepository.getByEmail(normalizedEmail); //Busca por email al usuario y verificar que este exista.
+    const user = await user_repository.getByEmail(normalizedEmail); //Busca por email al usuario y verificar que este exista.
     if (!user) {
         throw new ServerError(
             "User not found",
@@ -142,12 +143,20 @@ export async function login(request, response) {
             name: user.name,
             email: user.email
         },
-        ENVIRONMENT._SECRET_KEY
+        ENVIRONMENT.JWT_SECRET_KEY
     )
 
     return response.status(200).send({
         ok: true,
         message: "You have logged in successfully",
+        data: {
+            token: authToken,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        }
     });
 }
 
@@ -156,26 +165,26 @@ export async function verifyEmail(request, response) {
     const { verifyEmailToken } = request.params
     const { email } = jwt.verify(verifyEmailToken, ENVIRONMENT.JWT_SECRET_KEY)
 
-    const foundUser = await userRepository.getByEmail(email)
+    const userFound = await user_repository.getByEmail(email)
 
-    if (!foundUser) {
+    if (!userFound) {
         throw new ServerError('User not found', 404)
     }
 
-    if(!foundUser.active){
+    if (!userFound.active) {
         throw new ServerError('The account was deactivated. Contact the client support if you think this is a mistake.', 400)
     }
 
-    if(foundUser.verified_email){
+    if (userFound.verified_email) {
         throw new ServerError('You have already verified your account', 400)
     }
 
-    userRepository.updateById(
-        foundUser._id,
-        {verifyEmail: true}
+    await user_repository.updateById(
+        userFound._id,
+        { verified_email: true }
     )
 
-    return response.status(200).send( 
+    return response.status(200).send(
         {
             ok: true,
             message: 'User verified successfully.'
