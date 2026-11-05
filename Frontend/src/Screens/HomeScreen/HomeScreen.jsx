@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import useRequest from '../../Hooks/useRequest'
 import { getAllWorkspaces } from '../../Services/WorkSpaceService'
 import { Link } from 'react-router'
-import WorkspaceList from '../../Components/WorkspaceList/WorkspaceList'
+import WorkspaceList from '../../Components/WorkspaceLists/WorkspaceLists'
 
 function HomeScreeen() {
     return (
