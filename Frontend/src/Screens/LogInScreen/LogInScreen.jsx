@@ -1,17 +1,35 @@
-import React, { useState } from 'react'
-import useForm from '../../Hooks/userForm'
-import { logIn } from '../../Services/AuthService'
+import React, { useEffect, useState } from 'react'
+import useForm from '../../Hooks/useForm'
+import { login } from '../../Services/AuthService'
+import useRequest from '../../Hooks/useRequest'
+import { useNavigate } from 'react-router'
 
 
-function LogInScreen() {
+function LoginScreen() {
 
     const initialState = { email: '', password: '' }
     const { formState, handleChangeInput } = useForm(initialState)
+    const { loading, response, error, sendRequest } = useRequest()
+    const navigate = useNavigate()
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault()
-        console.log('The user is trying to log in.', formState)
+        sendRequest(
+            () => login(formState.email, formState.password)
+        )
+        console.log('User attempting to log in', formState)
     }
+
+    useEffect( //Sirven para controlar la recarga/ejecución de una función.
+        () => {
+            if (response && response.data) {
+                localStorage.setItem('authToken', response.data.authToken)
+                navigate('/')
+            }
+        },
+        [response]
+    )
+
 
     return (
         <div>
@@ -37,10 +55,26 @@ function LogInScreen() {
                         onChange={handleChangeInput}
                     />
                 </div>
-                <button type='submit'>Log In</button>
+                {
+                    error
+                    &&
+                    !loading
+                    &&
+                    <span style={{ color: 'red' }}>{error}</span>
+                }
+
+                {
+                    loading
+                        ? <button type='submit' disabled={true}>Loading...</button>
+                        : <button type='submit'>Log In</button>
+                }
+
+                {
+                    response && !loading && <span style={{ color: 'greenyellow' }}>Login successful</span>
+                }
             </form>
         </div>
     )
 }
 
-export default LogInScreen
+export default LoginScreen

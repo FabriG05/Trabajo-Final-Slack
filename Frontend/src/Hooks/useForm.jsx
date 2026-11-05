@@ -1,23 +1,20 @@
 import { useState } from "react"
 
-function useForm (initialState){
-
+function useForm(initialState) {
     const [formState, setFormState] = useState(initialState)
 
-    function handleChangeInput (event){
+    function handleChangeInput(event) {
         const input = event.target
         const fieldName = input.name
         const fieldValue = input.value
 
-        setFormState(
-            (prevState) => {
-                return {...prevState, [fieldName]: fieldValue}
-            }
-        )
+        setFormState((prevState) => {
+            return { ...prevState, [fieldName]: fieldValue }
+        })
     }
 
     return {
-        formState, 
+        formState,
         handleChangeInput
     }
 }

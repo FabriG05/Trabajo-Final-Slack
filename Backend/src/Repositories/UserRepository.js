@@ -19,8 +19,8 @@ class UserRepository {
     async getByCreationDate(min_date, max_date) {
         const result = await User.find({
             created_at: {
-                $gte: new Date(min_date), //Establece una fecha mínima
-                $lt: new Date(max_date) //Establece una fecha máxima
+                $gte: new Date(min_date), //Establece una fecha mínima.
+                $lt: new Date(max_date) //Establece una fecha máxima.
             }
         })
         console.log(result)

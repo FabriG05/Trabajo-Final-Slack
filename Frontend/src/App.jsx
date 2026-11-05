@@ -7,9 +7,12 @@ import RegisterScreen from './Screens/RegisterScreen/RegisterScreen'
 const App = () => {
   return (
     <Routes>
-      <Route path='/' element={<HomeScreeen/>}/>
-      <Route path='/login' element={<LogInScreen/>}/>
-      <Route path='/register' element={<RegisterScreen/>} />
+      <Route element={<AuthMiddleware />}>
+        <Route path='/' element={<HomeScreeen />} />
+
+      </Route>
+      <Route path='/login' element={<LogInScreen />} />
+      <Route path='/register' element={<RegisterScreen />} />
     </Routes>
   )
 }
