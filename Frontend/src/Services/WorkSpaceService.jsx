@@ -1,21 +1,21 @@
 const API_URL = import.meta.env.VITE_APP_URL_BACKEND
 
-export async function getAllWorkspaces(){
-    const auth_token = localStorage.getItem('auth_token')
-    const response_http = await fetch(
-            API_URL + '/api/workspaces',
-            {
-                method: 'GET',
-                headers: {
-                    'Authorization': `bearer ${auth_token}`
-                }
+export async function getAllWorkspaces() {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + '/api/workspaces',
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
             }
-        )
-    const response_body = await response_http.json()
+        }
+    )
+    const responseBody = await responseHttp.json()
 
-    if(!response_body.ok){
-        throw new Error(response_body.message)
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
     }
 
-    return response_body
+    return responseBody
 }

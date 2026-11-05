@@ -1,7 +1,8 @@
-import useWorkspaceList from "../../Hooks/useWorkspaceList";
+import React from 'react'
+import { Link } from 'react-router'
+import useWorkspaceList from '../../Hooks/useWorkspaceList'
 
 export default function WorkspaceList() {
-
     const {
         workspaces_error,
         workspaces_loading,
@@ -9,33 +10,49 @@ export default function WorkspaceList() {
         reloadWorkspaces
     } = useWorkspaceList()
 
-
-
     if (workspaces_loading) {
         return <span>Loading...</span>
     }
-    else if (workspaces_error) {
-        return <div>
-            <span className='error-text'>Error: {workspaces_error}</span>
-            <button onClick={reloadWorkspaces}> Reload </button>
-        </div>
-    }
-    else if (!workspaces_response) {
-        return <div>
-            <span className='error-text'>Error: There was an error while getting the workspace list.</span>
-            <button onClick={reloadWorkspaces}> Reload </button>
-        </div>
-    }
-    else if (workspaces_response.data.workspaces.length === 0) {
-        return <p>You haven't created any workspace.</p>
-    }
-    else {
-        return <div>
-            {workspaces_response.data.workspaces.map((workspace) => (
-                <Link key={workspace.id} to={`/workspace/${workspace._id}`}>
-                    {workspace.nombre}
-                </Link>
-            ))}
-        </div>
-    }
+
+        if (workspaces_error) {
+            return (
+                <div>
+                    <span className='error-text'>Error: {workspaces_error}</span>
+                    <button onClick={reloadWorkspaces}>Reload</button>
+                </div>
+            )
+        }
+
+            if (!workspaces_response || !workspaces_response.data) {
+                return (
+                    <div>
+                        <span className='error-text'>Error: There was an error while getting the workspace list.</span>
+                        <button onClick={reloadWorkspaces}>Reload</button>
+                    </div>
+                )
+            }
+
+                const workspaces = workspaces_response.data.workspaces || workspaces_response.data.obtainedWorkspaces || []
+
+                if (workspaces.length === 0) {
+                    return <p>You haven't created any workspace.</p>
+                }
+
+                        return (
+                        <div>
+                            {workspaces.map((item) => {
+                                const workspace = item.FK_id_workspace || item
+                                const workspaceId = workspace._id || workspace.id || item._id
+                                const workspaceName = workspace.name || workspace.nombre || 'Workspace'
+
+                                return (
+                                    <div key={workspaceId}>
+                                        <Link to={`/workspace/${workspaceId}`}>
+                                            {workspaceName}
+                                        </Link>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        )
 }

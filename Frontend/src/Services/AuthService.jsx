@@ -6,9 +6,9 @@ export async function login(email, password) {
         {
             method: 'POST',
             headers: {
-                'Content-Type': "application/json" //Le decimos al servidor qué tipo de dato estamos enviando.
+                'Content-Type': "application/json" //Inform server about data type.
             },
-            body: JSON.stringify({ //Sive para transformar un objeto de Js en un JSON.
+            body: JSON.stringify({ //Transform JS object into JSON.
                 email: email,
                 password: password
             })
@@ -40,7 +40,8 @@ export async function register(username, email, password) {
             })
         }
     )
-    //Leemos el cuerpo de la respuesta como un JSON.
+
+    //Read the response body as JSON.
     const responseBody = await responseHttp.json()
 
     if (!responseBody.ok) {

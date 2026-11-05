@@ -3,7 +3,7 @@ import { Outlet, Navigate } from "react-router";
 
 
 export default function AuthMiddleware() {
-    const authToken = localStorage.getItem("authToken")
+    const authToken = localStorage.getItem("auth_token") || localStorage.getItem("authToken")
 
     if (authToken) {
         return <Outlet />

@@ -20,11 +20,15 @@ function LoginScreen() {
         console.log('User attempting to log in', formState)
     }
 
-    useEffect( //Sirven para controlar la recarga/ejecución de una función.
+    useEffect(
         () => {
             if (response && response.data) {
-                localStorage.setItem('authToken', response.data.authToken)
-                navigate('/')
+                const token = response.data.token || response.data.authToken
+                if (token) {
+                    localStorage.setItem('auth_token', token)
+                    localStorage.setItem('authToken', token)
+                    navigate('/')
+                }
             }
         },
         [response]

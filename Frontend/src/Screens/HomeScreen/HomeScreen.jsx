@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import useRequest from '../../Hooks/useRequest'
-import { getAllWorkspaces } from '../../Services/WorkSpaceService'
-import { Link } from 'react-router'
+import React from 'react'
 import WorkspaceList from '../../Components/WorkspaceLists/WorkspaceLists'
 
 function HomeScreeen() {
     return (
         <div>
-            <h1>Bienvenido a slack!</h1>
+            <h1>Welcome to Slack!</h1>
             <div>
-                <h2>Mis espacios de trabajo:</h2>
+                <h2>My Workspaces:</h2>
                 <WorkspaceList />
             </div>
         </div>
