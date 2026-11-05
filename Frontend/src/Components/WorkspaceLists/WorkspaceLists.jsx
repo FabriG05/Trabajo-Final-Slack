@@ -1,11 +1,11 @@
-import useWorkspaceList from '../../hooks/useWorkspaceList'
+import useWorkspaceList from "../../Hooks/useWorkspaceList";
 
 export default function WorkspaceList() {
 
     const {
-        workspaces_error, 
-        workspaces_loading, 
-        workspaces_response, 
+        workspaces_error,
+        workspaces_loading,
+        workspaces_response,
         reloadWorkspaces
     } = useWorkspaceList()
 
