@@ -1,0 +1,96 @@
+/* Full-screen white wrapper, centered card. */
+.auth-screen {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: var(--color-card);
+}
+
+/* Centered card that holds the form, without border or shadow. */
+.auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 40px 32px 28px;
+    background: var(--color-card);
+    border-radius: var(--radius-card);
+    text-align: center;
+}
+
+/* Slack wordmark above the form. */
+.auth-card__logo {
+    display: block;
+    margin: 0 auto 28px;
+    width: auto;
+}
+
+/* Slack-style headline, matching the original h1 styles.
+   min-height instead of height so growing titles never
+   overlap the helper text below. */
+.auth-card__title {
+    display: block;
+    box-sizing: border-box;
+    min-height: 92px;
+    margin: 0 0 12px;
+    color-scheme: light;
+    font-family: var(--font-family-heading);
+    font-size: 48px;
+    line-height: 1.15;
+    font-variant-ligatures: common-ligatures;
+    font-weight: 700;
+    letter-spacing: -0.75px;
+    color: rgb(29, 28, 29);
+}
+
+.auth-card__subtitle {
+    margin: 0 0 28px;
+    font-size: 15px;
+    color: var(--color-text-muted);
+}
+
+.auth-card__body {
+    text-align: left;
+}
+
+.auth-card__footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border-light);
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.auth-card__footer-link {
+    color: var(--color-primary-hover);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-card__footer-link:hover {
+    text-decoration: underline;
+}
+
+/* Small screens: let the card use almost the whole viewport. */
+@media (max-width: 480px) {
+    .auth-screen {
+        padding: 16px;
+        align-items: flex-start;
+    }
+
+    .auth-card {
+        padding: 28px 20px 20px;
+    }
+
+    .auth-card__title {
+        font-size: 32px;
+        letter-spacing: -0.5px;
+        min-height: 0;
+        line-height: 1.2;
+    }
+
+    .auth-card__subtitle,
+    .auth-card__footer {
+        font-size: 13px;
+    }
+}

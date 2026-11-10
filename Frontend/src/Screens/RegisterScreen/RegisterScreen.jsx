@@ -2,6 +2,8 @@ import React from 'react'
 import useForm from '../../Hooks/useForm'
 import useRequest from '../../Hooks/useRequest'
 import { register } from '../../Services/AuthService'
+import AuthCard from '../../Components/Auth/AuthCard'
+import AuthForm from '../../Components/Auth/AuthForm'
 
 function RegisterScreen() {
     const initialState = { name: '', email: '', password: '' }
@@ -17,56 +19,33 @@ function RegisterScreen() {
     }
 
     return (
-        <div>
-            <h1>User Registration</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="name">Name:</label>
-                    <input
-                        name='name'
-                        id='name'
-                        type='text'
-                        value={formState.name}
-                        onChange={handleChangeInput}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        name='email'
-                        id='email'
-                        type='email'
-                        value={formState.email}
-                        onChange={handleChangeInput}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        name='password'
-                        id='password'
-                        type='password'
-                        value={formState.password}
-                        onChange={handleChangeInput}
-                    />
-                </div>
-                {
-                    error
-                    &&
-                    !loading
-                    &&
-                    <span style={{ color: 'red' }}>{error}</span>
-                }
-                {
-                    loading
-                        ? <button type='submit' disabled={true}>Loading...</button>
-                        : <button type='submit'>Register</button>
-                }
-                {
-                    response && !loading && <span style={{ color: 'greenyellow' }}>Registration successful, check your email to verify your account</span>
-                }
-            </form>
-        </div>
+        <AuthCard
+            title='First of all, enter your email address'
+            subtitle='We suggest using the email address that you use at work.'
+            footer={{
+                text: 'Already have an account?',
+                linkText: 'Log in',
+                to: '/login'
+            }}
+        >
+            <AuthForm
+                fields={[
+                    { name: 'name', type: 'text', label: 'Name', autoComplete: 'name', placeholder: 'Your name' },
+                    { name: 'email', type: 'email', label: 'Email', autoComplete: 'email', placeholder: 'name@work-email.com' },
+                    { name: 'password', type: 'password', label: 'Password', autoComplete: 'new-password' }
+                ]}
+                values={formState}
+                onChange={handleChangeInput}
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                response={response}
+                submitLabel='Register'
+                loadingLabel='Registering...'
+                successTitle="You're all set!"
+                successMessage='Registration successful. Check your email to verify your account.'
+            />
+        </AuthCard>
     )
 }
 

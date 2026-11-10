@@ -1,0 +1,13 @@
+/* Stack fields, alerts and the submit button vertically. */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Compact spacing on small screens. */
+@media (max-width: 480px) {
+    .auth-form {
+        gap: 16px;
+    }
+}

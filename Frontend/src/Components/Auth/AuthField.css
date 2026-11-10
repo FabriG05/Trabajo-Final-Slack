@@ -1,0 +1,48 @@
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-field__label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* Slack-style inputs: gray border, Slack focus ring. */
+.auth-field__input {
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--color-text);
+    background: var(--color-card);
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-field__input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.auth-field__input:hover:not(:disabled) {
+    border-color: var(--color-text-muted);
+}
+
+.auth-field__input:focus {
+    /* Slack's focus ring: solid 1px halo plus a soft color-mix glow. */
+    border-color: #0000;
+    box-shadow:
+        0 0 0 1px var(--sk-focused-shadow-color),
+        0 0 0 5px color-mix(in srgb, var(--sk-focused-shadow-color) 30%, transparent);
+    outline: none;
+}
+
+.auth-field__input:disabled {
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}

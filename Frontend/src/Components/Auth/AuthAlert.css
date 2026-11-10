@@ -1,0 +1,48 @@
+.auth-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-left: 4px solid;
+    border-radius: var(--radius-alert);
+    text-align: left;
+    animation: auth-alert-in 0.25s ease;
+}
+
+.auth-alert__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.auth-alert__message {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+/* Server or network error feedback. */
+.auth-alert--error {
+    color: var(--color-error);
+    background: var(--color-error-bg);
+    border-left-color: var(--color-error);
+}
+
+/* Success confirmation feedback. */
+.auth-alert--success {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border-left-color: var(--color-success);
+}
+
+@keyframes auth-alert-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

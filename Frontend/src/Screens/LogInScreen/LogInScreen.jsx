@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import useForm from '../../Hooks/useForm'
 import { login } from '../../Services/AuthService'
 import useRequest from '../../Hooks/useRequest'
 import { useNavigate } from 'react-router'
+import AuthCard from '../../Components/Auth/AuthCard'
+import AuthForm from '../../Components/Auth/AuthForm'
 
 
 function LoginScreen() {
@@ -36,48 +38,29 @@ function LoginScreen() {
 
 
     return (
-        <div>
-            <h1>Log In</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        name='email'
-                        id='email'
-                        type='email'
-                        value={formState.email}
-                        onChange={handleChangeInput}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        name='password'
-                        id='password'
-                        type='password'
-                        value={formState.password}
-                        onChange={handleChangeInput}
-                    />
-                </div>
-                {
-                    error
-                    &&
-                    !loading
-                    &&
-                    <span style={{ color: 'red' }}>{error}</span>
-                }
-
-                {
-                    loading
-                        ? <button type='submit' disabled={true}>Loading...</button>
-                        : <button type='submit'>Log In</button>
-                }
-
-                {
-                    response && !loading && <span style={{ color: 'greenyellow' }}>Login successful</span>
-                }
-            </form>
-        </div>
+        <AuthCard
+            title='Enter your email address to sign in'
+            subtitle='Or choose another way to sign in.'
+            footer={{
+                text: 'New to Slack?',
+                linkText: 'Create an account',
+                to: '/register'
+            }}
+        >
+            <AuthForm
+                fields={[
+                    { name: 'email', type: 'email', label: 'Email', autoComplete: 'email', placeholder: 'name@work-email.com' },
+                    { name: 'password', type: 'password', label: 'Password', autoComplete: 'current-password' }
+                ]}
+                values={formState}
+                onChange={handleChangeInput}
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                submitLabel='Log in'
+                loadingLabel='Logging in...'
+            />
+        </AuthCard>
     )
 }
 
