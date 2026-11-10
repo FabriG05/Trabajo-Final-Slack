@@ -88,3 +88,53 @@ export async function resendVerificationEmail(email) {
 
     return responseBody
 }
+
+export async function forgotPassword(email) {
+    const responseHttp = await fetch(
+        API_URL + '/api/auth/forgot-password',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        }
+    )
+
+    //Read the response body as JSON.
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+export async function resetPassword(resetPasswordToken, password) {
+    // The token and the new password travel in the body, matching POST /api/auth/reset-password.
+    const responseHttp = await fetch(
+        API_URL + '/api/auth/reset-password',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify({
+                reset_password_token: resetPasswordToken,
+                password: password
+            })
+        }
+    )
+
+    //Read the response body as JSON.
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}

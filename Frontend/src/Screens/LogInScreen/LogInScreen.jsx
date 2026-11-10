@@ -61,6 +61,12 @@ function LoginScreen() {
                 loadingLabel='Logging in...'
             />
             <p className='auth-card__helper'>
+                Forgot your password?{' '}
+                <Link className='auth-card__footer-link' to='/forgot-password'>
+                    Reset it
+                </Link>
+            </p>
+            <p className='auth-card__helper'>
                 Did not receive your verification email?{' '}
                 <Link className='auth-card__footer-link' to='/resend-email-verification'>
                     Resend it
