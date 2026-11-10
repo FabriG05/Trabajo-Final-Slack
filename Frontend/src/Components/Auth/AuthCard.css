@@ -71,6 +71,14 @@
     text-decoration: underline;
 }
 
+/* Helper line with extra links below the form (e.g. resend verification email). */
+.auth-card__helper {
+    margin: 16px 0 0;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
 /* Small screens: let the card use almost the whole viewport. */
 @media (max-width: 480px) {
     .auth-screen {

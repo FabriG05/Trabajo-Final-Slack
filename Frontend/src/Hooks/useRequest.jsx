@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 /* 
-Este hook nos va a permitir manejar mediante estados la respuesta del servidor.
+    This hook lets us handle the server response through state.
 */
 
 function useRequest() {

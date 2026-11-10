@@ -9,7 +9,8 @@ const ENVIRONMENT = {
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
     GMAIL_USER: process.env.GMAIL_USER,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
-    URL_BACKEND: process.env.URL_BACKEND
+    URL_BACKEND: process.env.URL_BACKEND,
+    URL_FRONTEND: process.env.URL_FRONTEND
 }
 
 export default ENVIRONMENT

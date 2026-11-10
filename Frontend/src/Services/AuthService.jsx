@@ -50,3 +50,41 @@ export async function register(username, email, password) {
 
     return responseBody
 }
+
+export async function verifyEmail(verificationToken) {
+    // The token travels through the querystring, just like the email link sends it.
+    const responseHttp = await fetch(
+        API_URL + '/api/auth/verify-email?verification_token=' + encodeURIComponent(verificationToken),
+        {
+            method: 'GET'
+        }
+    )
+
+    //Read the response body as JSON.
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+export async function resendVerificationEmail(email) {
+    // The email travels through the path, matching the backend route: /api/auth/verify-email/:email/resend
+    const responseHttp = await fetch(
+        API_URL + '/api/auth/verify-email/' + encodeURIComponent(email) + '/resend',
+        {
+            method: 'GET'
+        }
+    )
+
+    //Read the response body as JSON.
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}

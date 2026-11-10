@@ -4,6 +4,8 @@ import AuthMiddleware from './Middlewares/AuthMiddleware'
 import HomeScreeen from './Screens/HomeScreen/HomeScreen'
 import LogInScreen from './Screens/LogInScreen/LogInScreen'
 import RegisterScreen from './Screens/RegisterScreen/RegisterScreen'
+import VerifyEmailScreen from './Screens/VerifyEmailScreen/VerifyEmailScreen'
+import ResendEmailVerificationScreen from './Screens/ResendEmailVerificationScreen/ResendEmailVerificationScreen'
 
 const App = () => {
   return (
@@ -13,6 +15,8 @@ const App = () => {
       </Route>
       <Route path='/login' element={<LogInScreen />} />
       <Route path='/register' element={<RegisterScreen />} />
+      <Route path='/verify-email' element={<VerifyEmailScreen />} />
+      <Route path='/resend-email-verification' element={<ResendEmailVerificationScreen />} />
     </Routes>
   )
 }

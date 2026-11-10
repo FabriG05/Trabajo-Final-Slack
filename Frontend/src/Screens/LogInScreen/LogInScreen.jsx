@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import useForm from '../../Hooks/useForm'
 import { login } from '../../Services/AuthService'
 import useRequest from '../../Hooks/useRequest'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import AuthCard from '../../Components/Auth/AuthCard'
 import AuthForm from '../../Components/Auth/AuthForm'
 
@@ -60,6 +60,12 @@ function LoginScreen() {
                 submitLabel='Log in'
                 loadingLabel='Logging in...'
             />
+            <p className='auth-card__helper'>
+                Did not receive your verification email?{' '}
+                <Link className='auth-card__footer-link' to='/resend-email-verification'>
+                    Resend it
+                </Link>
+            </p>
         </AuthCard>
     )
 }
