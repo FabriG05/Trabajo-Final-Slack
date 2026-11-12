@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-/* Carga en process.env las variables definidas en el archivo .env */
+/* Loads the variables defined in the .env file into process.env */
 dotenv.config()
 
 const ENVIRONMENT = {

@@ -14,12 +14,12 @@ import { verifyEmail } from "./Controllers/AuthControllers.js";
 
 connectMongoDB()
 
-/* Para hacer un server HTTP con NODE.js vamos a usar una librería que se llama express.js (Otra opción para TS podría ser nest.js) */
+/* To build an HTTP server with NODE.js we'll use a library called express.js (another option for TS could be nest.js) */
 
-const PORT = 8080 //Destimos un puerto de nuestra PC para que esta app se escuche.
-const app = express() //Con esto creamos una app express (server http).
+const PORT = 8080 // Assign a port on our machine for this app to listen on.
+const app = express() // With this we create an express app (HTTP server).
 
-// Middleware para permitir CORS (Cross-Origin Resource Sharing)
+// Middleware to enable CORS (Cross-Origin Resource Sharing)
 app.use((request, response, next) => {
     response.setHeader('Access-Control-Allow-Origin', '*');
     response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -30,18 +30,18 @@ app.use((request, response, next) => {
     next();
 });
 
-app.use(express.json()) //Configuramos nuestra API para que el body pueda ser tipo JSON. Esto de llama middleware.
-//Cada vez que le llegue una consulta, el middleware revisará si el request header.['Content.type']
+app.use(express.json()) // Configure our API so the body can be JSON. This is called a middleware.
+// Every time a request arrives, the middleware checks the request header['Content-Type']
 
 app.listen(
-    PORT, //Si este método listen funciona, nos trae esta segunda función.
+    PORT, // If this listen method succeeds, it runs this callback function.
     () => {
         console.log(`El servidor se está escuchando correctamente en https://localhost:${PORT}`)
     }
 )
 
 
-/* Todas las consultas que lleguen a /api/auth lo manejará el auth_router */
+/* All requests that arrive at /api/auth will be handled by auth_router */
 app.use('/api/auth', auth_router)
 app.use('/api/user', user_router)
 app.use('/api/workspace', workspaceRouter)

@@ -4,34 +4,34 @@ import ServerError from "../Utils/Error.Utils.js"
 
 function authMiddleware(request, response, next) {
     try {
-        // Cuando un usuario una operación que necesite auth, vamos a recibir el authToken de los headers de la consulta. Lo solemos esperar en un header llamado authorization.
+        // When a user performs an operation requiring auth, we receive the authToken in the request headers. We usually expect it in a header named authorization.
         const authHeader = request.headers.authorization
 
         if (!authHeader) {
             throw new ServerError("Auth header is required.", 400)
         }
 
-        const authParts = authHeader.split(" ") // "Bearer tokenValue" --> Acá hay dos partes. Necesito la segunda, la de la derecha.
+        const authParts = authHeader.split(" ") // "Bearer tokenValue" --> Here there are two parts. I need the second one, on the right.
         const authToken = authParts[1] // tokenValue
 
         if (!authToken || authParts[0] !== "Bearer") {
             throw new ServerError("Auth token is required or malformed.", 400)
         }
 
-        const { id, name, email } = jwt.verify(authToken, ENVIRONMENT.JWT_SECRET_KEY) //Verifica la firma para ver si coinciden.
-        request.user = { // Mutamos la request para que guarde dentro de la nueva propiedad user los datos de la credencial.
+        const { id, name, email } = jwt.verify(authToken, ENVIRONMENT.JWT_SECRET_KEY) // Verifies the signature to see if they match.
+        request.user = { // Mutate the request so it stores the credential data inside the new user property.
             id: id,
             name: name,
             email: email
         }
 
-        next() // Esto hace que se siga al siguiente Middleware / controlador.
+        next() // This moves on to the next middleware / controller.
 
     } catch (error) {
-        if ( // Si hubo un fallo al verificar el token,
-            error instanceof jwt.JsonWebTokenError || // Si está mal el token.
-            error instanceof jwt.NotBeforeError ||  // Si el token se creó en un tiempo futuro.
-            error instanceof jwt.TokenExpiredError // Si es un token expirado.
+        if ( // If there was a failure verifying the token,
+            error instanceof jwt.JsonWebTokenError || // If the token is invalid.
+            error instanceof jwt.NotBeforeError ||  // If the token was created in a future time.
+            error instanceof jwt.TokenExpiredError // If the token has expired.
         ) {
             return response.status(401).send({
                 ok: false,
@@ -47,7 +47,7 @@ function authMiddleware(request, response, next) {
             )
         }
 
-        // Es un error inesperado, error genérico.
+        // Unexpected error, generic error.
         console.error('[Server Error]:', error.message)
         return response.status(500).send(
             {

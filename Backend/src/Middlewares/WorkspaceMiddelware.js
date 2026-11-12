@@ -4,10 +4,10 @@ import ServerError from "../Utils/Error.Utils.js"
 
 
 /* 
-Validar que el espacio de trabajo exista.
-Validar que quien consulta sea parte de este espacio de trabajo.
-    Revisar que sea miembro de este workspace (que tenga membresia)
-Validar el rol de quien consulta.
+Validate that the workspace exists.
+Validate that the requester belongs to this workspace.
+    Check that they are a member of this workspace (that they have a membership)
+Validate the role of the requester.
 */
 
 function workspaceMiddleware(validRoles = []) {

@@ -1,6 +1,6 @@
 const errorMiddleware = (error, request, response, next) => {
     console.log("[Error Middleware]", error)
-    if (error.status) { // Si hay status es un error manejable, porque yo definí / contemplé ese error.
+    if (error.status) { // If there is a status, it's a manageable error, because I defined / accounted for that error.
         return response.status(error.status).send(
             {
                 ok: false,
@@ -8,7 +8,7 @@ const errorMiddleware = (error, request, response, next) => {
             }
         )
     }
-    else { // Es un error inesperado, error genérico.
+    else { // Unexpected error, generic error.
         console.error('[Server Error]:', error.message)
         return response.status(500).send(
             {
