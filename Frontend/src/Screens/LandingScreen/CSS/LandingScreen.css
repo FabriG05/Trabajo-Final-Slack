@@ -1,0 +1,8 @@
+/*
+    Root wrapper of the landing page. Each section brings its
+    own stylesheet; this only sets the page background.
+*/
+.landing-screen {
+    min-height: 100dvh;
+    background: var(--color-card);
+}

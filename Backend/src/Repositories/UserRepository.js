@@ -1,7 +1,7 @@
 import User from "../Models/UserModel.js"
 
 /* 
-Un repository es donde manejamos la comunicación con nuestros datos --> Generalmente la DB  
+Un repository es donde manejamos la comunicación con nuestros datos --> Generalmente la DB.
 Siempre que podamos, usemos filtros del lado de la base de datos. Son mucho más óptimos que un for of... 
 */
 
@@ -9,7 +9,7 @@ class UserRepository {
     async create(name, email, password) {
         return await User.create({ name: name, email: email, password: password })
     }
-    
+
     async get() {
         const result = await User.find()
         console.log(result)
@@ -19,8 +19,8 @@ class UserRepository {
     async getByCreationDate(min_date, max_date) {
         const result = await User.find({
             created_at: {
-                $gte: new Date(min_date), //Establece una fecha mínima.
-                $lt: new Date(max_date) //Establece una fecha máxima.
+                $gte: new Date(min_date), // Establece una fecha mínima.
+                $lt: new Date(max_date) // Establece una fecha máxima.
             }
         })
         console.log(result)
@@ -43,7 +43,7 @@ class UserRepository {
     }
 
     async getByEmail(email) {
-        const result = await User.findOne({ email: email }) //Te devuelve Null si no encuentra o un onbjeto con el resultado. 
+        const result = await User.findOne({ email: email }) // Te devuelve Null si no encuentra o un onbjeto con el resultado. 
         return result
     }
 
@@ -70,7 +70,7 @@ class UserRepository {
     }
 }
 
-//EL UserRepository es un singleton --> solo tiene una instancia (Lo escribís una vez y lo usás en varios lados desp.).
+// EL UserRepository es un singleton --> solo tiene una instancia (Lo escribís una vez y lo usás en varios lados desp.).
 const user_repository = new UserRepository()
 
 export default user_repository

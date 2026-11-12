@@ -1,0 +1,100 @@
+/*
+    Full-screen dimmed backdrop with a centered dialog, similar
+    to Slack's "create workspace" step.
+*/
+.create-workspace-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: rgba(29, 28, 29, 0.6);
+}
+
+.create-workspace-modal {
+    width: 100%;
+    max-width: 440px;
+    padding: 32px 28px 24px;
+    background: var(--color-card);
+    border-radius: var(--radius-card);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.create-workspace-modal__title {
+    margin: 0 0 6px;
+    font-family: var(--font-family-heading);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--color-text);
+}
+
+.create-workspace-modal__subtitle {
+    margin: 0 0 20px;
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.create-workspace-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+/* Cancel: quiet, bordered button. */
+.create-workspace-modal__button {
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.create-workspace-modal__button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.create-workspace-modal__button--secondary {
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text);
+}
+
+.create-workspace-modal__button--secondary:hover:not(:disabled) {
+    background: var(--color-surface-muted);
+}
+
+/* Confirm: same slack-purple as the auth primary button. */
+.create-workspace-modal__button--primary {
+    background: var(--color-primary);
+    border: none;
+    color: #ffffff;
+}
+
+.create-workspace-modal__button--primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+.create-workspace-modal__button--primary:active:not(:disabled) {
+    background: var(--color-primary-active);
+}
+
+@media (max-width: 480px) {
+    .create-workspace-modal {
+        padding: 24px 20px 20px;
+    }
+
+    .create-workspace-modal__actions {
+        flex-direction: column-reverse;
+    }
+
+    .create-workspace-modal__button {
+        width: 100%;
+    }
+}

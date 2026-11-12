@@ -1,0 +1,59 @@
+/*
+    Aubergine stats band: bold claim on top, three big numbers
+    with captions below, all white on brand purple.
+*/
+.stats-section {
+    padding: 56px 32px 64px;
+    background: var(--color-primary);
+    color: #ffffff;
+    text-align: center;
+}
+
+.stats-section__claim {
+    margin: 0 0 48px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.stats-section__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 280px));
+    justify-content: center;
+    gap: 48px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.stats-section__value {
+    margin: 0 0 14px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(48px, 6vw, 84px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1;
+}
+
+.stats-section__value sup {
+    font-size: 0.35em;
+    vertical-align: super;
+}
+
+.stats-section__caption {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.stats-section__caption sup {
+    font-size: 0.6em;
+}
+
+@media (max-width: 640px) {
+    .stats-section__grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+}

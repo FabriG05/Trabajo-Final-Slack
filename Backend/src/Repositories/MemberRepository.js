@@ -91,6 +91,30 @@ class MemberRepository {
         return await this.getAllMembershipsByWorkspaceId(workspaceId);
     }
 
+    /*
+        Active members of several workspaces in a single query:
+        a membership counts as active when the invitation was
+        already accepted. The user's name and active flag come
+        populated so the service can filter deactivated users.
+    */
+    async getActiveMembersByWorkspaceIds(workspaceIds) {
+        try {
+            const result = await Member
+                .find({
+                    FK_id_workspace: { $in: workspaceIds },
+                    invitation_accepted: true
+                })
+                .populate(
+                    'FK_id_user',
+                    'name active'
+                );
+            return result;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
+    }
+
     async getMembershipByUserAndWorkspace(userId, workspaceId) {
         try {
             const membership = await Member.findOne({

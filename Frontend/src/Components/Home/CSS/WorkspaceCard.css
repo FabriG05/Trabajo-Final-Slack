@@ -1,0 +1,85 @@
+/*
+    Workspace tile: white card that lifts on hover, with a
+    colored initial as the avatar, the name/description and
+    a small role badge on the right.
+*/
+.workspace-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.workspace-card:hover {
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Square avatar showing the first letter of the workspace name. */
+.workspace-card__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.workspace-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.workspace-card__name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-card__description {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Role badge, tinted per role. */
+.workspace-card__role {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+}
+
+.workspace-card__role--owner {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.workspace-card__role--admin {
+    background: #f4ecf7;
+    color: var(--color-primary-hover);
+}

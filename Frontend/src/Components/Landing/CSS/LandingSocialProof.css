@@ -1,0 +1,128 @@
+/*
+    White section after the purple stats band: centered title,
+    then two columns (adoption counters | G2 badges) divided by
+    a thin vertical rule, like the original.
+*/
+.social-proof {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 72px 32px 88px;
+    background: var(--color-card);
+}
+
+.social-proof__title {
+    margin: 0 0 48px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1d1c1d;
+    text-align: center;
+}
+
+.social-proof__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+/* Left column: stacked big counters */
+.social-proof__stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 36px;
+    padding-right: 56px;
+}
+
+.social-proof__stat {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.social-proof__value {
+    flex-shrink: 0;
+    min-width: 130px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #1d1c1d;
+}
+
+.social-proof__caption {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-text);
+}
+
+.social-proof__caption sup {
+    font-size: 0.6em;
+}
+
+/* Vertical divider between the columns */
+.social-proof__stats {
+    border-right: 1px solid var(--color-border-light);
+}
+
+/* Right column: heading + G2 badges grid */
+.social-proof__awards {
+    padding-left: 56px;
+}
+
+.social-proof__claim {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d1c1d;
+}
+
+.social-proof__text {
+    margin: 0 0 28px;
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+.social-proof__text sup {
+    font-size: 0.6em;
+}
+
+.social-proof__badges {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(100px, 150px));
+    gap: 20px 28px;
+    justify-content: start;
+}
+
+.social-proof__badge {
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 900px) {
+    .social-proof__columns {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .social-proof__stats {
+        border-right: none;
+        padding-right: 0;
+        align-items: center;
+    }
+
+    .social-proof__awards {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-proof {
+        padding: 56px 16px 64px;
+    }
+
+    .social-proof__badges {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

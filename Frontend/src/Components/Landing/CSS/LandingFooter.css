@@ -1,0 +1,147 @@
+/*
+    White footer: region + socials row, divider, then the Slack
+    mark next to five link columns (Product column carries a
+    second "Why Slack?" group below it).
+*/
+.landing-footer {
+    background: var(--color-card);
+    color: var(--color-text);
+}
+
+.landing-footer__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 32px 96px;
+}
+
+.landing-footer__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.landing-footer__region {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--color-text);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.landing-footer__region:hover {
+    background: var(--color-surface-muted);
+}
+
+.landing-footer__caret {
+    font-size: 10px;
+    color: var(--color-text-muted);
+}
+
+.landing-footer__socials {
+    display: flex;
+    gap: 6px;
+}
+
+.landing-footer__social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--color-text);
+    border-radius: 50%;
+    transition: background 0.15s ease;
+}
+
+.landing-footer__social:hover {
+    background: var(--color-surface-muted);
+}
+
+.landing-footer__divider {
+    margin: 24px 0 40px;
+    border: none;
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* Slack mark + five columns */
+.landing-footer__columns {
+    display: grid;
+    grid-template-columns: 120px repeat(5, 1fr);
+    gap: 32px;
+}
+
+.landing-footer__brand img {
+    width: 56px;
+    height: 56px;
+}
+
+.landing-footer__col {
+    min-width: 0;
+}
+
+.landing-footer__group + .landing-footer__group {
+    margin-top: 32px;
+}
+
+.landing-footer__group-title {
+    margin: 0 0 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+.landing-footer__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.landing-footer__link {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.landing-footer__link:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+    .landing-footer__columns {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .landing-footer__brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-footer__container {
+        padding: 32px 16px 64px;
+    }
+
+    .landing-footer__top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .landing-footer__columns {
+        grid-template-columns: 1fr;
+    }
+}

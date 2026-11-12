@@ -1,0 +1,154 @@
+/*
+    Purple marketing section: white text on the aubergine brand
+    color, feature pills with "New" badges, and the skills demo
+    video on the right with a working pause control.
+*/
+.ai-section {
+    padding: 72px 32px 80px;
+    background: var(--color-primary);
+    color: #ffffff;
+    text-align: center;
+}
+
+.ai-section__title {
+    max-width: 820px;
+    margin: 0 auto 20px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.ai-section__subtitle {
+    max-width: 680px;
+    margin: 0 auto 56px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ai-section__content {
+    display: grid;
+    grid-template-columns: minmax(300px, 440px) minmax(360px, 640px);
+    justify-content: center;
+    align-items: center;
+    gap: 64px;
+    max-width: 1180px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+/* Feature pills */
+.ai-section__pills {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ai-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    transition: background 0.15s ease;
+}
+
+.ai-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ai-pill__label {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ai-pill__badge {
+    flex-shrink: 0;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-primary-hover);
+    background: #f4ecf7;
+    border-radius: 999px;
+}
+
+/* Demo column: video + pause control */
+.ai-section__demo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ai-section__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* Working pause / play control */
+.ai-section__pause {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.ai-section__pause-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+/* Two bars = pause state. */
+.ai-section__pause-button span {
+    width: 3px;
+    height: 12px;
+    background: var(--color-primary);
+    border-radius: 2px;
+}
+
+.ai-section__pause-button span + span {
+    margin-left: 3px;
+}
+
+/* Single triangle = play state. */
+.ai-section__pause-play {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--color-primary);
+}
+
+/* Stack on narrow screens */
+@media (max-width: 1024px) {
+    .ai-section__content {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-section {
+        padding: 56px 16px 64px;
+    }
+}

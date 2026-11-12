@@ -1,0 +1,98 @@
+.landing-hero {
+    padding: 88px 24px 96px;
+    background: var(--color-card);
+    text-align: center;
+}
+
+.landing-hero__title {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(40px, 6vw, 68px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.05;
+    color: #1d1c1d;
+}
+
+.landing-hero__subtitle {
+    margin: 0 0 36px;
+    font-size: 18px;
+    color: var(--color-text);
+}
+
+.landing-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.landing-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-btn);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.landing-hero__cta--primary {
+    color: #ffffff;
+    background: var(--color-primary-hover);
+}
+
+.landing-hero__cta--primary:hover {
+    background: var(--color-primary);
+}
+
+/* Outlined purple button with the trailing arrow. */
+.landing-hero__cta--secondary {
+    color: var(--color-primary-hover);
+    background: transparent;
+    border: 1px solid var(--color-primary-hover);
+}
+
+.landing-hero__cta--secondary:hover {
+    background: #f4ecf7;
+}
+
+.landing-hero__arrow {
+    font-size: 16px;
+}
+
+/* Demo video in a rounded box, like the original. */
+.landing-hero__video-wrapper {
+    max-width: 780px;
+    margin: 48px auto 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}
+
+.landing-hero__video {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 480px) {
+    .landing-hero {
+        padding: 56px 16px 64px;
+    }
+
+    .landing-hero__actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .landing-hero__cta {
+        width: 100%;
+        justify-content: center;
+    }
+}

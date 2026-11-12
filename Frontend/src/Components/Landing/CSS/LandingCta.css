@@ -1,0 +1,74 @@
+/*
+    Purple closing band: big white headline, white filled button
+    next to an outlined white one.
+*/
+.cta-section {
+    padding: 88px 24px;
+    background: var(--color-primary);
+    text-align: center;
+}
+
+.cta-section__title {
+    max-width: 760px;
+    margin: 0 auto 36px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(32px, 4.5vw, 54px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: #ffffff;
+}
+
+.cta-section__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.cta-section__button {
+    padding: 16px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-btn);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* White filled, purple text. */
+.cta-section__button--primary {
+    color: var(--color-primary-hover);
+    background: #ffffff;
+}
+
+.cta-section__button--primary:hover {
+    background: #f4ecf7;
+}
+
+/* Transparent with white border. */
+.cta-section__button--secondary {
+    color: #ffffff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.cta-section__button--secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 480px) {
+    .cta-section {
+        padding: 64px 16px;
+    }
+
+    .cta-section__actions {
+        flex-direction: column;
+    }
+
+    .cta-section__button {
+        width: 100%;
+        text-align: center;
+    }
+}

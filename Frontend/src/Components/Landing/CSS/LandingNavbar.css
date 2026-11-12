@@ -1,0 +1,270 @@
+/*
+    Sticky white top bar: brand + menu on the left, search /
+    sign in / CTAs on the right. Uppercase purple CTAs like the
+    slack.com original.
+*/
+.landing-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 32px;
+    background: var(--color-card);
+    /* Subtle shadow instead of a border, so the bar stands out
+       from the content while scrolling. */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.landing-navbar__left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    min-width: 0;
+}
+
+.landing-navbar__brand {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.landing-navbar__logo {
+    display: block;
+    height: 34px;
+    width: auto;
+}
+
+.landing-navbar__menu {
+    display: flex;
+    gap: 4px;
+}
+
+/* Wrapper keeps the trigger in flow; the panel anchors to the
+   sticky navbar itself (full width, like the original). */
+.landing-navbar__menu-wrapper {
+    display: flex;
+}
+
+.landing-navbar__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: 8px;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.landing-navbar__link:hover {
+    background: var(--color-surface-muted);
+}
+
+/* Trigger state: caret flips up and the label tints purple. */
+.landing-navbar__trigger--open {
+    color: var(--color-primary-hover);
+}
+
+.landing-navbar__trigger--open .landing-navbar__caret {
+    transform: rotate(180deg);
+}
+
+.landing-navbar__caret {
+    font-size: 10px;
+    line-height: 1;
+    transform: translateY(1px);
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease;
+}
+
+/* Full-width panel hanging from the navbar. */
+.landing-navbar__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-card);
+    box-shadow: 0 24px 40px rgba(0, 0, 0, 0.14);
+    border-top: 1px solid var(--color-border-light);
+    animation: landing-dropdown-fade 0.12s ease;
+}
+
+@keyframes landing-dropdown-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landing-navbar__dropdown-columns {
+    display: grid;
+    gap: 40px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 36px 48px 40px;
+}
+
+.landing-navbar__column-title {
+    margin: 0 0 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.landing-navbar__column-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.landing-navbar__dropdown-link {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 10px;
+    margin: 0 -10px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.landing-navbar__dropdown-link:hover {
+    background: var(--color-surface-muted);
+}
+
+.landing-navbar__dropdown-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.landing-navbar__dropdown-link:hover .landing-navbar__dropdown-label {
+    color: var(--color-primary-hover);
+}
+
+.landing-navbar__dropdown-description {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.landing-navbar__new-badge {
+    padding: 3px 10px;
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary-hover);
+    background: #f4ecf7;
+    border-radius: 999px;
+    vertical-align: 2px;
+}
+
+/* Bottom row: Watch demo / Download Slack. */
+.landing-navbar__dropdown-footer {
+    display: flex;
+    gap: 32px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px 48px 28px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.landing-navbar__dropdown-footer-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.landing-navbar__dropdown-footer-link:hover {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+}
+
+.landing-navbar__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.landing-navbar__signin {
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.landing-navbar__signin:hover {
+    background: var(--color-surface-muted);
+}
+
+/* Uppercase CTA pair, like the original. */
+.landing-navbar__demo,
+.landing-navbar__get-started {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-btn);
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.landing-navbar__demo {
+    color: var(--color-primary-hover);
+    border: 1px solid var(--color-primary-hover);
+}
+
+.landing-navbar__demo:hover {
+    background: #f4ecf7;
+}
+
+.landing-navbar__get-started {
+    color: #ffffff;
+    background: var(--color-primary-hover);
+    border: 1px solid var(--color-primary-hover);
+}
+
+.landing-navbar__get-started:hover {
+    background: var(--color-primary);
+}
+
+/* Tablets and below: keep brand + auth actions, drop the menu. */
+@media (max-width: 1024px) {
+    .landing-navbar__menu {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .landing-navbar {
+        padding: 10px 16px;
+    }
+
+    .landing-navbar__demo {
+        display: none;
+    }
+}
