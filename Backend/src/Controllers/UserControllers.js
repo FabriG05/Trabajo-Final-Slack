@@ -32,3 +32,23 @@ export async function getUserById(request, response) {
         }
     )
 }
+
+export async function updateProfile(request, response) {
+    const { name, profile_photo } = request.body
+
+    const updatedUser = await user_service.updateProfile(
+        request.user.id,
+        name,
+        profile_photo
+    )
+
+    return response.status(200).send(
+        {
+            message: "Profile updated successfully",
+            ok: true,
+            data: {
+                user: updatedUser
+            }
+        }
+    )
+}

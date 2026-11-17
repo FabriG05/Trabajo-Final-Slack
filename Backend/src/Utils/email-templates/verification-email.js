@@ -4,11 +4,6 @@ import ENVIRONMENT from "../../Config/Environment.config.js";
     Email templates. One builder per email type, each returning the
     ready-to-send body. The controller/service layer only decides WHEN
     to send, the wording and styling live here.
-
-    Inline styles only: most email clients strip <style> tags, so all
-    CSS has to live in style attributes. The layout is table-based for
-    the same reason, with a colored header band, a call-to-action
-    button and a plain-text URL fallback.
 */
 export function buildVerificationEmailHtml(verifyEmailToken) {
     const verifyEmailUrl = ENVIRONMENT.URL_FRONTEND + '/verify-email?verification_token=' + verifyEmailToken

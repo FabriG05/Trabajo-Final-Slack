@@ -1,0 +1,4 @@
+/* Step 1 only narrows the width of its input, like the reference. */
+.onboarding-step__field--name {
+    max-width: 360px;
+}

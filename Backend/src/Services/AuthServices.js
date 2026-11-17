@@ -23,8 +23,8 @@ import { buildResetPasswordEmailHtml, buildResetPasswordEmailText } from "../Uti
 */
 async function sendVerificationEmail(email) {
     /* When a user logs in, we must hand them a signed credential that lets us state who they are.
-       The same mechanism backs the verification flow: JWT (JsonWebTokens) are Js objects turned
-       into strings by an algorithm called HS256. */
+        The same mechanism backs the verification flow: JWT (JsonWebTokens) are Js objects turned
+        into strings by an algorithm called HS256. */
     const verifyEmailToken = jwt.sign(
         {
             email: email
@@ -255,7 +255,7 @@ class AuthService {
             throw new ServerError('Email is required', 400)
         }
 
-        const normalizedEmail = email.trim().toLowerCase() //.trim() removes leading and trailing spaces. .toLowerCase() converts the whole text to lowercase.
+        const normalizedEmail = email.trim().toLowerCase()
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) { //Checks that the email looks like an email.
             throw new ServerError(
                 "Email is incorrect",

@@ -20,6 +20,36 @@ class UserService {
 
         return user
     }
+
+    async updateProfile(user_id, name, profile_photo) {
+        const updateData = {}
+
+        if (name !== undefined) {
+            const trimmedName = typeof name === 'string' ? name.trim() : ''
+
+            if (!trimmedName) {
+                throw new ServerError("Name cannot be empty.", 400)
+            }
+
+            updateData.name = trimmedName
+        }
+
+        if (profile_photo !== undefined) {
+            if (profile_photo !== null && typeof profile_photo !== 'string') {
+                throw new ServerError("Profile photo must be a base64 string.", 400)
+            }
+
+            updateData.profile_photo = profile_photo
+        }
+
+        const updatedUser = await user_repository.updateById(user_id, updateData)
+
+        if (!updatedUser) {
+            throw new ServerError("User not found", 404)
+        }
+
+        return updatedUser
+    }
 }
 
 export default new UserService()

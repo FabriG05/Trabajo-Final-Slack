@@ -1,0 +1,116 @@
+/*
+    Shared base styles for the three onboarding steps: headline,
+    subtitle, Slack-style input with character counter, feedback
+    error and the purple "Next" button.
+*/
+.onboarding-step {
+    max-width: 560px;
+}
+
+.onboarding-step__title {
+    margin: 0 0 14px;
+    font-family: var(--font-family-heading);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.onboarding-step__subtitle {
+    margin: 0 0 32px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #b9bcc0;
+}
+
+.onboarding-step__form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.onboarding-step__field {
+    position: relative;
+    width: 100%;
+}
+
+/* Slack-style dark input: teal border and the remaining-character
+   counter sitting inside, on the right. */
+.onboarding-step__input {
+    width: 100%;
+    padding: 15px 56px 15px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #ffffff;
+    background: transparent;
+    border: 2px solid #2e9db4;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.onboarding-step__input::placeholder {
+    color: #8b8f94;
+}
+
+.onboarding-step__input:focus {
+    border-color: #36c5f0;
+    box-shadow: 0 0 0 3px rgba(54, 197, 240, 0.25);
+}
+
+.onboarding-step__input:disabled {
+    opacity: 0.6;
+}
+
+.onboarding-step__counter {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #8b8f94;
+    pointer-events: none;
+}
+
+/* Dark-theme error text, used by every step. */
+.onboarding-step__error {
+    margin: 14px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-error);
+}
+
+/* Purple "Next" button shared by the three steps. */
+.onboarding-step__next {
+    margin-top: 32px;
+    padding: 12px 40px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    background: var(--color-primary-hover);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.onboarding-step__next:hover:not(:disabled) {
+    background: var(--color-primary);
+}
+
+.onboarding-step__next:disabled {
+    background: #3f4448;
+    color: #9a9ea3;
+    cursor: default;
+}
+
+@media (max-width: 480px) {
+    .onboarding-step__title {
+        font-size: 30px;
+    }
+
+    .onboarding-step__subtitle {
+        font-size: 15px;
+    }
+}

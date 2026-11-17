@@ -8,6 +8,15 @@ const errorMiddleware = (error, request, response, next) => {
             }
         )
     }
+    else if (error.name === 'ValidationError') {
+        // Mongoose schema validation failures are client mistakes: report them as 400 with the real message, not as a 500.
+        return response.status(400).send(
+            {
+                ok: false,
+                message: error.message
+            }
+        )
+    }
     else { // Unexpected error, generic error.
         console.error('[Server Error]:', error.message)
         return response.status(500).send(

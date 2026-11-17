@@ -2,26 +2,11 @@ import React from 'react'
 import { useNavigate } from 'react-router'
 import WorkspaceList from '../../../Components/WorkspaceLists/JSX/WorkspaceLists'
 import WorkspaceCard from '../../../Components/Home/JSX/WorkspaceCard'
-import CreateWorkspaceModal from '../../../Components/Home/JSX/CreateWorkspaceModal'
-import useCreateWorkspace from '../../../Hooks/useCreateWorkspace'
-import useWorkspaceList from '../../../Hooks/useWorkspaceList'
 import slackLogo from '../../../assets/slackLogo.svg'
 import '../CSS/HomeScreen.css'
 
 function HomeScreeen() {
     const navigate = useNavigate()
-    const {
-        workspaces_error,
-        workspaces_loading,
-        reloadWorkspaces
-    } = useWorkspaceList()
-    const {
-        create_loading,
-        create_error,
-        submitCreateWorkspace
-    } = useCreateWorkspace(reloadWorkspaces)
-
-    const [modalOpen, setModalOpen] = React.useState(false)
 
     function handleSignOut() {
         localStorage.removeItem('auth_token')
@@ -29,11 +14,10 @@ function HomeScreeen() {
         navigate('/login')
     }
 
-    async function handleCreateWorkspace(name, description) {
-        const response = await submitCreateWorkspace(name, description)
-        if (response) {
-            setModalOpen(false)
-        }
+    // The "create a workspace" action lives on its own onboarding
+    // screen; this screen only links to it.
+    function handleCreateWorkspace() {
+        navigate('/create-workspace')
     }
 
     // The list hook already owns loading/error/empty rendering;
@@ -60,7 +44,7 @@ function HomeScreeen() {
                     <h1 className='home-workspaces__title'>My Workspaces</h1>
                     <button
                         className='home-workspaces__create'
-                        onClick={() => setModalOpen(true)}
+                        onClick={handleCreateWorkspace}
                     >
                         + Create a workspace
                     </button>
@@ -95,7 +79,7 @@ function HomeScreeen() {
                             </p>
                             <button
                                 className='home-workspaces__create home-workspaces__create--big'
-                                onClick={() => setModalOpen(true)}
+                                onClick={handleCreateWorkspace}
                             >
                                 Create a workspace
                             </button>
@@ -116,14 +100,6 @@ function HomeScreeen() {
                     )}
                 />
             </main>
-
-            <CreateWorkspaceModal
-                open={modalOpen}
-                submitting={create_loading}
-                error={create_error}
-                onClose={() => setModalOpen(false)}
-                onSubmit={handleCreateWorkspace}
-            />
         </div>
     )
 }

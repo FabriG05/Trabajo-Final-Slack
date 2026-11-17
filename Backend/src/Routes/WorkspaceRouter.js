@@ -7,7 +7,8 @@ import {
     updateWorkspace,
     getWorkspaceMembers,
     deleteWorkspaceMember,
-    acceptInvitation
+    acceptInvitation,
+    createInvitations
 } from '../Controllers/WorkspaceControllers.js'
 import authMiddleware from '../Middlewares/AuthMiddleware.js'
 import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
@@ -57,6 +58,13 @@ workspaceRouter.delete(
 workspaceRouter.get(
     "/:workspace_id/members/accept-invite/:invitation_token",
     acceptInvitation
+)
+
+workspaceRouter.post(
+    "/:workspace_id/invitations",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin']),
+    createInvitations
 )
 
 workspaceRouter.use('/:workspace_id/channels', channelRouter)

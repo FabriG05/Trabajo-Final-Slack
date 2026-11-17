@@ -5,6 +5,7 @@ import GuestMiddleware from './Middlewares/GuestMiddleware'
 import PlaceholderScreen from './Screens/PlaceholderScreen/JSX/PlaceholderScreen'
 import LandingScreen from './Screens/LandingScreen/JSX/LandingScreen'
 import HomeScreeen from './Screens/HomeScreen/JSX/HomeScreen'
+import CreateWorkspaceScreen from './Screens/CreateWorkspaceScreen/JSX/CreateWorkspaceScreen'
 import LogInScreen from './Screens/LogInScreen/JSX/LogInScreen'
 import RegisterScreen from './Screens/RegisterScreen/JSX/RegisterScreen'
 import VerifyEmailScreen from './Screens/VerifyEmailScreen/JSX/VerifyEmailScreen'
@@ -20,6 +21,7 @@ const App = () => {
       </Route>
       <Route element={<AuthMiddleware />}>
         <Route path='/home' element={<HomeScreeen />} />
+        <Route path='/create-workspace' element={<CreateWorkspaceScreen />} />
       </Route>
       <Route path='/login' element={<LogInScreen />} />
       <Route path='/register' element={<RegisterScreen />} />

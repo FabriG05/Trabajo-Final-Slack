@@ -91,12 +91,6 @@ class MemberRepository {
         return await this.getAllMembershipsByWorkspaceId(workspaceId);
     }
 
-    /*
-        Active members of several workspaces in a single query:
-        a membership counts as active when the invitation was
-        already accepted. The user's name and active flag come
-        populated so the service can filter deactivated users.
-    */
     async getActiveMembersByWorkspaceIds(workspaceIds) {
         try {
             const result = await Member

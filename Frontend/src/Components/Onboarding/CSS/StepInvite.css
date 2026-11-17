@@ -1,0 +1,103 @@
+/* Step 3: email invitation form with the Google contacts row and
+   the "Next" + "Copy invitation link" action pair. */
+.step-invite__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 520px;
+    margin-bottom: 10px;
+}
+
+.step-invite__label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.step-invite__google {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #36c5f0;
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.step-invite__google-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.step-invite__textarea {
+    width: 100%;
+    max-width: 520px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #ffffff;
+    background: transparent;
+    border: 2px solid #2e9db4;
+    border-radius: 10px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s ease;
+}
+
+.step-invite__textarea::placeholder {
+    color: #8b8f94;
+}
+
+.step-invite__textarea:focus {
+    border-color: #36c5f0;
+    box-shadow: 0 0 0 3px rgba(54, 197, 240, 0.25);
+}
+
+.step-invite__textarea:disabled {
+    opacity: 0.6;
+}
+
+.step-invite__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.step-invite__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    background: transparent;
+    border: 1px solid #6b6f74;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.step-invite__copy:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #9a9ea3;
+}
+
+.step-invite__copy:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.step-invite__copy-icon {
+    width: 16px;
+    height: 16px;
+    fill: #ffffff;
+}

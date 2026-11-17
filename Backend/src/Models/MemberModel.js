@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { UserCollection } from "./UserModel.js";
 import { WorkspaceCollection } from "./WorkSpaceModel.js";
 
-// For now, we'll put FK but it's bad practice
+// For now, we'll put FK but it's not recommended.
 const memberSchema = new mongoose.Schema({
     FK_id_user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: UserCollection },
     FK_id_workspace: { type: mongoose.Schema.Types.ObjectId, required: true, ref: WorkspaceCollection },

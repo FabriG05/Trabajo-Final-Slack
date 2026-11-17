@@ -1,6 +1,8 @@
 import workspaceRepository from "../Repositories/WorkSpaceRepository.js";
 import memberRepository from "../Repositories/MemberRepository.js";
+import userRepository from "../Repositories/UserRepository.js";
 import ServerError from "../Utils/Error.Utils.js";
+import crypto from "crypto";
 
 /*
     Workspace service. This layer holds the business logic of the
@@ -83,11 +85,6 @@ class WorkspaceService {
         };
     }
 
-    /*
-        The workspace itself and the membership of the requester are
-        already validated and attached to the request by the workspace
-        middleware, so the read only needs what the middleware found.
-    */
     async getWorkspaceById(workspace) {
         return workspace;
     }
@@ -128,6 +125,73 @@ class WorkspaceService {
         }
 
         await memberRepository.acceptInvitation(invitation._id);
+    }
+
+    async createInvitations(workspaceId, emails) {
+        if (!Array.isArray(emails)) {
+            throw new ServerError("Emails must be an array.", 400);
+        }
+
+        // Normalize, remove duplicates and keep only well-formed emails.
+        const normalizedEmails = [...new Set(
+            emails
+                .filter((email) => typeof email === 'string')
+                .map((email) => email.trim().toLowerCase())
+                .filter((email) => email.length > 0)
+        )];
+
+        if (normalizedEmails.length === 0) {
+            throw new ServerError("At least one email address is required.", 400);
+        }
+
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (normalizedEmails.some((email) => !EMAIL_REGEX.test(email))) {
+            throw new ServerError("One or more email addresses are not valid.", 400);
+        }
+
+        const invited = [];
+        const notFound = [];
+        const alreadyMembers = [];
+
+        // Expiration shared by every invitation created in this batch.
+        const invitationExpiresAt = new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000
+        );
+
+        for (const email of normalizedEmails) {
+            const user = await userRepository.getByEmail(email);
+
+            if (!user || !user.active) {
+                notFound.push(email);
+                continue;
+            }
+
+            const existingMembership =
+                await memberRepository.getMembershipByUserAndWorkspace(
+                    user._id,
+                    workspaceId
+                );
+
+            if (existingMembership) {
+                alreadyMembers.push(email);
+                continue;
+            }
+
+            await memberRepository.create(
+                user._id,
+                workspaceId,
+                'User',
+                {
+                    invitation_token: crypto.randomBytes(16).toString('hex'),
+                    invitation_expires_at: invitationExpiresAt
+                }
+            );
+
+            invited.push(email);
+        }
+
+        return { invited, not_found: notFound, already_members: alreadyMembers };
     }
 }
 

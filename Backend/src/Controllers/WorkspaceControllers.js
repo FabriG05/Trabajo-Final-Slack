@@ -127,3 +127,20 @@ export async function acceptInvitation(request, response) {
         message: "Invitation accepted successfully.",
     });
 }
+
+export async function createInvitations(request, response) {
+    const { emails } = request.body;
+
+    const invitationSummary = await workspace_service.createInvitations(
+        request.workspace._id,
+        emails
+    );
+
+    return response.status(201).send({
+        ok: true,
+        message: "Invitations processed successfully.",
+        data: {
+            invitationSummary
+        }
+    });
+}

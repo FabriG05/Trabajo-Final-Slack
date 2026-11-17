@@ -1,0 +1,276 @@
+/*
+    Mockup of the workspace UI (dark purple sidebar + white main
+    panel) shown next to the onboarding form. Everything is drawn
+    with CSS so the texts can update live.
+*/
+.workspace-preview {
+    display: flex;
+    width: 470px;
+    max-width: 100%;
+    height: 430px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    text-align: left;
+    user-select: none;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+/* Left rail */
+.workspace-preview__rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 46px;
+    padding: 12px 0;
+    background: #542963;
+}
+
+.workspace-preview__workspace-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffffff;
+    background: #e8912d;
+    border-radius: 6px;
+}
+
+.workspace-preview__rail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    opacity: 0.85;
+}
+
+.workspace-preview__icon {
+    width: 13px;
+    height: 13px;
+    fill: rgba(255, 255, 255, 0.85);
+}
+
+.workspace-preview__rail-label {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.workspace-preview__rail-dots {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.workspace-preview__rail-plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-top: auto;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+}
+
+.workspace-preview__rail-avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    background: #26cbd8;
+    border-radius: 6px;
+}
+
+.workspace-preview__presence {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 7px;
+    height: 7px;
+    border: 1.5px solid #542963;
+    border-radius: 50%;
+    background: #2bac76;
+}
+
+/* Channel sidebar */
+.workspace-preview__sidebar {
+    width: 185px;
+    padding: 14px 14px 16px;
+    background: linear-gradient(165deg, #9e56a4 0%, #83368f 55%, #6d2b7c 100%);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.workspace-preview__workspace-name {
+    margin: 0 0 14px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workspace-preview__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.workspace-preview__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workspace-preview__item--action {
+    opacity: 0.75;
+}
+
+.workspace-preview__glyph {
+    flex-shrink: 0;
+    width: 12px;
+    font-weight: 700;
+    text-align: center;
+    opacity: 0.85;
+}
+
+.workspace-preview__section-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 12px 0 2px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.workspace-preview__caret {
+    font-size: 8px;
+    opacity: 0.8;
+}
+
+.workspace-preview__dm-avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+    font-weight: 800;
+    color: #ffffff;
+    background: #26cbd8;
+    border-radius: 4px;
+}
+
+.workspace-preview__dm-avatar--pending {
+    background: #b9bfc6;
+}
+
+.workspace-preview__dm-avatar .workspace-preview__presence {
+    width: 5px;
+    height: 5px;
+    border-width: 1px;
+    border-color: #83368f;
+}
+
+.workspace-preview__you {
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+/* Main conversation panel */
+.workspace-preview__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: #ffffff;
+}
+
+.workspace-preview__main-header {
+    padding: 10px 14px 0;
+    border-bottom: 1px solid #e4e5e7;
+}
+
+.workspace-preview__channel-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1d1c1d;
+}
+
+.workspace-preview__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 2px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1d1c1d;
+    border-bottom: 2px solid #1d1c1d;
+}
+
+.workspace-preview__tab-dot {
+    width: 10px;
+    height: 10px;
+    border: 2.5px solid #1d1c1d;
+    border-radius: 50%;
+}
+
+.workspace-preview__message-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    margin-bottom: 12px;
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #9a9b9e;
+    border: 1px solid #d6d6d8;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.workspace-preview__message-tools {
+    letter-spacing: 1px;
+    color: #616061;
+}
+
+/* The preview is cropped on the right edge of the card, like the
+   reference design, so the last panel loses part of its width. */
+@media (max-width: 1024px) {
+    .workspace-preview {
+        width: 400px;
+        height: 360px;
+    }
+}
+
+@media (max-width: 768px) {
+    .workspace-preview {
+        display: none;
+    }
+}
