@@ -1,109 +1,107 @@
 /*
-    Home screen: fixed top header with the Slack wordmark and
-    sign out, then the "My Workspaces" section with a grid of
-    cards (or centered empty / error states).
+    Home screen: Slack-style "welcome back" page. The landing
+    navbar on top, a purple hero closed by a gentle SVG wave,
+    the white workspace card floating over the wave and the
+    landing footer at the bottom.
 */
 .home-screen {
     min-height: 100dvh;
-    background: var(--color-surface-muted);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-card);
 }
 
-/* Top bar */
-.home-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 32px;
+/* Purple hero, straight bottom edge: the wave below does the
+   curving and starts flush with this edge, so both purples
+   merge into one shape. */
+.home-hero {
+    background: var(--color-primary);
+    color: #ffffff;
+    text-align: center;
+    padding: 96px 24px 190px;
+}
+
+.home-hero__title {
+    margin: 0 0 8px;
+    font-family: var(--font-family-heading);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.home-hero__subtitle {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* Gentle asymmetric wave closing the hero; the purple fill is
+   set here so it always matches the hero background. */
+.home-hero__wave {
+    display: block;
+    width: 100%;
+    height: 64px;
+}
+
+.home-hero__wave path {
+    fill: var(--color-primary);
+}
+
+/* The white workspace card, floating over the wave and the
+   bottom of the hero. */
+.home-content {
+    flex: 1;
+    max-width: 760px;
+    width: 100%;
+    margin: -180px auto 0;
+    padding: 0 24px 96px;
+    position: relative;
+}
+
+.home-workspaces-card {
     background: var(--color-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-card);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+/* Tab bar, Slack style with an underline on the active tab */
+.home-workspaces-card__tabs {
+    padding: 0 24px;
     border-bottom: 1px solid var(--color-border-light);
 }
 
-.home-header__logo {
-    height: 28px;
-    width: auto;
-}
-
-.home-header__signout {
-    padding: 8px 16px;
+.home-workspaces-card__tab {
+    display: inline-block;
+    padding: 16px 4px 12px;
     font-size: 14px;
     font-weight: 700;
-    font-family: inherit;
     color: var(--color-text);
-    background: transparent;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-btn);
-    cursor: pointer;
-    transition: background 0.15s ease;
+    border-bottom: 3px solid var(--color-primary-hover);
 }
 
-.home-header__signout:hover {
-    background: var(--color-surface-muted);
+.home-workspaces-card__body {
+    padding: 20px 24px 8px;
 }
 
-/* Section below the header */
-.home-content {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 40px 24px 64px;
+.home-workspaces-card__label {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-muted);
 }
 
-.home-workspaces__head {
+.home-workspaces-card__list {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+    flex-direction: column;
 }
 
-.home-workspaces__title {
-    margin: 0;
-    font-family: var(--font-family-heading);
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-    color: var(--color-text);
-}
-
-/* "Create a workspace" button, shared by the header row and
-   the empty state. */
-.home-workspaces__create {
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: inherit;
-    color: #ffffff;
-    background: var(--color-primary);
-    border: none;
-    border-radius: var(--radius-btn);
-    cursor: pointer;
-    transition: background 0.15s ease;
-    flex-shrink: 0;
-}
-
-.home-workspaces__create:hover {
-    background: var(--color-primary-hover);
-}
-
-.home-workspaces__create:active {
-    background: var(--color-primary-active);
-}
-
-.home-workspaces__create--big {
-    padding: 14px 28px;
-    font-size: 16px;
-}
-
-/* Grid of workspace cards */
-.home-workspaces__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
-}
-
-/* Loading placeholder, mimics one card */
+/* Loading placeholder, mimics one row */
 .home-workspaces__skeleton {
-    height: 80px;
-    border-radius: var(--radius-card);
+    height: 68px;
+    margin-bottom: 8px;
+    border-radius: 10px;
     background: linear-gradient(
         100deg,
         var(--color-surface-muted) 40%,
@@ -120,12 +118,9 @@
     }
 }
 
-/* Centered empty and error states */
+/* Centered empty and error states, inside the card */
 .home-workspaces__state {
-    padding: 56px 24px;
-    background: var(--color-card);
-    border: 1px dashed var(--color-border-light);
-    border-radius: var(--radius-card);
+    padding: 32px 16px 40px;
     text-align: center;
 }
 
@@ -141,6 +136,33 @@
     margin: 0 0 24px;
     font-size: 14px;
     color: var(--color-text-muted);
+}
+
+/* "Create a workspace" button, shared by the empty state */
+.home-workspaces__create {
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.home-workspaces__create:hover {
+    background: var(--color-primary-hover);
+}
+
+.home-workspaces__create:active {
+    background: var(--color-primary-active);
+}
+
+.home-workspaces__create--big {
+    padding: 14px 28px;
+    font-size: 16px;
 }
 
 .home-workspaces__state-error {
@@ -167,22 +189,55 @@
     background: var(--color-primary-hover);
 }
 
-@media (max-width: 480px) {
-    .home-header {
-        padding: 12px 16px;
+/* Footer with the create link and the help hint */
+.home-workspaces-card__footer {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.home-workspaces-card__create-link {
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--color-primary-hover);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.home-workspaces-card__create-link:hover {
+    text-decoration: underline;
+}
+
+.home-workspaces-card__hint {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+    .home-hero {
+        padding: 64px 16px 120px;
+    }
+
+    .home-hero__title {
+        font-size: 30px;
+    }
+
+    .home-hero__wave {
+        height: 36px;
     }
 
     .home-content {
-        padding: 24px 16px 48px;
+        margin-top: -112px;
+        padding: 0 16px 64px;
     }
 
-    .home-workspaces__head {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: center;
-    }
-
-    .home-workspaces__grid {
-        grid-template-columns: 1fr;
+    .home-workspaces-card__body,
+    .home-workspaces-card__tabs,
+    .home-workspaces-card__footer {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 }

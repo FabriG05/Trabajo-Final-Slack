@@ -7,6 +7,11 @@ import ServerError from "../Utils/Error.Utils.js";
     it over here and build the response.
 */
 class UserService {
+    // The client compresses the photo to a small JPEG before sending
+    // it, so anything beyond this points at a bypass of that step.
+    // 500 KB of base64 covers the ~256px JPEG with plenty of margin.
+    static MAX_PROFILE_PHOTO_LENGTH = 500 * 1024
+
     async getUserList() {
         return await user_repository.get()
     }
@@ -37,6 +42,13 @@ class UserService {
         if (profile_photo !== undefined) {
             if (profile_photo !== null && typeof profile_photo !== 'string') {
                 throw new ServerError("Profile photo must be a base64 string.", 400)
+            }
+
+            if (
+                profile_photo !== null &&
+                profile_photo.length > UserService.MAX_PROFILE_PHOTO_LENGTH
+            ) {
+                throw new ServerError("Profile photo is too large.", 413)
             }
 
             updateData.profile_photo = profile_photo

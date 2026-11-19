@@ -7,7 +7,7 @@ import {
     updateWorkspace,
     getWorkspaceMembers,
     deleteWorkspaceMember,
-    acceptInvitation,
+    joinWorkspace,
     createInvitations
 } from '../Controllers/WorkspaceControllers.js'
 import authMiddleware from '../Middlewares/AuthMiddleware.js'
@@ -55,9 +55,16 @@ workspaceRouter.delete(
     deleteWorkspaceMember
 )
 
-workspaceRouter.get(
-    "/:workspace_id/members/accept-invite/:invitation_token",
-    acceptInvitation
+/*
+    Join endpoint: works with the workspace-level invite link token or
+    with the personal token of a pending invitation (sent by email).
+    It only requires auth: the joiner is not a member yet, so the
+    workspace middleware must NOT run here.
+*/
+workspaceRouter.post(
+    "/:workspace_id/join",
+    authMiddleware,
+    joinWorkspace
 )
 
 workspaceRouter.post(

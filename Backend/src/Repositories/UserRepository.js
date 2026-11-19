@@ -11,7 +11,7 @@ class UserRepository {
     }
 
     async get() {
-        const result = await User.find()
+        const result = await User.find().select('-password')
         console.log(result)
         return result
     }
@@ -38,7 +38,7 @@ class UserRepository {
     }
 
     async getById(user_id) {
-        const result = await User.findById(user_id)
+        const result = await User.findById(user_id).select('-password')
         return result
     }
 
@@ -66,7 +66,7 @@ class UserRepository {
             user_id,
             updateData,
             { new: true }
-        )
+        ).select('-password')
     }
 }
 

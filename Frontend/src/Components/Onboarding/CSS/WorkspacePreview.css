@@ -96,6 +96,24 @@
     border-radius: 6px;
 }
 
+.workspace-preview__avatar-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Match the host avatar's rounding; overflow: hidden is not an
+   option because it would clip the presence dot. */
+.workspace-preview__rail-avatar .workspace-preview__avatar-image {
+    border-radius: 6px;
+}
+
+.workspace-preview__dm-avatar .workspace-preview__avatar-image {
+    border-radius: 4px;
+}
+
 .workspace-preview__presence {
     position: absolute;
     right: -2px;

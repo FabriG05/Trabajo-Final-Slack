@@ -4,14 +4,72 @@ import '../CSS/StepProfile.css'
 
 /*
     Step 2 of the onboarding wizard: the user's name and an
-    optional profile photo. The photo is read locally, converted
-    to a base64 data URL and handed to the parent screen, so both
-    the avatar and the live preview show it right away.
+    optional profile photo. The photo is read locally, resized
+    to a small square JPEG and handed to the parent screen as a
+    base64 data URL, so both the avatar and the live preview show
+    it right away while keeping what reaches the database small.
 */
 const NAME_MAX_LENGTH = 50
 
-// Base64 inflates binary size by ~33%; keep the original file small.
-const PHOTO_MAX_BYTES = 300 * 1024
+// The user may pick a large original; the client compresses it
+// down before anything is sent, so only the output size matters.
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024
+
+// Rendered avatars are small (26-72px); 256px keeps some headroom
+// for retina screens while staying around ~50-100 KB as JPEG.
+const PHOTO_OUTPUT_SIZE = 256
+const PHOTO_JPEG_QUALITY = 0.85
+
+/*
+    Reads the image file, draws the central square crop on a canvas
+    at PHOTO_OUTPUT_SIZE and returns it as a JPEG data URL.
+*/
+function compressPhoto(file) {
+    return new Promise((resolve, reject) => {
+        const imageUrl = URL.createObjectURL(file)
+        const image = new Image()
+
+        image.onload = () => {
+            URL.revokeObjectURL(imageUrl)
+
+            const canvas = document.createElement('canvas')
+            canvas.width = PHOTO_OUTPUT_SIZE
+            canvas.height = PHOTO_OUTPUT_SIZE
+
+            const context = canvas.getContext('2d')
+            if (!context) {
+                reject(new Error('The image could not be processed.'))
+                return
+            }
+
+            // Center-crop the image to a square, like object-fit: cover.
+            const side = Math.min(image.naturalWidth, image.naturalHeight)
+            const offsetX = (image.naturalWidth - side) / 2
+            const offsetY = (image.naturalHeight - side) / 2
+
+            context.drawImage(
+                image,
+                offsetX,
+                offsetY,
+                side,
+                side,
+                0,
+                0,
+                PHOTO_OUTPUT_SIZE,
+                PHOTO_OUTPUT_SIZE
+            )
+
+            resolve(canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY))
+        }
+
+        image.onerror = () => {
+            URL.revokeObjectURL(imageUrl)
+            reject(new Error('The image could not be read. Please try again.'))
+        }
+
+        image.src = imageUrl
+    })
+}
 
 function StepProfile({
     name,
@@ -31,7 +89,7 @@ function StepProfile({
         fileInputRef.current?.click()
     }
 
-    function handlePhotoChange(event) {
+    async function handlePhotoChange(event) {
         const file = event.target.files?.[0]
         event.target.value = ''
 
@@ -45,19 +103,17 @@ function StepProfile({
         }
 
         if (file.size > PHOTO_MAX_BYTES) {
-            setPhotoError('The image is too large. Please choose one under 300 KB.')
+            setPhotoError('The image is too large. Please choose one under 5 MB.')
             return
         }
 
-        const reader = new FileReader()
-        reader.onload = () => {
+        try {
+            const compressedPhoto = await compressPhoto(file)
             setPhotoError(null)
-            onPhotoChange(reader.result)
-        }
-        reader.onerror = () => {
+            onPhotoChange(compressedPhoto)
+        } catch {
             setPhotoError('The image could not be read. Please try again.')
         }
-        reader.readAsDataURL(file)
     }
 
     function handleSubmit(event) {
@@ -120,22 +176,27 @@ function StepProfile({
                             viewBox='0 0 48 48'
                             aria-hidden='true'
                         >
-                            <circle
-                                cx='24'
-                                cy='24'
-                                r='24'
+                            <clipPath id='step-profile-avatar-clip'>
+                                <rect width='48' height='48' rx='10.67' />
+                            </clipPath>
+                            <rect
+                                width='48'
+                                height='48'
+                                rx='10.67'
                                 fill='#e9edee'
                             />
-                            <circle
-                                cx='24'
-                                cy='19'
-                                r='8'
-                                fill='#26b0b8'
-                            />
-                            <path
-                                d='M8 46c0-9 7.16-14 16-14s16 5 16 14'
-                                fill='#26b0b8'
-                            />
+                            <g clipPath='url(#step-profile-avatar-clip)'>
+                                <circle
+                                    cx='24'
+                                    cy='19'
+                                    r='8'
+                                    fill='#26b0b8'
+                                />
+                                <path
+                                    d='M8 52 C8 41 15.16 32 24 32 C32.84 32 40 41 40 52 Z'
+                                    fill='#26b0b8'
+                                />
+                            </g>
                         </svg>
                     )}
 

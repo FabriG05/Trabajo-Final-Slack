@@ -3,10 +3,11 @@ import '../CSS/WorkspacePreview.css'
 /*
     Decorative mockup of the workspace UI shown on the right side
     of the onboarding card. It updates live: the workspace name in
-    step 1, the user name in step 2 and the invited teammate in
-    step 3.
+    step 1, the user name and photo in step 2 and the invited
+    teammate in step 3. Where the photo is missing, the initial
+    is shown as a fallback.
 */
-function WorkspacePreview({ workspaceName, userName, teammateName }) {
+function WorkspacePreview({ workspaceName, userName, userPhoto, teammateName }) {
     const safeWorkspaceName = workspaceName.trim() || 'New Workspace'
     const safeUserName = userName.trim() || 'Your name'
     const safeTeammateName = teammateName.trim() || 'Your teammate'
@@ -45,7 +46,15 @@ function WorkspacePreview({ workspaceName, userName, teammateName }) {
                 <div className='workspace-preview__rail-plus'>+</div>
 
                 <div className='workspace-preview__rail-avatar'>
-                    {safeUserName.charAt(0).toUpperCase()}
+                    {userPhoto ? (
+                        <img
+                            className='workspace-preview__avatar-image'
+                            src={userPhoto}
+                            alt=''
+                        />
+                    ) : (
+                        safeUserName.charAt(0).toUpperCase()
+                    )}
                     <span className='workspace-preview__presence' />
                 </div>
             </div>
@@ -89,7 +98,15 @@ function WorkspacePreview({ workspaceName, userName, teammateName }) {
                 <ul className='workspace-preview__list'>
                     <li className='workspace-preview__item'>
                         <span className='workspace-preview__dm-avatar'>
-                            {safeUserName.charAt(0).toUpperCase()}
+                            {userPhoto ? (
+                                <img
+                                    className='workspace-preview__avatar-image'
+                                    src={userPhoto}
+                                    alt=''
+                                />
+                            ) : (
+                                safeUserName.charAt(0).toUpperCase()
+                            )}
                             <span className='workspace-preview__presence' />
                         </span>
                         {safeUserName}

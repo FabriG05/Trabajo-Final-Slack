@@ -12,6 +12,7 @@ import VerifyEmailScreen from './Screens/VerifyEmailScreen/JSX/VerifyEmailScreen
 import ResendEmailVerificationScreen from './Screens/ResendEmailVerificationScreen/JSX/ResendEmailVerificationScreen'
 import ForgotPasswordScreen from './Screens/ForgotPasswordScreen/JSX/ForgotPasswordScreen'
 import ResetPasswordScreen from './Screens/ResetPasswordScreen/JSX/ResetPasswordScreen'
+import JoinWorkspaceScreen from './Screens/JoinWorkspaceScreen/JSX/JoinWorkspaceScreen'
 
 const App = () => {
   return (
@@ -25,6 +26,9 @@ const App = () => {
       </Route>
       <Route path='/login' element={<LogInScreen />} />
       <Route path='/register' element={<RegisterScreen />} />
+
+      {/* Target of the workspace invitation links (copy link button and invitation emails). */}
+      <Route path='/workspace/:workspaceId/join' element={<JoinWorkspaceScreen />} />
       <Route path='/verify-email' element={<VerifyEmailScreen />} />
       <Route path='/resend-email-verification' element={<ResendEmailVerificationScreen />} />
       <Route path='/forgot-password' element={<ForgotPasswordScreen />} />

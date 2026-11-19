@@ -117,14 +117,23 @@ export async function deleteWorkspaceMember(request, response) {
     });
 }
 
-export async function acceptInvitation(request, response) {
-    const { workspace_id, invitation_token } = request.params;
+export async function joinWorkspace(request, response) {
+    const { workspace_id } = request.params;
+    const { invitation_token } = request.body;
 
-    await workspace_service.acceptInvitation(workspace_id, invitation_token);
+    const joinSummary = await workspace_service.joinWorkspace(
+        workspace_id,
+        request.user.id,
+        request.user.email,
+        invitation_token
+    );
 
     return response.status(200).send({
         ok: true,
         message: "Invitation accepted successfully.",
+        data: {
+            joinSummary
+        }
     });
 }
 
@@ -133,6 +142,7 @@ export async function createInvitations(request, response) {
 
     const invitationSummary = await workspace_service.createInvitations(
         request.workspace._id,
+        request.user.name,
         emails
     );
 

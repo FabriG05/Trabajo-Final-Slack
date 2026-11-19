@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import useForm from '../../../Hooks/useForm'
 import { login } from '../../../Services/AuthService'
 import useRequest from '../../../Hooks/useRequest'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import AuthCard from '../../../Components/Auth/JSX/AuthCard'
 import AuthForm from '../../../Components/Auth/JSX/AuthForm'
 
@@ -13,6 +13,7 @@ function LoginScreen() {
     const { formState, handleChangeInput } = useForm(initialState)
     const { loading, response, error, sendRequest } = useRequest()
     const navigate = useNavigate()
+    const location = useLocation()
 
     async function handleSubmit(event) {
         event.preventDefault()
@@ -29,7 +30,9 @@ function LoginScreen() {
                 if (token) {
                     localStorage.setItem('auth_token', token)
                     localStorage.setItem('authToken', token)
-                    navigate('/home')
+                    // Links like the workspace invitation can ask to come
+                    // back to their page right after logging in.
+                    navigate(location.state?.redirectTo ?? '/home')
                 }
             }
         },

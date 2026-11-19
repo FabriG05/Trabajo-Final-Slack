@@ -82,7 +82,6 @@
 
 /* Purple "Next" button shared by the three steps. */
 .onboarding-step__next {
-    margin-top: 32px;
     padding: 12px 40px;
     font-size: 15px;
     font-weight: 700;
@@ -93,6 +92,13 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+/* Space the standalone Next button away from the fields above
+   it; the invite step wraps its button in an actions row that
+   owns the spacing instead, so the two buttons stay aligned. */
+.onboarding-step__form > .onboarding-step__next {
+    margin-top: 32px;
 }
 
 .onboarding-step__next:hover:not(:disabled) {

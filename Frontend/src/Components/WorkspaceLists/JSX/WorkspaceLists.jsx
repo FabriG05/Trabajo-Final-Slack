@@ -49,25 +49,22 @@ export default function WorkspaceList({
             )
     }
 
-    // Each item is a membership that references the workspace.
-    // The repository populates FK_id_workspace with name/description.
-    const memberships = workspaces_response.data.obtainedWorkspaces || []
+    // Each item is a workspace directly, carrying its list of
+    // active members (name and role) under `members`.
+    const obtainedWorkspaces = workspaces_response.data.obtainedWorkspaces || []
 
-    if (memberships.length === 0) {
+    if (obtainedWorkspaces.length === 0) {
         return renderEmpty
             ? renderEmpty()
             : <p>You haven't created any workspace.</p>
     }
 
-    const workspaces = memberships.map((membership) => {
-        const workspace = membership.FK_id_workspace || {}
-        return {
-            id: workspace._id || workspace.id,
-            name: workspace.name,
-            description: workspace.description,
-            role: membership.role
-        }
-    }).filter((workspace) => workspace.id)
+    const workspaces = obtainedWorkspaces.map((workspace) => ({
+        id: workspace._id,
+        name: workspace.name,
+        description: workspace.description,
+        memberCount: workspace.members?.length ?? 0
+    })).filter((workspace) => workspace.id)
 
     return renderItems
         ? renderItems(workspaces)

@@ -197,7 +197,15 @@ class AuthService {
             throw new ServerError('The verification token is missing', 400)
         }
 
-        const { email } = jwt.verify(verifyEmailToken, ENVIRONMENT.JWT_SECRET_KEY)
+        // jwt.verify throws when the signature is invalid or the token already
+        // expired; we turn that into a controlled error instead of a 500.
+        let payload
+        try {
+            payload = jwt.verify(verifyEmailToken, ENVIRONMENT.JWT_SECRET_KEY)
+        } catch (error) {
+            throw new ServerError('The verification token is invalid or expired', 400)
+        }
+        const { email } = payload
 
         const userFound = await user_repository.getByEmail(email)
 
@@ -289,8 +297,15 @@ class AuthService {
             throw new ServerError('Reset token and new password are required', 400)
         }
 
-        // jwt.verify throws when the signature is invalid or the token already expired; the error middleware answers to the client.
-        const { email } = jwt.verify(resetPasswordToken, ENVIRONMENT.JWT_SECRET_KEY)
+        // jwt.verify throws when the signature is invalid or the token already
+        // expired; we turn that into a controlled error instead of a 500.
+        let payload
+        try {
+            payload = jwt.verify(resetPasswordToken, ENVIRONMENT.JWT_SECRET_KEY)
+        } catch (error) {
+            throw new ServerError('The reset token is invalid or expired', 400)
+        }
+        const { email } = payload
 
         const userFound = await user_repository.getByEmail(email)
 

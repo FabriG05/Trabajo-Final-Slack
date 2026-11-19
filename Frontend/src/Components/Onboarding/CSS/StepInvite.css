@@ -1,10 +1,8 @@
-/* Step 3: email invitation form with the Google contacts row and
-   the "Next" + "Copy invitation link" action pair. */
+/* Step 3: email invitation form and the "Next" + "Copy invitation
+   link" action pair. */
 .step-invite__head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
     max-width: 520px;
     margin-bottom: 10px;
 }
@@ -14,25 +12,6 @@
     font-size: 14px;
     font-weight: 700;
     color: #ffffff;
-}
-
-.step-invite__google {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-    color: #36c5f0;
-    background: transparent;
-    border: none;
-    cursor: default;
-}
-
-.step-invite__google-icon {
-    width: 16px;
-    height: 16px;
 }
 
 .step-invite__textarea {
@@ -68,6 +47,34 @@
     align-items: center;
     gap: 12px;
     margin-top: 28px;
+}
+
+/* Outcome summary shown after the invitations are processed. */
+.step-invite__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 520px;
+    padding: 16px;
+    border: 1px solid #35373b;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.step-invite__summary-row {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #b9bcbf;
+    word-break: break-word;
+}
+
+.step-invite__summary-row--ok {
+    color: #2eb67d;
+}
+
+.step-invite__summary-row--warn {
+    color: #ecb22e;
 }
 
 .step-invite__copy {

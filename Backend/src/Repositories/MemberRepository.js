@@ -49,8 +49,9 @@ class MemberRepository {
 
     async getAllWorkspacesByUserId(userId) {
         try {
+            // Pending invitations are not the user's workspaces yet, so they are excluded.
             const result = await Member
-                .find({ FK_id_user: userId })
+                .find({ FK_id_user: userId, invitation_accepted: true })
                 .populate(
                     'FK_id_workspace',
                     'name created_at description'

@@ -5,9 +5,13 @@ class WorkspaceRepository {
         return await this.createWorkspace(name, description);
     }
 
-    async createWorkspace(name, description) {
+    async createWorkspace(name, description, inviteLinkToken = null) {
         try {
-            const createdWorkspace = await Workspace.create({ name, description });
+            const createdWorkspace = await Workspace.create({
+                name,
+                description,
+                invite_link_token: inviteLinkToken
+            });
             console.log('Workspace created successfully:', createdWorkspace);
             return createdWorkspace; 
         } catch (error) {

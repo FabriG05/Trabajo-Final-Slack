@@ -40,6 +40,8 @@ function CreateWorkspaceScreen() {
     const [step, setStep] = useState(1)
     const [workspaceName, setWorkspaceName] = useState('')
     const [workspaceId, setWorkspaceId] = useState(null)
+    const [inviteLinkToken, setInviteLinkToken] = useState(null)
+    const [invitationSummary, setInvitationSummary] = useState(null)
     const [profileName, setProfileName] = useState('')
     const [profilePhoto, setProfilePhoto] = useState(null)
     const [inviteEmails, setInviteEmails] = useState('')
@@ -52,6 +54,7 @@ function CreateWorkspaceScreen() {
 
         if (response) {
             setWorkspaceId(response.data.createdWorkspace._id)
+            setInviteLinkToken(response.data.createdWorkspace.invite_link_token)
             setStep(2)
         }
     }
@@ -68,8 +71,13 @@ function CreateWorkspaceScreen() {
         const response = await submitInviteMembers(workspaceId, emails)
 
         if (response) {
-            navigate('/home')
+            // Stay on this step to show the per-email outcome summary.
+            setInvitationSummary(response.data.invitationSummary)
         }
+    }
+
+    function handleInviteFinish() {
+        navigate('/home')
     }
 
     function handleWorkspaceNameChange(event) {
@@ -117,8 +125,11 @@ function CreateWorkspaceScreen() {
                             value={inviteEmails}
                             onChange={handleInviteEmailsChange}
                             workspaceId={workspaceId}
+                            inviteLinkToken={inviteLinkToken}
                             submitting={invitations_loading}
                             error={invitations_error}
+                            invitationSummary={invitationSummary}
+                            onFinish={handleInviteFinish}
                             onSubmit={handleInviteSubmit}
                         />
                     )}
@@ -128,6 +139,7 @@ function CreateWorkspaceScreen() {
                     <WorkspacePreview
                         workspaceName={workspaceName}
                         userName={profileName}
+                        userPhoto={profilePhoto}
                         teammateName={previewTeammate}
                     />
                 </div>

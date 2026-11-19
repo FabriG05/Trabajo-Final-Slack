@@ -154,7 +154,12 @@ function DropdownColumn({ title, items }) {
     )
 }
 
-function LandingNavbar() {
+/*
+    When `signedIn` is passed, the auth CTAs on the right are
+    replaced by a single Sign out button (used by the home
+    screen); the landing keeps the default behaviour.
+*/
+function LandingNavbar({ signedIn = false, onSignOut }) {
     const [openMenu, setOpenMenu] = useState(null)
     const location = useLocation()
 
@@ -271,17 +276,29 @@ function LandingNavbar() {
             </div>
 
             <div className='landing-navbar__right'>
-                <Link to='/login' className='landing-navbar__signin'>
-                    Sign in
-                </Link>
+                {signedIn ? (
+                    <button
+                        type='button'
+                        className='landing-navbar__signout'
+                        onClick={onSignOut}
+                    >
+                        Sign out
+                    </button>
+                ) : (
+                    <>
+                        <Link to='/login' className='landing-navbar__signin'>
+                            Sign in
+                        </Link>
 
-                <Link to='/demo' className='landing-navbar__demo'>
-                    Request a demo
-                </Link>
+                        <Link to='/demo' className='landing-navbar__demo'>
+                            Request a demo
+                        </Link>
 
-                <Link to='/register' className='landing-navbar__get-started'>
-                    Get started
-                </Link>
+                        <Link to='/register' className='landing-navbar__get-started'>
+                            Get started
+                        </Link>
+                    </>
+                )}
             </div>
         </header>
     )

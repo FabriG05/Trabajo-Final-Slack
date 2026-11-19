@@ -1,0 +1,57 @@
+.join-workspace-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.join-workspace-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 32px;
+    border-radius: 12px;
+    background-color: #1a1d21;
+    border: 1px solid #35373b;
+    text-align: center;
+}
+
+.join-workspace-card__title {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.join-workspace-card__message {
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #b9bcbf;
+    word-break: break-word;
+}
+
+.join-workspace-card__actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.join-workspace-card__button {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    background-color: #481a54;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.join-workspace-card__button:hover {
+    background-color: #5c226c;
+}
