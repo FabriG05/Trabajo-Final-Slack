@@ -1,0 +1,381 @@
+/*
+    Channels and DMs sidebar panel (~250px wide)
+*/
+.workspace-sidebar {
+    width: 250px;
+    background: #1e1022;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    flex-shrink: 0;
+    user-select: none;
+    height: 100%;
+}
+
+.workspace-sidebar__header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.workspace-sidebar__workspace-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 0;
+    max-width: 160px;
+}
+
+.workspace-sidebar__workspace-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-sidebar__chevron {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.workspace-sidebar__header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.workspace-sidebar__icon-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.workspace-sidebar__icon-btn:hover {
+    background: #302034;
+    color: #ffffff;
+}
+
+/* Promo Card */
+.workspace-sidebar__promo {
+    margin: 12px 14px 6px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.workspace-sidebar__promo-icon {
+    font-size: 20px;
+}
+
+.workspace-sidebar__promo-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.workspace-sidebar__promo-subtitle {
+    margin: 2px 0 0;
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+/* Quick Search */
+.workspace-sidebar__search {
+    padding: 10px 14px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.workspace-sidebar__search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 4px 8px;
+    gap: 6px;
+}
+
+.workspace-sidebar__search-icon {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.workspace-sidebar__search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+.workspace-sidebar__search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.workspace-sidebar__directories-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+}
+
+.workspace-sidebar__directories-btn:hover {
+    background: #302034;
+    color: #ffffff;
+}
+
+/* Sections */
+.workspace-sidebar__sections {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.workspace-sidebar__section {
+    margin-bottom: 12px;
+}
+
+.workspace-sidebar__section-header {
+    padding: 4px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.workspace-sidebar__section-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.workspace-sidebar__section-star {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.workspace-sidebar__section-title {
+    flex: 1;
+}
+
+.workspace-sidebar__section-empty {
+    margin: 4px 16px 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-style: italic;
+}
+
+.workspace-sidebar__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.workspace-sidebar__item-btn {
+    width: 100%;
+    padding: 6px 16px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s ease;
+}
+
+.workspace-sidebar__item-btn:hover {
+    background: #302034;
+    color: #ffffff;
+}
+
+.workspace-sidebar__item-btn--active,
+.workspace-sidebar__item-btn--active:hover {
+    background: #7d3986;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.workspace-sidebar__item-prefix {
+    font-size: 14px;
+    opacity: 0.7;
+    width: 14px;
+}
+
+.workspace-sidebar__item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-sidebar__dm-avatar {
+    position: relative;
+    font-size: 14px;
+}
+
+.workspace-sidebar__online-badge {
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    width: 6px;
+    height: 6px;
+    background: #2bac76;
+    border-radius: 50%;
+    border: 1px solid #1e1022;
+}
+
+.workspace-sidebar__you-badge {
+    font-size: 11px;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.workspace-sidebar__item-badge {
+    background: #7d3986;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.workspace-sidebar__external-icon {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.workspace-sidebar__add-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    padding: 4px 16px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.workspace-sidebar__add-btn:hover {
+    color: #ffffff;
+}
+
+.workspace-sidebar__add-form {
+    padding: 6px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.workspace-sidebar__add-input {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #ffffff;
+    font-size: 12px;
+    outline: none;
+}
+
+.workspace-sidebar__add-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.workspace-sidebar__add-save,
+.workspace-sidebar__add-cancel {
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.workspace-sidebar__add-save {
+    background: #007a5a;
+    border: none;
+    color: #ffffff;
+}
+
+.workspace-sidebar__add-cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Footer Task Widget */
+.workspace-sidebar__footer-task {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 16px;
+}
+
+.workspace-sidebar__task-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.workspace-sidebar__task-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.workspace-sidebar__task-body {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.workspace-sidebar__task-circle {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}

@@ -7,7 +7,9 @@ import '../CSS/StepInvite.css'
     The textarea accepts comma/space separated emails. "Next" is
     disabled until there is at least one valid email. The copy
     button copies the join link of the created workspace, which
-    carries the workspace-level invite link token.
+    carries the workspace-level invite link token. "Skip this step"
+    asks for confirmation before finishing the wizard without
+    inviting anyone.
 */
 function StepInvite({
     value,
@@ -22,6 +24,7 @@ function StepInvite({
 }) {
     const [invalidEmails, setInvalidEmails] = useState([])
     const [copied, setCopied] = useState(false)
+    const [skipConfirmOpen, setSkipConfirmOpen] = useState(false)
 
     // Rebuild the button label once the "copied" feedback ends.
     useEffect(
@@ -34,6 +37,25 @@ function StepInvite({
             return () => clearTimeout(timer)
         },
         [copied]
+    )
+
+    // Close the "skip" confirmation with Escape, like a native dialog.
+    useEffect(
+        () => {
+            if (!skipConfirmOpen) {
+                return undefined
+            }
+
+            function handleKeyDown(event) {
+                if (event.key === 'Escape') {
+                    setSkipConfirmOpen(false)
+                }
+            }
+
+            document.addEventListener('keydown', handleKeyDown)
+            return () => document.removeEventListener('keydown', handleKeyDown)
+        },
+        [skipConfirmOpen]
     )
 
     function parseEmails(rawValue) {
@@ -195,8 +217,138 @@ function StepInvite({
                         </svg>
                         {copied ? 'Link copied!' : 'Copy invitation link'}
                     </button>
+
+                    <button
+                        type='button'
+                        className='step-invite__skip'
+                        onClick={() => setSkipConfirmOpen(true)}
+                        disabled={submitting}
+                    >
+                        Skip this step
+                    </button>
                 </div>
             </form>
+
+            {skipConfirmOpen && (
+                <div
+                    className='step-invite__modal-backdrop'
+                    role='presentation'
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) {
+                            setSkipConfirmOpen(false)
+                        }
+                    }}
+                >
+                    <div
+                        className='step-invite__modal'
+                        role='dialog'
+                        aria-modal='true'
+                        aria-labelledby='skip-invite-title'
+                    >
+                        <button
+                            type='button'
+                            className='step-invite__modal-close'
+                            onClick={() => setSkipConfirmOpen(false)}
+                            aria-label='Close'
+                        >
+                            <svg
+                                viewBox='0 0 24 24'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='2'
+                                strokeLinecap='round'
+                                aria-hidden='true'
+                            >
+                                <path d='M6 6l12 12' />
+                                <path d='M18 6L6 18' />
+                            </svg>
+                        </button>
+
+                        <h3
+                            className='step-invite__modal-title'
+                            id='skip-invite-title'
+                        >
+                            Skip without inviting?
+                        </h3>
+
+                        <p className='step-invite__modal-text'>
+                            Are you sure? Without someone else here,
+                            you&rsquo;ll be missing out on what makes
+                            Slack great, including:
+                        </p>
+
+                        <ul className='step-invite__benefits'>
+                            <li className='step-invite__benefit'>
+                                <svg
+                                    className='step-invite__benefit-icon'
+                                    viewBox='0 0 24 24'
+                                    fill='none'
+                                    stroke='currentColor'
+                                    strokeWidth='2'
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    aria-hidden='true'
+                                >
+                                    <path d='M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.1a8.4 8.4 0 0 1-1.1-4.4 8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 9 8.4Z' />
+                                </svg>
+                                Real-time messaging
+                            </li>
+                            <li className='step-invite__benefit'>
+                                <svg
+                                    className='step-invite__benefit-icon'
+                                    viewBox='0 0 24 24'
+                                    fill='none'
+                                    stroke='currentColor'
+                                    strokeWidth='2'
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    aria-hidden='true'
+                                >
+                                    <path d='M4 14v-2a8 8 0 0 1 16 0v2' />
+                                    <rect x='2' y='14' width='5' height='7' rx='2' />
+                                    <rect x='17' y='14' width='5' height='7' rx='2' />
+                                </svg>
+                                Video calls
+                            </li>
+                            <li className='step-invite__benefit'>
+                                <svg
+                                    className='step-invite__benefit-icon'
+                                    viewBox='0 0 24 24'
+                                    fill='none'
+                                    stroke='currentColor'
+                                    strokeWidth='2'
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    aria-hidden='true'
+                                >
+                                    <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z' />
+                                    <path d='M14 2v6h6' />
+                                    <path d='M8 13h8' />
+                                    <path d='M8 17h5' />
+                                </svg>
+                                Document sharing
+                            </li>
+                        </ul>
+
+                        <div className='step-invite__modal-actions'>
+                            <button
+                                type='button'
+                                className='step-invite__modal-back'
+                                onClick={() => setSkipConfirmOpen(false)}
+                            >
+                                Back
+                            </button>
+                            <button
+                                type='button'
+                                className='step-invite__modal-confirm'
+                                onClick={onFinish}
+                            >
+                                Don&rsquo;t invite anyone
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

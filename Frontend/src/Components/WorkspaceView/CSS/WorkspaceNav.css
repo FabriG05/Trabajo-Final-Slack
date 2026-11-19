@@ -1,0 +1,182 @@
+/*
+    Narrow left navigation bar: ~66px wide, deepest purple background.
+*/
+.workspace-nav {
+    width: 66px;
+    background: #270629;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0 16px;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.workspace-nav__top {
+    margin-bottom: 16px;
+}
+
+.workspace-nav__workspace-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #522653;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.workspace-nav__workspace-badge:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.workspace-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    flex: 1;
+}
+
+.workspace-nav__item {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.workspace-nav__btn {
+    width: 52px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.workspace-nav__btn:hover {
+    background: #302034;
+    color: #ffffff;
+}
+
+.workspace-nav__btn--active,
+.workspace-nav__btn--active:hover {
+    background: #7d3986;
+    color: #ffffff;
+}
+
+.workspace-nav__icon-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.workspace-nav__icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.workspace-nav__dot {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: #ecb22e;
+    border-radius: 50%;
+    border: 2px solid #270629;
+}
+
+.workspace-nav__label {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.1;
+    text-align: center;
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-nav__divider {
+    width: 36px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 4px 0;
+}
+
+.workspace-nav__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.workspace-nav__util-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #ffffff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.workspace-nav__util-btn:hover {
+    background: #302034;
+}
+
+.workspace-nav__profile-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.workspace-nav__profile-avatar {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #7d3986;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.workspace-nav__status-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 9px;
+    height: 9px;
+    background: #2bac76;
+    border-radius: 50%;
+    border: 2px solid #270629;
+}

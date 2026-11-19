@@ -1,8 +1,8 @@
 /*
     Home screen: Slack-style "welcome back" page. The landing
-    navbar on top, a purple hero closed by a gentle SVG wave,
-    the white workspace card floating over the wave and the
-    landing footer at the bottom.
+    navbar on top (in dark/purple mode), a purple hero closed by
+    a smooth symmetrical downward curve, the white workspace card
+    floating over it and the landing footer at the bottom.
 */
 .home-screen {
     min-height: 100dvh;
@@ -11,14 +11,13 @@
     background: var(--color-card);
 }
 
-/* Purple hero, straight bottom edge: the wave below does the
-   curving and starts flush with this edge, so both purples
-   merge into one shape. */
+/* Purple hero: sits under the purple navbar with balanced padding,
+   followed by the downward round curve. */
 .home-hero {
     background: var(--color-primary);
     color: #ffffff;
     text-align: center;
-    padding: 96px 24px 190px;
+    padding: 48px 24px 64px;
 }
 
 .home-hero__title {
@@ -35,27 +34,30 @@
     opacity: 0.9;
 }
 
-/* Gentle asymmetric wave closing the hero; the purple fill is
-   set here so it always matches the hero background. */
-.home-hero__wave {
+/* Smooth symmetrical downward round curve closing the hero.
+   The purple fill matches the hero background seamlessly. */
+.home-hero__curve {
     display: block;
     width: 100%;
-    height: 64px;
+    height: 140px;
+    margin-top: -1px;
+    pointer-events: none;
 }
 
-.home-hero__wave path {
+.home-hero__curve path {
     fill: var(--color-primary);
 }
 
-/* The white workspace card, floating over the wave and the
+/* The white workspace card, floating over the curve and the
    bottom of the hero. */
 .home-content {
     flex: 1;
     max-width: 760px;
     width: 100%;
-    margin: -180px auto 0;
+    margin: -140px auto 0;
     padding: 0 24px 96px;
     position: relative;
+    z-index: 2;
 }
 
 .home-workspaces-card {
@@ -218,19 +220,19 @@
 
 @media (max-width: 640px) {
     .home-hero {
-        padding: 64px 16px 120px;
+        padding: 36px 16px 44px;
     }
 
     .home-hero__title {
-        font-size: 30px;
+        font-size: 28px;
     }
 
-    .home-hero__wave {
-        height: 36px;
+    .home-hero__curve {
+        height: 70px;
     }
 
     .home-content {
-        margin-top: -112px;
+        margin-top: -80px;
         padding: 0 16px 64px;
     }
 

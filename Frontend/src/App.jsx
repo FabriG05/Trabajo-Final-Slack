@@ -13,6 +13,7 @@ import ResendEmailVerificationScreen from './Screens/ResendEmailVerificationScre
 import ForgotPasswordScreen from './Screens/ForgotPasswordScreen/JSX/ForgotPasswordScreen'
 import ResetPasswordScreen from './Screens/ResetPasswordScreen/JSX/ResetPasswordScreen'
 import JoinWorkspaceScreen from './Screens/JoinWorkspaceScreen/JSX/JoinWorkspaceScreen'
+import WorkspaceScreen from './Screens/WorkspaceScreen/JSX/WorkspaceScreen'
 
 const App = () => {
   return (
@@ -23,6 +24,8 @@ const App = () => {
       <Route element={<AuthMiddleware />}>
         <Route path='/home' element={<HomeScreeen />} />
         <Route path='/create-workspace' element={<CreateWorkspaceScreen />} />
+        <Route path='/workspace/:workspaceId' element={<WorkspaceScreen />} />
+        <Route path='/workspace/:workspaceId/channels/:channelId' element={<WorkspaceScreen />} />
       </Route>
       <Route path='/login' element={<LogInScreen />} />
       <Route path='/register' element={<RegisterScreen />} />

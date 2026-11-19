@@ -273,6 +273,43 @@
     background: var(--color-primary);
 }
 
+/*
+    Dark (purple) theme used on HomeScreen: matches the purple hero
+    seamlessly with white links and an outlined Sign out button,
+    just like the Slack original.
+*/
+.landing-navbar--dark {
+    background: var(--color-primary);
+    box-shadow: none;
+}
+
+.landing-navbar--dark .landing-navbar__link {
+    color: #ffffff;
+}
+
+.landing-navbar--dark .landing-navbar__link:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.landing-navbar--dark .landing-navbar__caret {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.landing-navbar--dark .landing-navbar__trigger--open {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.landing-navbar--dark .landing-navbar__signout {
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.75);
+    color: #ffffff;
+}
+
+.landing-navbar--dark .landing-navbar__signout:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
 /* Tablets and below: keep brand + auth actions, drop the menu. */
 @media (max-width: 1024px) {
     .landing-navbar__menu {

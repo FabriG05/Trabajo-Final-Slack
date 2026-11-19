@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import slackLogo from '../../../assets/slackLogo.svg'
+import slackLogoWhite from '../../../assets/slackLogoWhite.svg'
 import slugify from '../../../Utils/slugify'
 import '../CSS/LandingNavbar.css'
 
@@ -158,10 +159,13 @@ function DropdownColumn({ title, items }) {
     When `signedIn` is passed, the auth CTAs on the right are
     replaced by a single Sign out button (used by the home
     screen); the landing keeps the default behaviour.
+    `theme='dark'` switches the background to Slack purple and
+    nav items / logo to white (for pages with a purple hero).
 */
-function LandingNavbar({ signedIn = false, onSignOut }) {
+function LandingNavbar({ signedIn = false, onSignOut, theme = 'light' }) {
     const [openMenu, setOpenMenu] = useState(null)
     const location = useLocation()
+    const logoSrc = theme === 'dark' ? slackLogoWhite : slackLogo
 
     // Close the dropdown after any navigation.
     useEffect(
@@ -201,12 +205,12 @@ function LandingNavbar({ signedIn = false, onSignOut }) {
     )
 
     return (
-        <header className='landing-navbar'>
+        <header className={`landing-navbar${theme === 'dark' ? ' landing-navbar--dark' : ''}`}>
             <div className='landing-navbar__left'>
                 <Link to='/' className='landing-navbar__brand'>
                     <img
                         className='landing-navbar__logo'
-                        src={slackLogo}
+                        src={logoSrc}
                         alt='Slack'
                     />
                 </Link>

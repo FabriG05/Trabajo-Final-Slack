@@ -55,6 +55,31 @@ export async function getAllWorkspaces() {
     return responseBody
 }
 
+export async function getWorkspaceById(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
 /*
     Joins the workspace behind an invitation link. The token is either
     the workspace-level invite link token or a personal invitation token

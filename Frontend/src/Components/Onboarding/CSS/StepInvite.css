@@ -49,6 +49,159 @@
     margin-top: 28px;
 }
 
+/* Text button pushed to the far right of the actions row. */
+.step-invite__skip {
+    margin-left: auto;
+    padding: 12px 4px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #c7cacd;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.step-invite__skip:hover:not(:disabled) {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.step-invite__skip:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* "Skip without inviting?" confirmation dialog. */
+.step-invite__modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.step-invite__modal {
+    position: relative;
+    width: min(560px, 100%);
+    padding: 28px 32px 24px;
+    background: #1a1d21;
+    border: 1px solid #35373b;
+    border-radius: 12px;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+    text-align: left;
+}
+
+.step-invite__modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #b9bcbf;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.step-invite__modal-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.step-invite__modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.step-invite__modal-title {
+    margin: 0 40px 14px 0;
+    font-family: var(--font-family-heading);
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.step-invite__modal-text {
+    margin: 0 0 22px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #b9bcbf;
+}
+
+.step-invite__benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0 0 28px;
+    padding: 0;
+    list-style: none;
+}
+
+.step-invite__benefit {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.step-invite__benefit-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: #36c5f0;
+}
+
+.step-invite__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.step-invite__modal-back,
+.step-invite__modal-confirm {
+    padding: 12px 26px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #ffffff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.step-invite__modal-back {
+    background: transparent;
+    border: 1px solid #6b6f74;
+}
+
+.step-invite__modal-back:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #9a9ea3;
+}
+
+.step-invite__modal-confirm {
+    background: #e01e5a;
+    border: 1px solid #e01e5a;
+}
+
+.step-invite__modal-confirm:hover {
+    background: #c81a50;
+    border-color: #c81a50;
+}
+
 /* Outcome summary shown after the invitations are processed. */
 .step-invite__summary {
     display: flex;

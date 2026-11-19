@@ -1,0 +1,94 @@
+/*
+    Workspace top header: slim dark purple banner spanning 100% width.
+*/
+.workspace-topbar {
+    height: 44px;
+    background: #270629;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.workspace-topbar__history {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 240px;
+}
+
+.workspace-topbar__btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.workspace-topbar__btn:hover {
+    background: #302034;
+    color: #ffffff;
+}
+
+.workspace-topbar__search-container {
+    flex: 1;
+    max-width: 640px;
+    margin: 0 16px;
+}
+
+.workspace-topbar__search {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    gap: 8px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.workspace-topbar__search:hover,
+.workspace-topbar__search:focus-within {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.workspace-topbar__search-icon {
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+.workspace-topbar__search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.workspace-topbar__search-input::placeholder {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.workspace-topbar__search-sparkle {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.workspace-topbar__help {
+    width: 240px;
+    display: flex;
+    justify-content: flex-end;
+}

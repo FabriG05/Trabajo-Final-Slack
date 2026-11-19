@@ -1,42 +1,53 @@
 /*
-    Workspace row inside the "Workspaces" card: colored initial
-    avatar, name and member count, with an arrow that slides on
-    hover. The whole row links to the workspace.
+    Workspace row inside the "Workspaces" card: workspace picture,
+    name and member count. Following the Slack workspace picker,
+    hovering reveals a dashed purple outline, a soft grey row and
+    the blue "Launch" action. The whole row links to the workspace.
 */
 .workspace-card {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 12px 8px;
-    border-radius: 10px;
+    gap: 18px;
+    padding: 13px 12px;
+    border: 1.5px dashed transparent;
+    border-radius: 12px;
     text-decoration: none;
     color: inherit;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.workspace-card:hover {
-    background: var(--color-surface-muted);
-}
-
-/* Square avatar showing the first letter of the workspace name.
-   The background color is set inline from the name hash. */
+/* Square workspace picture. Without an uploaded photo the card
+   falls back to one of the default placeholders. The min/max
+   sizes keep the image clipped to the rounded square no matter
+   what size the source file is. */
 .workspace-card__avatar {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    color: #ffffff;
-    font-size: 20px;
-    font-weight: 700;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    overflow: hidden;
+    background: var(--color-surface-muted);
+    border-radius: 11px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.workspace-card__avatar-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
 }
 
 .workspace-card__info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     min-width: 0;
 }
 
@@ -62,14 +73,77 @@
     white-space: nowrap;
 }
 
-.workspace-card__arrow {
+.workspace-card__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
     margin-left: auto;
     color: var(--color-text-muted);
+    transition: color 0.15s ease;
+}
+
+/* "Launch" stays hidden until the row is hovered or focused. */
+.workspace-card__launch {
+    max-width: 0;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    transition: max-width 0.2s ease, opacity 0.15s ease;
+}
+
+.workspace-card__arrow {
+    flex-shrink: 0;
     transition: transform 0.15s ease, color 0.15s ease;
 }
 
-.workspace-card:hover .workspace-card__arrow {
-    color: var(--color-primary-hover);
+/* Hover treatment only on devices that actually support it, so
+   touch screens do not keep a row highlighted after a tap. */
+@media (hover: hover) {
+    .workspace-card:hover {
+        background: #f8f8f8;
+        border-color: var(--color-primary-hover);
+    }
+
+    .workspace-card:hover .workspace-card__launch {
+        max-width: 80px;
+        opacity: 1;
+    }
+
+    .workspace-card:hover .workspace-card__action,
+    .workspace-card:hover .workspace-card__arrow {
+        color: #1264a3;
+    }
+
+    .workspace-card:hover .workspace-card__arrow {
+        transform: translateX(4px);
+    }
+
+    .workspace-card:hover .workspace-card__avatar-image {
+        transform: scale(1.04);
+    }
+}
+
+/* Keyboard users get the same affordance. */
+.workspace-card:focus-visible {
+    background: #f8f8f8;
+    border-color: var(--color-primary-hover);
+    outline: 2px solid var(--color-primary-hover);
+    outline-offset: 2px;
+}
+
+.workspace-card:focus-visible .workspace-card__launch {
+    max-width: 80px;
+    opacity: 1;
+}
+
+.workspace-card:focus-visible .workspace-card__action,
+.workspace-card:focus-visible .workspace-card__arrow {
+    color: #1264a3;
+}
+
+.workspace-card:focus-visible .workspace-card__arrow {
     transform: translateX(4px);
 }

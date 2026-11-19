@@ -22,16 +22,15 @@ function HomeScreeen() {
     }
 
     // Slack-style welcome back page: the landing navbar (with
-    // Sign out), a purple hero closed by a gentle wave, the
-    // workspace card floating over it and the landing footer at
-    // the bottom. The list hook owns loading/error/empty states,
-    // rendered through render props so everything stays inside
-    // the card.
+    // Sign out) in dark theme, a purple hero closed by a smooth
+    // downward round curve, the workspace card floating over it
+    // and the landing footer at the bottom.
     return (
         <div className='home-screen'>
             <LandingNavbar
                 signedIn
                 onSignOut={handleSignOut}
+                theme='dark'
             />
 
             <section className='home-hero'>
@@ -41,16 +40,16 @@ function HomeScreeen() {
                 </p>
             </section>
 
-            {/* Gentle wave closing the hero: the path starts at the
-                top edge, so the purple fills down to the curve and
-                merges seamlessly with the hero above. */}
+            {/* Smooth symmetrical downward arc closing the hero: the path
+                starts at the top edge, curving down in a round parabola to
+                merge seamlessly with the purple hero above. */}
             <svg
-                className='home-hero__wave'
-                viewBox='0 0 1440 60'
+                className='home-hero__curve'
+                viewBox='0 0 1440 140'
                 preserveAspectRatio='none'
                 aria-hidden='true'
             >
-                <path d='M0,0 L1440,0 L1440,22 C1180,48 880,8 560,26 C360,38 140,34 0,14 Z' />
+                <path d='M0,-1 L1440,-1 L1440,0 Q720,280 0,0 Z' />
             </svg>
 
             <main className='home-content'>
@@ -113,6 +112,7 @@ function HomeScreeen() {
                                                 name={workspace.name}
                                                 description={workspace.description}
                                                 memberCount={workspace.memberCount}
+                                                photo={workspace.photo}
                                             />
                                         ))}
                                     </div>

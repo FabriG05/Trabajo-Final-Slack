@@ -63,7 +63,8 @@ export default function WorkspaceList({
         id: workspace._id,
         name: workspace.name,
         description: workspace.description,
-        memberCount: workspace.members?.length ?? 0
+        memberCount: workspace.members?.length ?? 0,
+        photo: workspace.photo || workspace.photo_url || workspace.profile_photo || null
     })).filter((workspace) => workspace.id)
 
     return renderItems
