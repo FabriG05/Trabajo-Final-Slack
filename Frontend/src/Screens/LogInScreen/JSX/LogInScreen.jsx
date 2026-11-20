@@ -5,6 +5,8 @@ import useRequest from '../../../Hooks/useRequest'
 import { Link, useLocation, useNavigate } from 'react-router'
 import AuthCard from '../../../Components/Auth/JSX/AuthCard'
 import AuthForm from '../../../Components/Auth/JSX/AuthForm'
+import AuthGoogleButton from '../../../Components/Auth/JSX/AuthGoogleButton'
+import { useSession } from '../../../Context/SessionContext'
 
 
 function LoginScreen() {
@@ -12,6 +14,7 @@ function LoginScreen() {
     const initialState = { email: '', password: '' }
     const { formState, handleChangeInput } = useForm(initialState)
     const { loading, response, error, sendRequest } = useRequest()
+    const { signIn } = useSession()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -28,15 +31,14 @@ function LoginScreen() {
             if (response && response.data) {
                 const token = response.data.token || response.data.authToken
                 if (token) {
-                    localStorage.setItem('auth_token', token)
-                    localStorage.setItem('authToken', token)
+                    signIn(token)
                     // Links like the workspace invitation can ask to come
                     // back to their page right after logging in.
                     navigate(location.state?.redirectTo ?? '/home')
                 }
             }
         },
-        [response]
+        [response, navigate, location.state?.redirectTo, signIn]
     )
 
 
@@ -50,6 +52,7 @@ function LoginScreen() {
                 to: '/register'
             }}
         >
+            <AuthGoogleButton />
             <AuthForm
                 fields={[
                     { name: 'email', type: 'email', label: 'Email', autoComplete: 'email', placeholder: 'name@work-email.com' },

@@ -18,17 +18,20 @@ import WorkspaceScreen from './Screens/WorkspaceScreen/JSX/WorkspaceScreen'
 const App = () => {
   return (
     <Routes>
-      <Route element={<GuestMiddleware />}>
-        <Route path='/' element={<LandingScreen />} />
-      </Route>
+      <Route path='/' element={<LandingScreen />} />
       <Route element={<AuthMiddleware />}>
         <Route path='/home' element={<HomeScreeen />} />
         <Route path='/create-workspace' element={<CreateWorkspaceScreen />} />
         <Route path='/workspace/:workspaceId' element={<WorkspaceScreen />} />
         <Route path='/workspace/:workspaceId/channels/:channelId' element={<WorkspaceScreen />} />
       </Route>
-      <Route path='/login' element={<LogInScreen />} />
-      <Route path='/register' element={<RegisterScreen />} />
+      <Route element={<GuestMiddleware />}>
+        <Route path='/login' element={<LogInScreen />} />
+        <Route path='/register' element={<RegisterScreen />} />
+      </Route>
+
+      {/* Stand-in for features that are not available yet (e.g. Google sign in). */}
+      <Route path='/coming-soon' element={<PlaceholderScreen />} />
 
       {/* Target of the workspace invitation links (copy link button and invitation emails). */}
       <Route path='/workspace/:workspaceId/join' element={<JoinWorkspaceScreen />} />

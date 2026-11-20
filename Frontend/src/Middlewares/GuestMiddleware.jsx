@@ -1,14 +1,14 @@
-import { Outlet, Navigate } from 'react-router';
+import { Outlet, Navigate } from "react-router";
+import { useSession } from "../Context/SessionContext";
 
 /*
-    Guard for public screens that only make sense while logged
-    out (like the landing page). If a session token exists the
-    user goes straight to the home screen instead.
+    Guard for auth screens (login, register). A signed-in user has
+    no reason to see them, so they go straight to the workspace list.
 */
 export default function GuestMiddleware() {
-    const authToken = localStorage.getItem("auth_token") || localStorage.getItem("authToken")
+    const { signedIn } = useSession()
 
-    if (authToken) {
+    if (signedIn) {
         return <Navigate to={'/home'} replace />
     }
     else {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 /* 
     This hook lets us handle the server response through state.
@@ -9,7 +9,7 @@ function useRequest() {
     const [response, setResponse] = useState(null)
     const [error, setError] = useState(null)
 
-    async function sendRequest(requestFn) {
+    const sendRequest = useCallback(async function sendRequest(requestFn) {
         try {
             setLoading(true)
             const response = await requestFn()
@@ -25,7 +25,7 @@ function useRequest() {
         finally {
             setLoading(false)
         }
-    }
+    }, [])
 
     return {
         loading,

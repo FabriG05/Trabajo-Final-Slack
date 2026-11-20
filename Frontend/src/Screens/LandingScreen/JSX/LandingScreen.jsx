@@ -6,6 +6,7 @@ import LandingStats from '../../../Components/Landing/JSX/LandingStats'
 import LandingSocialProof from '../../../Components/Landing/JSX/LandingSocialProof'
 import LandingCta from '../../../Components/Landing/JSX/LandingCta'
 import LandingFooter from '../../../Components/Landing/JSX/LandingFooter'
+import { useSession } from '../../../Context/SessionContext'
 import '../CSS/LandingScreen.css'
 
 /*
@@ -14,9 +15,11 @@ import '../CSS/LandingScreen.css'
     CTA and footer.
 */
 function LandingScreen() {
+    const { signedIn, signOut } = useSession()
+
     return (
         <div className='landing-screen'>
-            <LandingNavbar />
+            <LandingNavbar signedIn={signedIn} onSignOut={signOut} />
             <LandingHero />
             <LandingAiSection />
             <LandingNews />

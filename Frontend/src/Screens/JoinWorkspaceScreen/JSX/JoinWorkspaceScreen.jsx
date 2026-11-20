@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { joinWorkspace } from '../../../Services/WorkSpaceService'
+import { useSession } from '../../../Context/SessionContext'
 import '../CSS/JoinWorkspaceScreen.css'
 
 /*
@@ -18,15 +19,14 @@ import '../CSS/JoinWorkspaceScreen.css'
 function JoinWorkspaceScreen() {
     const { workspaceId } = useParams()
     const [searchParams] = useSearchParams()
-    const navigate = useNavigate()
     const location = useLocation()
     const joinCalled = useRef(false)
+    const { signedIn } = useSession()
 
     const invitationToken = searchParams.get('token')
-    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
 
     const [state, setState] = useState(
-        !authToken
+        !signedIn
             ? 'guest'
             : !invitationToken
                 ? 'missing_token'

@@ -167,14 +167,6 @@ function LandingNavbar({ signedIn = false, onSignOut, theme = 'light' }) {
     const location = useLocation()
     const logoSrc = theme === 'dark' ? slackLogoWhite : slackLogo
 
-    // Close the dropdown after any navigation.
-    useEffect(
-        () => {
-            setOpenMenu(null)
-        },
-        [location.pathname]
-    )
-
     // Close on outside click or Escape while a menu is open.
     useEffect(
         () => {
@@ -215,7 +207,17 @@ function LandingNavbar({ signedIn = false, onSignOut, theme = 'light' }) {
                     />
                 </Link>
 
-                <nav className='landing-navbar__menu' aria-label='Main'>
+                <nav
+                    className='landing-navbar__menu'
+                    aria-label='Main'
+                    onClick={(event) => {
+                        // Close the dropdown after following a link, but
+                        // leave trigger clicks alone so the panel opens.
+                        if (event.target.closest('a')) {
+                            setOpenMenu(null)
+                        }
+                    }}
+                >
                     {NAV_MENUS.map((menu) => (
                         <div
                             key={menu.label}
@@ -281,13 +283,23 @@ function LandingNavbar({ signedIn = false, onSignOut, theme = 'light' }) {
 
             <div className='landing-navbar__right'>
                 {signedIn ? (
-                    <button
-                        type='button'
-                        className='landing-navbar__signout'
-                        onClick={onSignOut}
-                    >
-                        Sign out
-                    </button>
+                    <>
+                        {location.pathname !== '/home' && (
+                            <Link to='/home' className='landing-navbar__get-started'>
+                                Go to workspaces
+                            </Link>
+                        )}
+
+                        {onSignOut && (
+                            <button
+                                type='button'
+                                className='landing-navbar__signout'
+                                onClick={onSignOut}
+                            >
+                                Sign out
+                            </button>
+                        )}
+                    </>
                 ) : (
                     <>
                         <Link to='/login' className='landing-navbar__signin'>

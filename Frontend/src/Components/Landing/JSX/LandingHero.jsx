@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { useSession } from '../../../Context/SessionContext'
 import '../CSS/LandingHero.css'
 
 /*
@@ -7,6 +8,8 @@ import '../CSS/LandingHero.css'
     demo video (compressed copy served from public/videos).
 */
 function LandingHero() {
+    const { signedIn } = useSession()
+
     return (
         <section className='landing-hero'>
             <h1 className='landing-hero__title'>
@@ -18,9 +21,15 @@ function LandingHero() {
             </p>
 
             <div className='landing-hero__actions'>
-                <Link to='/register' className='landing-hero__cta landing-hero__cta--primary'>
-                    Get started
-                </Link>
+                {signedIn ? (
+                    <Link to='/home' className='landing-hero__cta landing-hero__cta--primary'>
+                        Go to workspaces
+                    </Link>
+                ) : (
+                    <Link to='/register' className='landing-hero__cta landing-hero__cta--primary'>
+                        Get started
+                    </Link>
+                )}
                 <Link to='/pricing' className='landing-hero__cta landing-hero__cta--secondary'>
                     Find your subscription
                     <span className='landing-hero__arrow' aria-hidden='true'>→</span>

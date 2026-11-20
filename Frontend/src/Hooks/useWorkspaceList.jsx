@@ -11,7 +11,7 @@ function useWorkspaceList() {
                 () => getAllWorkspaces()
             )
         },
-        []
+        [sendRequest]
     )
 
     function reloadWorkspaces() {

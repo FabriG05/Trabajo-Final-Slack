@@ -4,15 +4,18 @@ import LandingNavbar from '../../../Components/Landing/JSX/LandingNavbar'
 import LandingFooter from '../../../Components/Landing/JSX/LandingFooter'
 import WorkspaceList from '../../../Components/WorkspaceLists/JSX/WorkspaceLists'
 import WorkspaceCard from '../../../Components/Home/JSX/WorkspaceCard'
+import { useSession } from '../../../Context/SessionContext'
 import '../CSS/HomeScreen.css'
 
 function HomeScreeen() {
     const navigate = useNavigate()
+    const { signOut } = useSession()
 
     function handleSignOut() {
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('authToken')
-        navigate('/login')
+        signOut()
+        // Back to the public landing page once the token is gone.
+        // `replace` keeps /home out of the history.
+        navigate('/', { replace: true })
     }
 
     // The "create a workspace" action lives on its own onboarding

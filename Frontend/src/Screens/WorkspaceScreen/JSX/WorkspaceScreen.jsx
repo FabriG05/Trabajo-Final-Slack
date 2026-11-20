@@ -29,7 +29,7 @@ function WorkspaceScreen() {
     const { workspaceId } = useParams()
 
     return (
-        <WorkspaceProvider workspaceId={workspaceId}>
+        <WorkspaceProvider key={workspaceId} workspaceId={workspaceId}>
             <WorkspaceScreenContent />
         </WorkspaceProvider>
     )

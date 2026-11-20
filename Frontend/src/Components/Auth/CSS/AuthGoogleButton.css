@@ -1,0 +1,60 @@
+/* White outlined button with the Google mark, Slack style. */
+.auth-google {
+    margin-bottom: 20px;
+}
+
+.auth-google__button {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--color-text);
+    background: var(--color-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-btn);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-google__button:hover {
+    background: var(--color-surface-muted);
+    border-color: var(--color-text-muted);
+}
+
+.auth-google__button:focus-visible {
+    outline: 2px solid var(--color-primary-hover);
+    outline-offset: 2px;
+}
+
+.auth-google__icon {
+    flex-shrink: 0;
+}
+
+/* "OR" separator between the Google button and the email form. */
+.auth-google__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    color: var(--color-text-muted);
+}
+
+.auth-google__divider::before,
+.auth-google__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border-light);
+}
+
+.auth-google__divider-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}

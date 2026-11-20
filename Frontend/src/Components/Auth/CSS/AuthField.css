@@ -10,8 +10,14 @@
     color: var(--color-text);
 }
 
+.auth-field__control {
+    position: relative;
+    display: flex;
+}
+
 /* Slack-style inputs: gray border, Slack focus ring. */
 .auth-field__input {
+    width: 100%;
     padding: 12px 14px;
     font-size: 16px;
     font-family: inherit;
@@ -22,6 +28,11 @@
     border-radius: var(--radius-input);
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Keep the text clear of the reveal button. */
+.auth-field__control--password .auth-field__input {
+    padding-right: 48px;
 }
 
 .auth-field__input::placeholder {
@@ -44,5 +55,39 @@
 .auth-field__input:disabled {
     background: var(--color-surface-muted);
     color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+/* Eye button that reveals / hides the password. */
+.auth-field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.auth-field__toggle:hover:not(:disabled) {
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+}
+
+.auth-field__toggle:focus-visible {
+    outline: 2px solid var(--color-primary-hover);
+    outline-offset: 1px;
+}
+
+.auth-field__toggle:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }

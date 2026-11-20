@@ -18,10 +18,10 @@ function PlaceholderScreen() {
             />
             <h1 className='placeholder-screen__title'>This page is coming soon</h1>
             <p className='placeholder-screen__text'>
-                We are still building this section. In the meantime, head back home.
+                We are still building this section. In the meantime, head back to Slack.
             </p>
             <Link to='/' className='placeholder-screen__link'>
-                Back to landing
+                Back to Slack
             </Link>
         </div>
     )

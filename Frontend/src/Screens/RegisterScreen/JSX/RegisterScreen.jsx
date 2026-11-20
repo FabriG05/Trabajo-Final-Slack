@@ -4,6 +4,7 @@ import useRequest from '../../../Hooks/useRequest'
 import { register } from '../../../Services/AuthService'
 import AuthCard from '../../../Components/Auth/JSX/AuthCard'
 import AuthForm from '../../../Components/Auth/JSX/AuthForm'
+import AuthGoogleButton from '../../../Components/Auth/JSX/AuthGoogleButton'
 
 function RegisterScreen() {
     const initialState = { name: '', email: '', password: '' }
@@ -28,6 +29,7 @@ function RegisterScreen() {
                 to: '/login'
             }}
         >
+            <AuthGoogleButton />
             <AuthForm
                 fields={[
                     { name: 'name', type: 'text', label: 'Name', autoComplete: 'name', placeholder: 'Your name' },

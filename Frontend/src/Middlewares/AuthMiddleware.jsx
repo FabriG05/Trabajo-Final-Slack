@@ -1,11 +1,12 @@
 import React from "react";
 import { Outlet, Navigate } from "react-router";
+import { useSession } from "../Context/SessionContext";
 
 
 export default function AuthMiddleware() {
-    const authToken = localStorage.getItem("auth_token") || localStorage.getItem("authToken")
+    const { signedIn } = useSession()
 
-    if (authToken) {
+    if (signedIn) {
         return <Outlet />
     }
     else {

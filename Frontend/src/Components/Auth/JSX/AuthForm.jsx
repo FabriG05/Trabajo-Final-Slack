@@ -49,6 +49,8 @@ function AuthForm({
                         onChange={onChange}
                         disabled={loading}
                         autoComplete={field.autoComplete}
+                        placeholder={field.placeholder}
+                        required={field.required}
                     />
                 ))
             }

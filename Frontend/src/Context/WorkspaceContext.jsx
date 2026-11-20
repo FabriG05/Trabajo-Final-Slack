@@ -51,7 +51,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const [activeChannelId, setActiveChannelId] = useState('new-channel')
 
     // Direct Messages and active selection
-    const [directMessages, setDirectMessages] = useState(INITIAL_DMS)
+    const [directMessages] = useState(INITIAL_DMS)
     const [activeDmId, setActiveDmId] = useState(null)
 
     // Apps list
@@ -74,13 +74,10 @@ export function WorkspaceProvider({ children, workspaceId }) {
     // Fetch workspace metadata when workspaceId is provided
     useEffect(() => {
         if (!workspaceId) {
-            setLoadingWorkspace(false)
             return
         }
 
         let isMounted = true
-        setLoadingWorkspace(true)
-        setWorkspaceError(null)
 
         getWorkspaceById(workspaceId)
             .then((res) => {
