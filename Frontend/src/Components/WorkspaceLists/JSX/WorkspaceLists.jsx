@@ -64,11 +64,13 @@ export default function WorkspaceList({
         name: workspace.name,
         description: workspace.description,
         memberCount: workspace.members?.length ?? 0,
+        // Role of the requesting user in this workspace (Owner/Admin/User).
+        role: workspace.role || null,
         photo: workspace.photo || workspace.photo_url || workspace.profile_photo || null
     })).filter((workspace) => workspace.id)
 
     return renderItems
-        ? renderItems(workspaces)
+        ? renderItems(workspaces, reloadWorkspaces)
         : (
             <div>
                 {workspaces.map((item) => (

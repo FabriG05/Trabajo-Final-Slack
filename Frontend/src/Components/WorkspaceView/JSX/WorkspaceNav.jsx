@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
-import { updateProfilePhoto } from '../../../Services/ProfileService'
 import { compressPhoto } from '../../../Utils/compressPhoto'
 import {
     IconHome,
@@ -38,11 +37,12 @@ const NAV_ITEMS = [
 ]
 
 function WorkspaceNav() {
-    const { activeNavTab, setActiveNavTab, workspace, currentUser, userStatus, setUserStatus } = useWorkspace()
+    const { activeNavTab, setActiveNavTab, workspace, currentUser, userStatus, setUserStatus, changeProfilePhoto } = useWorkspace()
 
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
     const photoInputRef = useRef(null)
     const [photoError, setPhotoError] = useState(null)
+    const [statusError, setStatusError] = useState(null)
 
     // Workspace badge abbreviation (e.g. "NW" for "New Workspace")
     const workspaceInitials = (workspace?.name || 'NW')
@@ -77,9 +77,20 @@ function WorkspaceNav() {
         try {
             const compressedPhoto = await compressPhoto(file)
             setPhotoError(null)
-            await updateProfilePhoto(compressedPhoto)
+            await changeProfilePhoto(compressedPhoto)
         } catch {
             setPhotoError('The image could not be read. Please try again.')
+        }
+    }
+
+    async function handleStatusChange(status) {
+        setStatusError(null)
+        const changed = await setUserStatus(status)
+
+        if (changed) {
+            setIsStatusMenuOpen(false)
+        } else {
+            setStatusError('Could not update your status. Please try again.')
         }
     }
 
@@ -152,7 +163,15 @@ function WorkspaceNav() {
                     title={currentUser.username}
                 >
                     <span className='workspace-nav__profile-avatar'>
-                        <IconUser size={18} />
+                        {currentUser.photo ? (
+                            <img
+                                className='workspace-nav__profile-photo'
+                                src={currentUser.photo}
+                                alt=''
+                            />
+                        ) : (
+                            <IconUser size={18} />
+                        )}
                         <span className='workspace-nav__status-dot' data-status={userStatus} />
                     </span>
                 </button>
@@ -165,10 +184,7 @@ function WorkspaceNav() {
                                     <button
                                         type='button'
                                         className={'workspace-nav__status-option' + (userStatus === option.value ? ' workspace-nav__status-option--active' : '')}
-                                        onClick={() => {
-                                            setUserStatus(option.value)
-                                            setIsStatusMenuOpen(false)
-                                        }}
+                                        onClick={() => handleStatusChange(option.value)}
                                         role='menuitemradio'
                                         aria-checked={userStatus === option.value}
                                     >
@@ -198,6 +214,12 @@ function WorkspaceNav() {
                         {photoError && (
                             <p className='workspace-nav__photo-error' role='alert'>
                                 {photoError}
+                            </p>
+                        )}
+
+                        {statusError && (
+                            <p className='workspace-nav__photo-error' role='alert'>
+                                {statusError}
                             </p>
                         )}
                     </div>

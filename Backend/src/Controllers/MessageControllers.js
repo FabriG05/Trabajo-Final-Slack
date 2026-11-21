@@ -1,5 +1,8 @@
 import message_service from "../Services/MessageServices.js";
-import { publishMessage } from "../Realtime/SocketServer.js";
+import {
+    publishMessage,
+    publishMessageDeleted
+} from "../Realtime/SocketServer.js";
 
 /*
     Message controllers. Thin HTTP layer for channel messages and
@@ -60,6 +63,32 @@ export async function getDirectMessages(request, response) {
         message: "Direct messages retrieved successfully.",
         data: {
             messages
+        }
+    });
+}
+
+/*
+    Deletes one message. The workspace middleware already loaded the
+    requester membership, so the role check does not need another query.
+*/
+export async function deleteMessage(request, response) {
+    const { message_id } = request.params;
+
+    const deletedMessage = await message_service.deleteMessage(
+        request.workspace._id,
+        message_id,
+        request.user.id,
+        request.membership?.role
+    );
+
+    // Notify the channel members, or both participants of the DM.
+    publishMessageDeleted(deletedMessage);
+
+    return response.status(200).send({
+        ok: true,
+        message: "Message deleted successfully.",
+        data: {
+            deletedMessage
         }
     });
 }

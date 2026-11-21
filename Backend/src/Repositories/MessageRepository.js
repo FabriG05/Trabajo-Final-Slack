@@ -37,6 +37,24 @@ class MessageRepository {
         }
     }
 
+    async getById(messageId) {
+        try {
+            return await Message.findById(messageId);
+        } catch (error) {
+            console.error('Error in MessageRepository.getById:', error.message);
+            throw error;
+        }
+    }
+
+    async deleteById(messageId) {
+        try {
+            return await Message.findByIdAndDelete(messageId);
+        } catch (error) {
+            console.error('Error in MessageRepository.deleteById:', error.message);
+            throw error;
+        }
+    }
+
     async getByChannelId(channelId) {
         try {
             const messages = await Message

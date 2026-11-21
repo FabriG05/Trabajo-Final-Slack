@@ -52,6 +52,46 @@
     gap: 4px;
 }
 
+/* Workspace dropdown: only owners see the destructive option. */
+.workspace-sidebar__workspace-menu-wrapper {
+    position: relative;
+    max-width: 160px;
+}
+
+.workspace-sidebar__workspace-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 190px;
+    padding: 6px;
+    background: #302034;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    z-index: 30;
+}
+
+.workspace-sidebar__workspace-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #ff8b8b;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.workspace-sidebar__workspace-menu-item:hover {
+    background: rgba(217, 63, 63, 0.18);
+    color: #ffffff;
+}
+
 .workspace-sidebar__icon-btn {
     background: transparent;
     border: none;
@@ -208,6 +248,10 @@
     padding: 0;
 }
 
+.workspace-sidebar__item {
+    position: relative;
+}
+
 .workspace-sidebar__item-btn {
     width: 100%;
     padding: 6px 16px;
@@ -221,6 +265,48 @@
     cursor: pointer;
     text-align: left;
     transition: background 0.12s ease;
+}
+
+/* Leave room for the delete action inside channel rows. */
+.workspace-sidebar__item .workspace-sidebar__item-btn {
+    padding-right: 34px;
+}
+
+/* Delete action: appears on hover or keyboard focus. */
+.workspace-sidebar__item-delete {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.workspace-sidebar__item-delete:hover {
+    background: rgba(217, 63, 63, 0.25);
+    color: #ffffff;
+}
+
+.workspace-sidebar__item:hover .workspace-sidebar__item-delete,
+.workspace-sidebar__item-delete:focus-visible {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .workspace-sidebar__item-delete {
+        opacity: 0.65;
+    }
 }
 
 .workspace-sidebar__item-btn:hover {

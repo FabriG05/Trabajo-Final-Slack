@@ -86,6 +86,12 @@ class ChannelService {
     async deleteChannel(workspaceId, channelId) {
         const channel = await this.getChannelById(workspaceId, channelId)
 
+        // #general is the fallback conversation of the workspace: deleting it
+        // would leave the workspace without its default channel.
+        if (channel.name === 'general') {
+            throw new ServerError("The #general channel cannot be deleted.", 400)
+        }
+
         // Cascade: a deleted channel takes its messages with it.
         await messageRepository.deleteByChannelId(channelId)
         await channelRepository.deleteById(channelId)

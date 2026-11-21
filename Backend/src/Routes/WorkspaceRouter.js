@@ -15,7 +15,8 @@ import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
 import channelRouter from './ChannelRouter.js'
 import {
     getDirectMessages,
-    createDirectMessage
+    createDirectMessage,
+    deleteMessage
 } from '../Controllers/MessageControllers.js'
 
 const workspaceRouter = express.Router()
@@ -94,6 +95,18 @@ workspaceRouter.post(
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin', 'User']),
     createDirectMessage
+)
+
+/*
+    A single message of either a channel or a direct conversation. The
+    service checks that it belongs to this workspace and that the
+    requester is the author, an admin or the owner.
+*/
+workspaceRouter.delete(
+    "/:workspace_id/messages/:message_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    deleteMessage
 )
 
 workspaceRouter.use('/:workspace_id/channels', channelRouter)

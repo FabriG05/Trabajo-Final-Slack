@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
+import ConfirmDialog from '../../Common/JSX/ConfirmDialog'
 import {
     IconSettingsSliders,
     IconCompose,
@@ -11,7 +12,8 @@ import {
     IconUser,
     IconSprout,
     IconExternalLink,
-    IconStar
+    IconStar,
+    IconTrash
 } from './SlackIcons'
 import '../CSS/WorkspaceSidebar.css'
 
@@ -27,6 +29,10 @@ function WorkspaceSidebar() {
         activeChannel,
         selectChannel,
         addChannel,
+        deleteChannel,
+        deleteWorkspace,
+        canManageChannels,
+        canManageWorkspace,
         loadingChannels,
         channelError,
         clearChannelError,
@@ -40,6 +46,9 @@ function WorkspaceSidebar() {
     const [isCreatingChannel, setIsCreatingChannel] = useState(false)
     const [newChannelName, setNewChannelName] = useState('')
     const [filterQuery, setFilterQuery] = useState('')
+    const [channelToDelete, setChannelToDelete] = useState(null)
+    const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
+    const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useState(false)
 
     const filteredChannels = channels.filter((c) =>
         c.name.toLowerCase().includes(filterQuery.toLowerCase())
@@ -64,18 +73,46 @@ function WorkspaceSidebar() {
         <aside className='workspace-sidebar'>
             {/* Header: Workspace switcher & Actions */}
             <div className='workspace-sidebar__header'>
-                <button
-                    type='button'
-                    className='workspace-sidebar__workspace-btn'
-                    title={workspace?.name || 'New Workspace'}
-                >
-                    <span className='workspace-sidebar__workspace-name'>
-                        {workspace?.name || 'New Workspace'}
-                    </span>
-                    <span className='workspace-sidebar__chevron' aria-hidden='true'>
-                        <IconChevronDown size={12} />
-                    </span>
-                </button>
+                <div className='workspace-sidebar__workspace-menu-wrapper'>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__workspace-btn'
+                        title={workspace?.name || 'New Workspace'}
+                        onClick={() => {
+                            if (canManageWorkspace) {
+                                setIsWorkspaceMenuOpen((open) => !open)
+                            }
+                        }}
+                        aria-haspopup={canManageWorkspace ? 'menu' : undefined}
+                        aria-expanded={canManageWorkspace ? isWorkspaceMenuOpen : undefined}
+                    >
+                        <span className='workspace-sidebar__workspace-name'>
+                            {workspace?.name || 'New Workspace'}
+                        </span>
+                        {canManageWorkspace && (
+                            <span className='workspace-sidebar__chevron' aria-hidden='true'>
+                                <IconChevronDown size={12} />
+                            </span>
+                        )}
+                    </button>
+
+                    {canManageWorkspace && isWorkspaceMenuOpen && (
+                        <div className='workspace-sidebar__workspace-menu' role='menu'>
+                            <button
+                                type='button'
+                                className='workspace-sidebar__workspace-menu-item'
+                                role='menuitem'
+                                onClick={() => {
+                                    setIsWorkspaceMenuOpen(false)
+                                    setIsDeleteWorkspaceOpen(true)
+                                }}
+                            >
+                                <IconTrash size={13} />
+                                <span>Delete workspace</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
 
                 <div className='workspace-sidebar__header-actions'>
                     <button
@@ -170,7 +207,7 @@ function WorkspaceSidebar() {
                             const unreadCount = Number(unreadByConversation[channel.id] || 0)
 
                             return (
-                                <li key={channel.id}>
+                                <li key={channel.id} className='workspace-sidebar__item'>
                                     <button
                                         type='button'
                                         className={`workspace-sidebar__item-btn${isActive ? ' workspace-sidebar__item-btn--active' : ''}`}
@@ -184,6 +221,18 @@ function WorkspaceSidebar() {
                                             </span>
                                         )}
                                     </button>
+
+                                    {canManageChannels && channel.name !== 'general' && (
+                                        <button
+                                            type='button'
+                                            className='workspace-sidebar__item-delete'
+                                            title={`Delete #${channel.name}`}
+                                            aria-label={`Delete #${channel.name}`}
+                                            onClick={() => setChannelToDelete(channel)}
+                                        >
+                                            <IconTrash size={13} />
+                                        </button>
+                                    )}
                                 </li>
                             )
                         })}
@@ -335,6 +384,32 @@ function WorkspaceSidebar() {
                     <span className='workspace-sidebar__task-text'>Set up your first channel</span>
                 </div>
             </div>
+
+            {channelToDelete && (
+                <ConfirmDialog
+                    title={`Delete #${channelToDelete.name}?`}
+                    description='This permanently deletes the channel and all of its messages. Members will lose access immediately.'
+                    confirmLabel='Delete channel'
+                    onCancel={() => setChannelToDelete(null)}
+                    onConfirm={async () => {
+                        await deleteChannel(channelToDelete.id)
+                        setChannelToDelete(null)
+                    }}
+                />
+            )}
+
+            {isDeleteWorkspaceOpen && (
+                <ConfirmDialog
+                    title={`Delete ${workspace?.name || 'this workspace'}?`}
+                    description='This permanently deletes the workspace, its channels, messages and memberships. This action cannot be undone.'
+                    confirmLabel='Delete workspace'
+                    requireText={workspace?.name || ''}
+                    onCancel={() => setIsDeleteWorkspaceOpen(false)}
+                    onConfirm={async () => {
+                        await deleteWorkspace()
+                    }}
+                />
+            )}
         </aside>
     )
 }

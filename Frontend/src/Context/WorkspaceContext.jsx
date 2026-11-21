@@ -1,14 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
     getWorkspaceById,
     getChannels,
     createChannel,
+    deleteChannel as deleteChannelRequest,
+    deleteMessage as deleteMessageRequest,
+    deleteWorkspace as deleteWorkspaceRequest,
     getChannelMessages,
     sendChannelMessage,
     getDirectMessages,
     sendDirectMessage
 } from '../Services/WorkSpaceService'
-import { updateUserStatus, getCurrentUser } from '../Services/ProfileService'
+import { updateUserStatus, updateProfilePhoto, getCurrentUser } from '../Services/ProfileService'
 import { connectSocket, disconnectSocket, getSocket } from '../Services/SocketService'
 import useWorkspaceMembers from '../Hooks/useWorkspaceMembers'
 
@@ -44,6 +48,7 @@ function mapMessage(message) {
     return {
         id: message._id,
         type: 'user',
+        senderId: String(sender?._id ?? message.sender_id ?? ''),
         user: sender?.name || sender?.email || 'Unknown user',
         text: message.content,
         time: createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -87,6 +92,7 @@ function sortByCreationDate(messages) {
 }
 
 export function WorkspaceProvider({ children, workspaceId }) {
+    const navigate = useNavigate()
     const [workspace, setWorkspace] = useState(null)
     const [loadingWorkspace, setLoadingWorkspace] = useState(Boolean(workspaceId))
     const [workspaceError, setWorkspaceError] = useState(null)
@@ -124,6 +130,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const activeChannelIdRef = useRef(null)
     const activeDmIdRef = useRef(null)
     const currentUserIdRef = useRef(null)
+    const channelsRef = useRef([])
 
     // Outgoing typing state and timers.
     const outgoingTypingRef = useRef(null)
@@ -139,29 +146,48 @@ export function WorkspaceProvider({ children, workspaceId }) {
         username: '',
         displayName: '',
         initials: '',
-        status: 'online'
+        status: 'online',
+        photo: null
     })
 
     // Direct messages: one entry per active member of the workspace.
+    // The signed-in user reads their own status from `currentUser`, so a
+    // status change shows up immediately instead of waiting for a refetch.
     const directMessages = activeMembers
         .filter((member) => member.FK_id_user?._id)
-        .map((member) => ({
-            id: member.FK_id_user._id,
-            username: member.FK_id_user.name || member.FK_id_user.email,
-            status: member.FK_id_user.status,
-            isSelf: Boolean(currentUser.id)
-                && String(member.FK_id_user._id) === String(currentUser.id)
-        }))
+        .map((member) => {
+            const id = member.FK_id_user._id
+            const isSelf = Boolean(currentUser.id)
+                && String(id) === String(currentUser.id)
 
-    // The user's own presence, from their active member entry.
-    const userStatus = directMessages.find((dm) => dm.isSelf)?.status || currentUser.status
+            return {
+                id,
+                username: member.FK_id_user.name || member.FK_id_user.email,
+                status: isSelf ? currentUser.status : member.FK_id_user.status,
+                isSelf
+            }
+        })
+
+    // The user's own presence.
+    const userStatus = currentUser.status
+
+    // Role of the signed-in user in this workspace. It decides which
+    // destructive actions the UI offers (the API enforces them anyway).
+    const currentMembership = activeMembers.find(
+        (member) => String(member.FK_id_user?._id) === String(currentUser.id)
+    )
+    const currentUserRole = currentMembership?.role || null
+    const canManageChannels = ['Owner', 'Admin'].includes(currentUserRole)
+    const canDeleteAnyMessage = canManageChannels
+    const canManageWorkspace = currentUserRole === 'Owner'
 
     // Keep the refs used by socket handlers in sync with the latest render.
     useEffect(() => {
         activeChannelIdRef.current = activeChannelId
         activeDmIdRef.current = activeDmId
         currentUserIdRef.current = currentUser.id
-    })
+        channelsRef.current = channels
+    }, [activeChannelId, activeDmId, currentUser.id, channels])
 
     // Fetch workspace metadata when workspaceId is provided
     useEffect(() => {
@@ -215,7 +241,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
                         username: user.name,
                         displayName: user.name,
                         initials: (user.name || '').slice(0, 2).toUpperCase(),
-                        status: user.status || 'online'
+                        status: user.status || 'online',
+                        photo: user.profile_photo || null
                     })
                 }
             })
@@ -347,6 +374,84 @@ export function WorkspaceProvider({ children, workspaceId }) {
             return {
                 ...previous,
                 [conversationKey]: sortByCreationDate([...byId.values()])
+            }
+        })
+    }, [])
+
+    /*
+        Removes a channel and everything cached for it. Used both by the
+        local delete action and by the channel:deleted socket event.
+    */
+    const removeChannelLocally = useCallback((channelId) => {
+        const key = String(channelId)
+        const remainingChannels = channelsRef.current.filter(
+            (channel) => String(channel.id) !== key
+        )
+
+        channelsRef.current = remainingChannels
+        setChannels(remainingChannels)
+
+        setMessagesByConversation((previous) => {
+            if (!(key in previous)) {
+                return previous
+            }
+
+            const next = { ...previous }
+            delete next[key]
+            return next
+        })
+
+        setUnreadByConversation((previous) => {
+            if (!(key in previous)) {
+                return previous
+            }
+
+            const next = { ...previous }
+            delete next[key]
+            return next
+        })
+
+        setTypingByConversation((previous) => {
+            if (!(key in previous)) {
+                return previous
+            }
+
+            const next = { ...previous }
+            delete next[key]
+            return next
+        })
+
+        // If the user was looking at the deleted channel, move to the first
+        // one that is still available (a DM open takes precedence).
+        if (!activeDmIdRef.current && String(activeChannelIdRef.current) === key) {
+            const nextChannelId = remainingChannels[0]?.id || null
+
+            activeChannelIdRef.current = nextChannelId
+            setActiveChannelId(nextChannelId)
+            setLoadingMessages(Boolean(nextChannelId))
+        }
+    }, [])
+
+    /* Removes one message from a conversation after it was deleted. */
+    const removeMessageLocally = useCallback((conversationKey, messageId) => {
+        setMessagesByConversation((previous) => {
+            const existing = previous[conversationKey]
+
+            if (!existing) {
+                return previous
+            }
+
+            const filtered = existing.filter(
+                (message) => String(message.id) !== String(messageId)
+            )
+
+            if (filtered.length === existing.length) {
+                return previous
+            }
+
+            return {
+                ...previous,
+                [conversationKey]: filtered
             }
         })
     }, [])
@@ -485,6 +590,64 @@ export function WorkspaceProvider({ children, workspaceId }) {
             ))
         }
 
+        function handleMessageDeleted(payload) {
+            const message = payload?.message
+
+            if (!message) {
+                return
+            }
+
+            const conversationKey = getConversationKey(message, currentUserIdRef.current)
+
+            if (!conversationKey) {
+                return
+            }
+
+            removeMessageLocally(
+                conversationKey,
+                payload.messageId ?? message._id
+            )
+
+            // If it was an unread message of another person, lower the badge.
+            const senderId = String(message.sender_id?._id ?? message.sender_id ?? '')
+            const isOwnMessage = senderId === String(currentUserIdRef.current)
+            const isActiveConversation = message.message_type === 'direct'
+                ? String(activeDmIdRef.current) === conversationKey
+                : !activeDmIdRef.current
+                    && String(activeChannelIdRef.current) === conversationKey
+
+            if (!isOwnMessage && !isActiveConversation) {
+                setUnreadByConversation((previous) => {
+                    const currentUnread = previous[conversationKey]
+
+                    if (!currentUnread) {
+                        return previous
+                    }
+
+                    return {
+                        ...previous,
+                        [conversationKey]: Math.max(0, currentUnread - 1)
+                    }
+                })
+            }
+        }
+
+        function handleChannelDeleted(payload) {
+            const channelId = payload?.channelId ?? payload?.channel?._id
+
+            if (!channelId) {
+                return
+            }
+
+            removeChannelLocally(channelId)
+        }
+
+        function handleWorkspaceDeleted() {
+            // The workspace no longer exists: leave the screen. The member
+            // who deleted it navigates here too, so this is idempotent.
+            navigate('/home', { replace: true })
+        }
+
         function removeTypingUser(conversationKey, userId) {
             const timerKey = `${conversationKey}:${userId}`
 
@@ -569,14 +732,20 @@ export function WorkspaceProvider({ children, workspaceId }) {
         }
 
         socket.on('message:created', handleMessageCreated)
+        socket.on('message:deleted', handleMessageDeleted)
         socket.on('channel:created', handleChannelCreated)
+        socket.on('channel:deleted', handleChannelDeleted)
+        socket.on('workspace:deleted', handleWorkspaceDeleted)
         socket.on('typing:start', handleTypingStart)
         socket.on('typing:stop', handleTypingStop)
 
         return () => {
             socket.off('connect', handleConnect)
             socket.off('message:created', handleMessageCreated)
+            socket.off('message:deleted', handleMessageDeleted)
             socket.off('channel:created', handleChannelCreated)
+            socket.off('channel:deleted', handleChannelDeleted)
+            socket.off('workspace:deleted', handleWorkspaceDeleted)
             socket.off('typing:start', handleTypingStart)
             socket.off('typing:stop', handleTypingStop)
 
@@ -585,7 +754,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
             disconnectSocket()
         }
-    }, [workspaceId, upsertMessage])
+    }, [workspaceId, upsertMessage, removeChannelLocally, removeMessageLocally, navigate])
 
     // Clear the outgoing typing timer when the screen unmounts.
     useEffect(() => {
@@ -684,15 +853,26 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
     async function setUserStatus(status) {
         if (!['online', 'away', 'offline', 'do not disturb'].includes(status)) {
-            return
+            return false
         }
 
         try {
             await updateUserStatus(status)
             setCurrentUser((prev) => ({ ...prev, status }))
+            return true
         } catch (error) {
             console.error('Could not update the user status:', error.message)
+            return false
         }
+    }
+
+    /*
+        Stores a new profile photo (already compressed to a small base64
+        JPEG) and updates the avatar without a reload.
+    */
+    async function changeProfilePhoto(profilePhoto) {
+        await updateProfilePhoto(profilePhoto)
+        setCurrentUser((prev) => ({ ...prev, photo: profilePhoto }))
     }
 
     /*
@@ -731,6 +911,66 @@ export function WorkspaceProvider({ children, workspaceId }) {
             setMessageError(error.message)
             return false
         }
+    }
+
+    /*
+        Deletes one message of the active conversation. Returns true when
+        the message is gone from the server (or already gone).
+    */
+    async function deleteMessage(messageId) {
+        if (!workspaceId || !messageId) {
+            return false
+        }
+
+        const conversationKey = currentConversationKey
+            ? String(currentConversationKey)
+            : null
+
+        try {
+            await deleteMessageRequest(workspaceId, messageId)
+        } catch (error) {
+            // A 404 means someone else deleted it first: drop it locally too.
+            if (!/404/.test(error.message)) {
+                setMessageError(error.message)
+                return false
+            }
+        }
+
+        if (conversationKey) {
+            removeMessageLocally(conversationKey, messageId)
+        }
+
+        setMessageError(null)
+        return true
+    }
+
+    /*
+        Deletes a channel and everything cached for it. Throws on failure so
+        the confirmation dialog can show the server message.
+    */
+    async function deleteChannel(channelId) {
+        if (!workspaceId || !channelId) {
+            throw new Error('Channel not found.')
+        }
+
+        await deleteChannelRequest(workspaceId, channelId)
+
+        stopTyping()
+        removeChannelLocally(channelId)
+    }
+
+    /*
+        Deletes the workspace (owner only) and returns to the workspace list.
+    */
+    async function deleteWorkspace() {
+        if (!workspaceId) {
+            throw new Error('Workspace not found.')
+        }
+
+        await deleteWorkspaceRequest(workspaceId)
+
+        disconnectSocket()
+        navigate('/home', { replace: true })
     }
 
     /*
@@ -794,6 +1034,13 @@ export function WorkspaceProvider({ children, workspaceId }) {
         loadingMessages,
         messageError,
         sendMessage,
+        deleteMessage,
+        deleteChannel,
+        deleteWorkspace,
+        currentUserRole,
+        canManageChannels,
+        canDeleteAnyMessage,
+        canManageWorkspace,
         unreadByConversation,
         typingUsers: currentTypingUsers,
         notifyTyping,
@@ -801,6 +1048,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         currentUser,
         userStatus,
         setUserStatus,
+        changeProfilePhoto,
         searchQuery,
         setSearchQuery
     }

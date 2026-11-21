@@ -19,17 +19,20 @@ import {
 
 const channelRouter = express.Router({ mergeParams: true })
 
+const memberRoles = ['Owner', 'Admin', 'User']
+const managerRoles = ['Owner', 'Admin']
+
 channelRouter.use(authMiddleware)
-channelRouter.use(workspaceMiddleware(['Owner', 'Admin', 'User']))
 
-channelRouter.get('/', getChannels)
+channelRouter.get('/', workspaceMiddleware(memberRoles), getChannels)
 
-channelRouter.post('/', createChannel)
+channelRouter.post('/', workspaceMiddleware(memberRoles), createChannel)
 
-channelRouter.delete('/:channel_id', deleteChannel)
+// Only owners and admins can delete a channel (and its messages).
+channelRouter.delete('/:channel_id', workspaceMiddleware(managerRoles), deleteChannel)
 
-channelRouter.get('/:channel_id/messages', getChannelMessages)
+channelRouter.get('/:channel_id/messages', workspaceMiddleware(memberRoles), getChannelMessages)
 
-channelRouter.post('/:channel_id/messages', createChannelMessage)
+channelRouter.post('/:channel_id/messages', workspaceMiddleware(memberRoles), createChannelMessage)
 
 export default channelRouter

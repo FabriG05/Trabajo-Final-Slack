@@ -72,6 +72,9 @@ class WorkspaceService {
                 name: workspace.name,
                 description: workspace.description,
                 created_at: workspace.createdAt,
+                // Role of the requesting user in this workspace, so the
+                // frontend can show the owner-only actions.
+                role: membership.role,
                 members: membersByWorkspace.get(String(workspace._id)) ?? []
             };
         });

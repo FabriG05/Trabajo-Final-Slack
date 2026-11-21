@@ -71,6 +71,33 @@ class MessageService {
         )
     }
 
+    /*
+        Deletes a single message of a channel or a direct conversation.
+        The author can always delete their own message; owners and admins
+        can delete any message of the workspace.
+    */
+    async deleteMessage(workspaceId, messageId, requesterId, requesterRole) {
+        const message = await messageRepository.getById(messageId)
+
+        if (!message || String(message.workspace_id) !== String(workspaceId)) {
+            throw new ServerError("Message not found.", 404)
+        }
+
+        const isAuthor = String(message.sender_id) === String(requesterId)
+        const canModerate = ['Owner', 'Admin'].includes(requesterRole)
+
+        if (!isAuthor && !canModerate) {
+            throw new ServerError(
+                "You do not have enough permissions to delete this message.",
+                403
+            )
+        }
+
+        const deletedMessage = await messageRepository.deleteById(messageId)
+
+        return deletedMessage ?? message
+    }
+
     async validateDirectMessageTarget(workspaceId, otherUserId) {
         // The other side of the conversation must be an active member of
         // this workspace, otherwise the DM would be unreachable for them.

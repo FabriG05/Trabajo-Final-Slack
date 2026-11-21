@@ -1,0 +1,111 @@
+/* Modal used for destructive actions (channels and workspaces). */
+.confirm-dialog__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.confirm-dialog__panel {
+    width: 100%;
+    max-width: 440px;
+    background: #1a1d21;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.confirm-dialog__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.confirm-dialog__description {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.confirm-dialog__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.confirm-dialog__label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.confirm-dialog__input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    background: #222529;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.confirm-dialog__input:focus {
+    outline: 2px solid #7d3986;
+    outline-offset: 1px;
+}
+
+.confirm-dialog__error {
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: #ff8b8b;
+}
+
+.confirm-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.confirm-dialog__btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.12s ease, opacity 0.12s ease;
+}
+
+.confirm-dialog__btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.confirm-dialog__btn--cancel {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.confirm-dialog__btn--cancel:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.confirm-dialog__btn--danger {
+    background: #d93f3f;
+    color: #ffffff;
+}
+
+.confirm-dialog__btn--danger:hover:not(:disabled) {
+    background: #c23434;
+}

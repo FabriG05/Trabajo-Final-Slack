@@ -1,5 +1,28 @@
 const API_URL = import.meta.env.VITE_APP_URL_BACKEND
 
+/*
+    Builds the Error thrown when a request fails. It keeps the backend
+    message (for example "The #general channel cannot be deleted.") and
+    the HTTP status, so callers can react to 403/404 specifically.
+*/
+async function buildResponseError(responseHttp) {
+    let message = `Server error (HTTP ${responseHttp.status})`
+
+    try {
+        const responseBody = await responseHttp.json()
+
+        if (responseBody?.message) {
+            message = responseBody.message
+        }
+    } catch {
+        // The body was not JSON: keep the generic message.
+    }
+
+    const error = new Error(message)
+    error.status = responseHttp.status
+    return error
+}
+
 export async function createWorkspace(name, description) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
     const responseHttp = await fetch(
@@ -227,6 +250,58 @@ export async function deleteChannel(workspaceId, channelId) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
     const responseHttp = await fetch(
         API_URL + `/api/workspace/${workspaceId}/channels/${channelId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Deletes one message of a channel or a direct conversation. */
+export async function deleteMessage(workspaceId, messageId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/messages/${messageId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Deletes the whole workspace (owner only). */
+export async function deleteWorkspace(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}`,
         {
             method: 'DELETE',
             headers: {

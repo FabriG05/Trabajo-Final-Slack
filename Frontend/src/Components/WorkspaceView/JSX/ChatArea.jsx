@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import useWorkspaceMemberCount from '../../../Hooks/useWorkspaceMemberCount'
 import {
@@ -12,7 +12,8 @@ import {
     IconSend,
     IconUser,
     IconChevronDown,
-    IconDMs
+    IconDMs,
+    IconTrash
 } from './SlackIcons'
 import '../CSS/ChatArea.css'
 
@@ -45,6 +46,8 @@ function ChatArea() {
         loadingMessages,
         messageError,
         sendMessage,
+        deleteMessage,
+        canDeleteAnyMessage,
         typingUsers,
         notifyTyping,
         currentUser,
@@ -53,11 +56,125 @@ function ChatArea() {
     const { memberCount } = useWorkspaceMemberCount(workspaceId)
     const [composerText, setComposerText] = useState('')
     const [activeTab, setActiveTab] = useState('messages')
+    const [deletingMessageId, setDeletingMessageId] = useState(null)
 
+    // Auto-scroll state: the feed sticks to the bottom unless the user
+    // scrolled up to read older messages.
+    const messagesContainerRef = useRef(null)
+    const [showJumpToLatest, setShowJumpToLatest] = useState(false)
+    const stickToBottomRef = useRef(true)
+    const previousConversationRef = useRef(null)
+    const previousCountRef = useRef(0)
+
+    const conversationKey = activeDm?.id || activeChannel?.id || null
+    const isConversationOpen = Boolean(activeDm || activeChannel)
     const displayName = activeDm ? `@${activeDm.username}` : `#${activeChannel?.name || 'channel'}`
 
+    const scrollToBottom = useCallback((behavior = 'auto') => {
+        const container = messagesContainerRef.current
+
+        if (container) {
+            container.scrollTo({ top: container.scrollHeight, behavior })
+        }
+    }, [])
+
+    /*
+        When the conversation changes, start at the bottom and forget any
+        pending "jump to latest" notice from the previous channel.
+    */
+    useEffect(() => {
+        stickToBottomRef.current = true
+        setShowJumpToLatest(false)
+        setDeletingMessageId(null)
+
+        const frame = requestAnimationFrame(() => scrollToBottom('auto'))
+
+        return () => cancelAnimationFrame(frame)
+    }, [conversationKey, scrollToBottom])
+
+    /*
+        Follow new messages: always when they are yours, and when the user
+        is already near the bottom. If they scrolled up, keep the position
+        and offer the floating "Jump to latest" button instead.
+    */
+    useEffect(() => {
+        const isNewConversation = previousConversationRef.current !== conversationKey
+
+        if (isNewConversation) {
+            previousConversationRef.current = conversationKey
+            previousCountRef.current = messages.length
+            stickToBottomRef.current = true
+            setShowJumpToLatest(false)
+            return
+        }
+
+        if (messages.length === previousCountRef.current) {
+            return
+        }
+
+        const grew = messages.length > previousCountRef.current
+        previousCountRef.current = messages.length
+
+        if (!grew) {
+            return
+        }
+
+        const lastMessage = messages[messages.length - 1]
+        const isOwnMessage = String(lastMessage?.senderId || '') === String(currentUser.id)
+
+        if (isOwnMessage || stickToBottomRef.current) {
+            scrollToBottom('smooth')
+            setShowJumpToLatest(false)
+        } else {
+            setShowJumpToLatest(true)
+        }
+    }, [messages, conversationKey, currentUser.id, scrollToBottom])
+
+    function handleMessagesScroll() {
+        const container = messagesContainerRef.current
+
+        if (!container) {
+            return
+        }
+
+        const distanceToBottom =
+            container.scrollHeight - container.scrollTop - container.clientHeight
+        const isNearBottom = distanceToBottom < 80
+
+        stickToBottomRef.current = isNearBottom
+
+        if (isNearBottom) {
+            setShowJumpToLatest(false)
+        }
+    }
+
+    function handleJumpToLatest() {
+        stickToBottomRef.current = true
+        setShowJumpToLatest(false)
+        scrollToBottom('smooth')
+    }
+
+    function canDeleteMessage(message) {
+        if (!message?.senderId) {
+            return false
+        }
+
+        return canDeleteAnyMessage
+            || String(message.senderId) === String(currentUser.id)
+    }
+
+    async function handleDeleteMessage(messageId) {
+        if (deletingMessageId) {
+            return
+        }
+
+        setDeletingMessageId(messageId)
+        await deleteMessage(messageId)
+        setDeletingMessageId(null)
+    }
+
     async function handleSend() {
-        if (!composerText.trim()) {
+        if (!composerText.trim() || !isConversationOpen) {
             return
         }
 
@@ -149,7 +266,20 @@ function ChatArea() {
             </header>
 
             {/* Scrollable conversation message feed */}
-            <div className='chat-messages'>
+            <div
+                className='chat-messages'
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+            >
+                {!isConversationOpen ? (
+                    <div className='chat-empty'>
+                        <h2 className='chat-empty__title'>No conversation selected</h2>
+                        <p className='chat-empty__text'>
+                            Choose a channel or a direct message to start talking.
+                        </p>
+                    </div>
+                ) : (
+                    <>
                 {/* Welcome banner with Slack template cards */}
                 <div className='chat-welcome'>
                     <h2 className='chat-welcome__title'>
@@ -237,7 +367,15 @@ function ChatArea() {
                         return (
                             <div key={msg.id} className='chat-message chat-message--user'>
                                 <div className='chat-message__avatar'>
-                                    {msg.user.slice(0, 2).toUpperCase()}
+                                    {String(msg.senderId) === String(currentUser.id) && currentUser.photo ? (
+                                        <img
+                                            className='chat-message__avatar-image'
+                                            src={currentUser.photo}
+                                            alt=''
+                                        />
+                                    ) : (
+                                        msg.user.slice(0, 2).toUpperCase()
+                                    )}
                                 </div>
                                 <div className='chat-message__body'>
                                     <div className='chat-message__meta'>
@@ -246,6 +384,18 @@ function ChatArea() {
                                     </div>
                                     <p className='chat-message__content'>{msg.text}</p>
                                 </div>
+                                {canDeleteMessage(msg) && (
+                                    <button
+                                        type='button'
+                                        className='chat-message__delete'
+                                        title='Delete message'
+                                        aria-label='Delete message'
+                                        onClick={() => handleDeleteMessage(msg.id)}
+                                        disabled={String(deletingMessageId) === String(msg.id)}
+                                    >
+                                        <IconTrash size={14} />
+                                    </button>
+                                )}
                             </div>
                         )
                     })}
@@ -253,7 +403,21 @@ function ChatArea() {
                         <p className='chat-messages__empty' role='alert'>{messageError}</p>
                     )}
                 </div>
+                    </>
+                )}
             </div>
+
+            {showJumpToLatest && (
+                <div className='chat-jump-latest'>
+                    <button
+                        type='button'
+                        className='chat-jump-latest__btn'
+                        onClick={handleJumpToLatest}
+                    >
+                        Jump to latest
+                    </button>
+                </div>
+            )}
 
             {typingUsers.length > 0 && (
                 <div className='chat-typing' aria-live='polite'>
@@ -281,11 +445,12 @@ function ChatArea() {
                     {/* Text area */}
                     <textarea
                         className='chat-composer__input'
-                        placeholder={`Message ${displayName}`}
+                        placeholder={isConversationOpen ? `Message ${displayName}` : 'Select a conversation to write'}
                         rows={2}
                         value={composerText}
                         onChange={handleComposerChange}
                         onKeyDown={handleKeyDown}
+                        disabled={!isConversationOpen}
                     />
 
                     {/* Action utilities & Send button */}
@@ -302,9 +467,9 @@ function ChatArea() {
                         <div className='chat-composer__actions-right'>
                             <button
                                 type='button'
-                                className={`chat-composer__send-btn${composerText.trim() ? ' chat-composer__send-btn--active' : ''}`}
+                                className={`chat-composer__send-btn${composerText.trim() && isConversationOpen ? ' chat-composer__send-btn--active' : ''}`}
                                 onClick={handleSend}
-                                disabled={!composerText.trim()}
+                                disabled={!composerText.trim() || !isConversationOpen}
                                 aria-label='Send message'
                             >
                                 <IconSend size={14} />

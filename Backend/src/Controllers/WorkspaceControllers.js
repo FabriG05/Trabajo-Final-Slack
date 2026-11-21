@@ -1,4 +1,5 @@
 import workspace_service from "../Services/WorkspaceServices.js";
+import { publishWorkspaceDeleted } from "../Realtime/SocketServer.js";
 
 /*
     To send information to an API we use the request body.
@@ -64,6 +65,9 @@ export async function getWorkspaceById(request, response) {
 
 export async function deleteWorkspace(request, response) {
     const deletedWorkspace = await workspace_service.deleteWorkspace(request.workspace._id);
+
+    // Everyone who still has the workspace open should leave it in real time.
+    publishWorkspaceDeleted(request.workspace._id);
 
     return response.status(200).send({
         ok: true,

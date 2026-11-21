@@ -210,3 +210,62 @@ export function publishChannel(workspaceId, channel) {
 
     io.to(workspaceRoom(workspaceId)).emit("channel:created", { channel });
 }
+
+/* Tells every reader that a message was deleted, so it disappears live. */
+export function publishMessageDeleted(message) {
+    if (!io || !message) {
+        return;
+    }
+
+    const messageId = message._id;
+
+    if (message.message_type === "direct") {
+        const senderId = message.sender_id?._id ?? message.sender_id;
+        const receiverId = message.receiver_id?._id ?? message.receiver_id;
+        const payload = { scope: "direct", messageId, message };
+
+        if (senderId) {
+            io.to(userRoom(senderId)).emit("message:deleted", payload);
+        }
+
+        if (receiverId) {
+            io.to(userRoom(receiverId)).emit("message:deleted", payload);
+        }
+
+        return;
+    }
+
+    const workspaceId = message.workspace_id?._id ?? message.workspace_id;
+
+    if (!workspaceId) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("message:deleted", {
+        scope: "channel",
+        channelId: message.channel_id,
+        messageId,
+        message
+    });
+}
+
+/* Publishes a deleted channel to the members of its workspace. */
+export function publishChannelDeleted(workspaceId, channel) {
+    if (!io || !workspaceId || !channel) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("channel:deleted", {
+        channelId: channel._id,
+        channel
+    });
+}
+
+/* Tells the members that the workspace no longer exists. */
+export function publishWorkspaceDeleted(workspaceId) {
+    if (!io || !workspaceId) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("workspace:deleted", { workspaceId });
+}

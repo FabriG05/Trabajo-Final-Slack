@@ -484,3 +484,26 @@ export function IconHelp({ size = 16, className = '' }) {
         </svg>
     )
 }
+
+export function IconTrash({ size = 16, className = '' }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox='0 0 20 20'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='1.5'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            className={className}
+            aria-hidden='true'
+        >
+            <path d='M3.5 5.5h13' />
+            <path d='M7.5 5.5V3.75h5V5.5' />
+            <path d='M5.25 5.5l.66 10.05a1 1 0 0 0 1 .95h6.18a1 1 0 0 0 1-.95l.66-10.05' />
+            <path d='M8.25 8.5v5' />
+            <path d='M11.75 8.5v5' />
+        </svg>
+    )
+}

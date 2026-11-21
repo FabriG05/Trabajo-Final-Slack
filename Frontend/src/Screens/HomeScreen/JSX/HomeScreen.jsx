@@ -102,7 +102,7 @@ function HomeScreeen() {
                                     </button>
                                 </div>
                             )}
-                            renderItems={(workspaces) => (
+                            renderItems={(workspaces, reloadWorkspaces) => (
                                 <>
                                     <p className='home-workspaces-card__label'>
                                         Ready to get started
@@ -116,6 +116,8 @@ function HomeScreeen() {
                                                 description={workspace.description}
                                                 memberCount={workspace.memberCount}
                                                 photo={workspace.photo}
+                                                canDelete={workspace.role === 'Owner'}
+                                                onDeleted={reloadWorkspaces}
                                             />
                                         ))}
                                     </div>

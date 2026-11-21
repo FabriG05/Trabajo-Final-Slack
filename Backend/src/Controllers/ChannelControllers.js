@@ -1,5 +1,8 @@
 import channel_service from "../Services/ChannelServices.js";
-import { publishChannel } from "../Realtime/SocketServer.js";
+import {
+    publishChannel,
+    publishChannelDeleted
+} from "../Realtime/SocketServer.js";
 
 /*
     Channel controllers. Thin HTTP layer: they read the data out of the
@@ -47,6 +50,9 @@ export async function deleteChannel(request, response) {
         request.workspace._id,
         channel_id
     );
+
+    // Notify the rest of the workspace in real time.
+    publishChannelDeleted(request.workspace._id, deletedChannel);
 
     return response.status(200).send({
         ok: true,
