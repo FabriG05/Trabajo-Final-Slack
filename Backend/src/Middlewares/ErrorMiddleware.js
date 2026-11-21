@@ -1,5 +1,37 @@
 const errorMiddleware = (error, request, response, next) => {
     console.log("[Error Middleware]", error)
+
+    // body-parser could not parse the JSON body. It has status 400, but its
+    // raw message includes parser internals, so answer with a stable one.
+    if (error.type === 'entity.parse.failed') {
+        return response.status(400).send(
+            {
+                ok: false,
+                message: 'Invalid JSON body.'
+            }
+        )
+    }
+
+    // body-parser rejected a body larger than the 1 MB limit set in main.js.
+    if (error.type === 'entity.too.large') {
+        return response.status(413).send(
+            {
+                ok: false,
+                message: 'Request body is too large.'
+            }
+        )
+    }
+
+    // Mongoose could not cast an id from the path/query to ObjectId.
+    if (error.name === 'CastError') {
+        return response.status(400).send(
+            {
+                ok: false,
+                message: 'Invalid id format.'
+            }
+        )
+    }
+
     if (error.status) { // If there is a status, it's a manageable error, because I defined / accounted for that error.
         return response.status(error.status).send(
             {
