@@ -295,6 +295,11 @@
     border-radius: 10px;
 }
 
+.workspace-sidebar__item-badge--unread {
+    background: #e05252;
+    flex-shrink: 0;
+}
+
 .workspace-sidebar__external-icon {
     font-size: 11px;
     opacity: 0.6;

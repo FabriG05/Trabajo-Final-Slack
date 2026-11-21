@@ -2,6 +2,8 @@ import workspaceRepository from "../Repositories/WorkSpaceRepository.js";
 import memberRepository from "../Repositories/MemberRepository.js";
 import invitationRepository from "../Repositories/InvitationRepository.js";
 import userRepository from "../Repositories/UserRepository.js";
+import channelRepository from "../Repositories/ChannelRepository.js";
+import messageRepository from "../Repositories/MessageRepository.js";
 import ServerError from "../Utils/Error.Utils.js";
 import crypto from "crypto";
 import ENVIRONMENT from "../Config/Environment.config.js";
@@ -88,9 +90,19 @@ class WorkspaceService {
             { invitation_accepted: true }
         );
 
+        // Every workspace starts with a #general channel so the user can
+        // send a message right away. Its name is free because the
+        // workspace was just created.
+        const generalChannel = await channelRepository.create(
+            createdWorkspace._id,
+            'general',
+            userId
+        );
+
         return {
             createdWorkspace,
-            ownerMembership
+            ownerMembership,
+            generalChannel
         };
     }
 
@@ -193,10 +205,13 @@ class WorkspaceService {
     }
 
     async deleteWorkspace(workspaceId) {
-        // Cascade: remove every membership and pending invitation of this workspace.
+        // Cascade: remove every membership, pending invitation, channel
+        // and message that belongs to this workspace.
         await Promise.all([
             memberRepository.deleteByWorkspaceId(workspaceId),
-            invitationRepository.deleteByWorkspaceId(workspaceId)
+            invitationRepository.deleteByWorkspaceId(workspaceId),
+            channelRepository.deleteByWorkspaceId(workspaceId),
+            messageRepository.deleteByWorkspaceId(workspaceId)
         ]);
 
         return workspaceRepository.deleteById(workspaceId);

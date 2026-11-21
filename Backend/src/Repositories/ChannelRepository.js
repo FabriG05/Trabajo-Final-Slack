@@ -17,9 +17,20 @@ class ChannelRepository {
 
     async getByWorkspaceId(workspaceId) {
         try {
-            return await Channel.find({ workspace_id: workspaceId });
+            return await Channel
+                .find({ workspace_id: workspaceId })
+                .sort({ created_at: 1 });
         } catch (error) {
             console.error('Error in ChannelRepository.getByWorkspaceId:', error.message);
+            throw error;
+        }
+    }
+
+    async getByWorkspaceAndName(workspaceId, name) {
+        try {
+            return await Channel.findOne({ workspace_id: workspaceId, name });
+        } catch (error) {
+            console.error('Error in ChannelRepository.getByWorkspaceAndName:', error.message);
             throw error;
         }
     }
@@ -38,6 +49,16 @@ class ChannelRepository {
             return await Channel.findByIdAndDelete(channelId);
         } catch (error) {
             console.error('Error in ChannelRepository.deleteById:', error.message);
+            throw error;
+        }
+    }
+
+    async deleteByWorkspaceId(workspaceId) {
+        try {
+            const result = await Channel.deleteMany({ workspace_id: workspaceId });
+            return result.deletedCount;
+        } catch (error) {
+            console.error('Error in ChannelRepository.deleteByWorkspaceId:', error.message);
             throw error;
         }
     }

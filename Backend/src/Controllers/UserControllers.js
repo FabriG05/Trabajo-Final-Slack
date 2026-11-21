@@ -19,6 +19,20 @@ export async function getUsers(request, response) {
     )
 }
 
+export async function getCurrentUser(request, response) {
+    const user = await user_service.getCurrentUser(request.user.id)
+
+    return response.status(200).send(
+        {
+            message: "Current user retrieved successfully",
+            ok: true,
+            data: {
+                user
+            }
+        }
+    )
+}
+
 export async function getUserById(request, response) {
     const user = await user_service.getUserById(request.params.user_id)
 

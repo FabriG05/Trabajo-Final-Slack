@@ -88,3 +88,29 @@ export async function updateProfilePhoto(profilePhoto) {
     return responseBody
 }
 
+/* Profile of the signed-in user, taken from the auth token on the server. */
+export async function getCurrentUser() {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + '/api/user/me',
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error('Server error (HTTP ' + responseHttp.status + ')')
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+

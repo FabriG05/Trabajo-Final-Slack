@@ -32,7 +32,7 @@ export async function getAllWorkspaces(request, response) {
 export async function createWorkspace(request, response) {
     const { name, description } = request.body;
 
-    const { createdWorkspace, ownerMembership } = await workspace_service.createWorkspace(
+    const { createdWorkspace, ownerMembership, generalChannel } = await workspace_service.createWorkspace(
         request.user.id,
         name,
         description
@@ -44,7 +44,8 @@ export async function createWorkspace(request, response) {
             message: "Everything is fine so far",
             data: {
                 createdWorkspace,
-                ownerMembership
+                ownerMembership,
+                generalChannel
             }
         }
     );

@@ -10,7 +10,9 @@ class MessageRepository {
                 message_type: 'channel',
                 content
             });
-            return message;
+            // The response is rendered directly by the client, so the sender
+            // goes populated with the same shape as the message list.
+            return await message.populate('sender_id', 'name email');
         } catch (error) {
             console.error('Error in MessageRepository.createChannelMessage:', error.message);
             throw error;
@@ -26,6 +28,8 @@ class MessageRepository {
                 message_type: 'direct',
                 content
             });
+            await message.populate('sender_id', 'name email');
+            await message.populate('receiver_id', 'name email');
             return message;
         } catch (error) {
             console.error('Error in MessageRepository.createDirectMessage:', error.message);
@@ -42,6 +46,26 @@ class MessageRepository {
             return messages;
         } catch (error) {
             console.error('Error in MessageRepository.getByChannelId:', error.message);
+            throw error;
+        }
+    }
+
+    async deleteByChannelId(channelId) {
+        try {
+            const result = await Message.deleteMany({ channel_id: channelId });
+            return result.deletedCount;
+        } catch (error) {
+            console.error('Error in MessageRepository.deleteByChannelId:', error.message);
+            throw error;
+        }
+    }
+
+    async deleteByWorkspaceId(workspaceId) {
+        try {
+            const result = await Message.deleteMany({ workspace_id: workspaceId });
+            return result.deletedCount;
+        } catch (error) {
+            console.error('Error in MessageRepository.deleteByWorkspaceId:', error.message);
             throw error;
         }
     }

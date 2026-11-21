@@ -13,13 +13,14 @@ import ENVIRONMENT from "./Config/Environment.config.js";
 import user_repository from "./Repositories/UserRepository.js";
 import ServerError from "./Utils/Error.Utils.js";
 import { verifyEmail } from "./Controllers/AuthControllers.js";
+import { initSocketServer } from "./Realtime/SocketServer.js";
 
 
 connectMongoDB()
 
 /* To build an HTTP server with NODE.js we'll use a library called express.js (another option for TS could be nest.js) */
 
-const PORT = 8080 // Assign a port on our machine for this app to listen on.
+const PORT = process.env.PORT || 8080 // Vercel/Render/Railway inject the port; local development falls back to 8080.
 const app = express() // With this we create an express app (HTTP server).
 
 app.set('trust proxy', 1) // Trust the first proxy (Vercel) so request.ip returns the real client IP.
@@ -43,13 +44,6 @@ app.use(loggerMiddleware) // Logs every request (ip, url, endpoint, method, stat
 /* Swagger UI: interactive documentation of every endpoint, served from the OpenAPI spec in ../Docs */
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpec))
 
-app.listen(
-    PORT, // If this listen method succeeds, it runs this callback function.
-    () => {
-        console.log(`El servidor se está escuchando correctamente en https://localhost:${PORT}`)
-    }
-)
-
 
 /* All requests that arrive at /api/auth will be handled by auth_router */
 app.use('/api/auth', auth_router)
@@ -57,3 +51,17 @@ app.use('/api/user', user_router)
 app.use('/api/workspace', workspaceRouter)
 
 app.use(errorMiddleware)
+
+/*
+    Socket.IO shares the HTTP server with Express. On environments that do
+    not support persistent connections (for example Vercel serverless),
+    initSocketServer is a no-op and the REST API keeps working.
+*/
+const httpServer = app.listen(
+    PORT, // If this listen method succeeds, it runs this callback function.
+    () => {
+        console.log(`El servidor se está escuchando correctamente en http://localhost:${PORT}`)
+    }
+)
+
+initSocketServer(httpServer)

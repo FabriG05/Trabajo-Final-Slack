@@ -13,6 +13,10 @@ import {
 import authMiddleware from '../Middlewares/AuthMiddleware.js'
 import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
 import channelRouter from './ChannelRouter.js'
+import {
+    getDirectMessages,
+    createDirectMessage
+} from '../Controllers/MessageControllers.js'
 
 const workspaceRouter = express.Router()
 
@@ -72,6 +76,24 @@ workspaceRouter.post(
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin']),
     createInvitations
+)
+
+/*
+    Direct messages between two active members of the workspace. The
+    conversation is identified by the other user's id.
+*/
+workspaceRouter.get(
+    "/:workspace_id/direct-messages/:user_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    getDirectMessages
+)
+
+workspaceRouter.post(
+    "/:workspace_id/direct-messages/:user_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    createDirectMessage
 )
 
 workspaceRouter.use('/:workspace_id/channels', channelRouter)

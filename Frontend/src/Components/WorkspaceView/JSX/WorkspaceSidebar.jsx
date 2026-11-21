@@ -27,6 +27,10 @@ function WorkspaceSidebar() {
         activeChannel,
         selectChannel,
         addChannel,
+        loadingChannels,
+        channelError,
+        clearChannelError,
+        unreadByConversation,
         directMessages,
         activeDm,
         selectDm,
@@ -45,10 +49,12 @@ function WorkspaceSidebar() {
         dm.username.toLowerCase().includes(filterQuery.toLowerCase())
     )
 
-    function handleCreateChannel(e) {
+    async function handleCreateChannel(e) {
         e.preventDefault()
-        if (newChannelName.trim()) {
-            addChannel(newChannelName)
+
+        const created = await addChannel(newChannelName)
+
+        if (created) {
             setNewChannelName('')
             setIsCreatingChannel(false)
         }
@@ -153,8 +159,16 @@ function WorkspaceSidebar() {
                     </div>
 
                     <ul className='workspace-sidebar__list'>
+                        {loadingChannels && (
+                            <li className='workspace-sidebar__section-empty'>Loading channels…</li>
+                        )}
+                        {!loadingChannels && filteredChannels.length === 0 && (
+                            <li className='workspace-sidebar__section-empty'>No channels yet</li>
+                        )}
                         {filteredChannels.map((channel) => {
                             const isActive = !activeDm && activeChannel?.id === channel.id
+                            const unreadCount = Number(unreadByConversation[channel.id] || 0)
+
                             return (
                                 <li key={channel.id}>
                                     <button
@@ -164,6 +178,11 @@ function WorkspaceSidebar() {
                                     >
                                         <span className='workspace-sidebar__item-prefix'>#</span>
                                         <span className='workspace-sidebar__item-name'>{channel.name}</span>
+                                        {unreadCount > 0 && (
+                                            <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
+                                                {unreadCount > 99 ? '99+' : unreadCount}
+                                            </span>
+                                        )}
                                     </button>
                                 </li>
                             )
@@ -185,17 +204,29 @@ function WorkspaceSidebar() {
                                 <button
                                     type='button'
                                     className='workspace-sidebar__add-cancel'
-                                    onClick={() => setIsCreatingChannel(false)}
+                                    onClick={() => {
+                                        setIsCreatingChannel(false)
+                                        setNewChannelName('')
+                                        clearChannelError()
+                                    }}
                                 >
                                     Cancel
                                 </button>
                             </div>
+                            {channelError && (
+                                <p className='workspace-sidebar__section-empty' role='alert'>
+                                    {channelError}
+                                </p>
+                            )}
                         </form>
                     ) : (
                         <button
                             type='button'
                             className='workspace-sidebar__add-btn'
-                            onClick={() => setIsCreatingChannel(true)}
+                            onClick={() => {
+                                setIsCreatingChannel(true)
+                                clearChannelError()
+                            }}
                         >
                             + Add channels
                         </button>
@@ -214,6 +245,8 @@ function WorkspaceSidebar() {
                     <ul className='workspace-sidebar__list'>
                         {filteredDms.map((dm) => {
                             const isActive = activeDm?.id === dm.id
+                            const unreadCount = Number(unreadByConversation[dm.id] || 0)
+
                             return (
                                 <li key={dm.id}>
                                     <button
@@ -229,6 +262,11 @@ function WorkspaceSidebar() {
                                             {dm.username}
                                             {dm.isSelf && <span className='workspace-sidebar__you-badge'> you</span>}
                                         </span>
+                                        {unreadCount > 0 && (
+                                            <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
+                                                {unreadCount > 99 ? '99+' : unreadCount}
+                                            </span>
+                                        )}
                                     </button>
                                 </li>
                             )

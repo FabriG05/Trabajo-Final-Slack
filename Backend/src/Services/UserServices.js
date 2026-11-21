@@ -26,6 +26,11 @@ class UserService {
         return user
     }
 
+    // Profile of the user behind the auth token.
+    async getCurrentUser(user_id) {
+        return await this.getUserById(user_id)
+    }
+
     async updateProfile(user_id, name, profile_photo) {
         const updateData = {}
 

@@ -21,18 +21,59 @@ import '../CSS/ChatArea.css'
     Composed of ChatHeader, ChatMessages (with empty/welcome state cards),
     and ChatComposer.
 */
+
+/* Human readable typing indicator: one, two or several people. */
+function formatTypingNames(names) {
+    const uniqueNames = [...new Set(names)]
+
+    if (uniqueNames.length === 1) {
+        return `${uniqueNames[0]} is typing…`
+    }
+
+    if (uniqueNames.length === 2) {
+        return `${uniqueNames[0]} and ${uniqueNames[1]} are typing…`
+    }
+
+    return 'Several people are typing…'
+}
+
 function ChatArea() {
-    const { activeChannel, activeDm, messages, sendMessage, currentUser, workspaceId } = useWorkspace()
+    const {
+        activeChannel,
+        activeDm,
+        messages,
+        loadingMessages,
+        messageError,
+        sendMessage,
+        typingUsers,
+        notifyTyping,
+        currentUser,
+        workspaceId
+    } = useWorkspace()
     const { memberCount } = useWorkspaceMemberCount(workspaceId)
     const [composerText, setComposerText] = useState('')
     const [activeTab, setActiveTab] = useState('messages')
 
     const displayName = activeDm ? `@${activeDm.username}` : `#${activeChannel?.name || 'channel'}`
 
-    function handleSend() {
-        if (composerText.trim()) {
-            sendMessage(composerText)
+    async function handleSend() {
+        if (!composerText.trim()) {
+            return
+        }
+
+        // The input is only cleared once the server stored the message.
+        const sent = await sendMessage(composerText)
+
+        if (sent) {
             setComposerText('')
+        }
+    }
+
+    function handleComposerChange(event) {
+        setComposerText(event.target.value)
+
+        if (event.target.value) {
+            notifyTyping()
         }
     }
 
@@ -175,6 +216,9 @@ function ChatArea() {
 
                 {/* Message list */}
                 <div className='chat-messages__list'>
+                    {loadingMessages && messages.length === 0 && (
+                        <p className='chat-messages__empty'>Loading messages…</p>
+                    )}
                     {messages.map((msg) => {
                         if (msg.type === 'system') {
                             return (
@@ -205,8 +249,18 @@ function ChatArea() {
                             </div>
                         )
                     })}
+                    {messageError && (
+                        <p className='chat-messages__empty' role='alert'>{messageError}</p>
+                    )}
                 </div>
             </div>
+
+            {typingUsers.length > 0 && (
+                <div className='chat-typing' aria-live='polite'>
+                    <span className='chat-typing__dots' aria-hidden='true'>•••</span>
+                    <span>{formatTypingNames(typingUsers)}</span>
+                </div>
+            )}
 
             {/* Message composer box */}
             <div className='chat-composer'>
@@ -230,7 +284,7 @@ function ChatArea() {
                         placeholder={`Message ${displayName}`}
                         rows={2}
                         value={composerText}
-                        onChange={(e) => setComposerText(e.target.value)}
+                        onChange={handleComposerChange}
                         onKeyDown={handleKeyDown}
                     />
 

@@ -4,7 +4,7 @@
   "description": "Proyecto de prueba para conenctarnos a MongoDB",
   "main": "main.js",
   "scripts": {
-    "start": "node ./main.js",
+    "start": "node ./src/main.js",
     "dev": "node --watch src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.1",
     "nodemailer": "^10.1.0",
+    "socket.io": "^4.8.4",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.2"
   }
