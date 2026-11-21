@@ -62,6 +62,22 @@ class UserService {
 
         return updatedUser
     }
+
+    async updateStatus(user_id, status) {
+        const validStatuses = ['online', 'away', 'offline', 'do not disturb']
+
+        if (!validStatuses.includes(status)) {
+            throw new ServerError("Status must be online, away, offline or do not disturb.", 400)
+        }
+
+        const updatedUser = await user_repository.updateById(user_id, { status })
+
+        if (!updatedUser) {
+            throw new ServerError("User not found", 404)
+        }
+
+        return updatedUser
+    }
 }
 
 export default new UserService()

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
+import useWorkspaceMemberCount from '../../../Hooks/useWorkspaceMemberCount'
 import {
     IconStar,
     IconMembers,
@@ -21,7 +22,8 @@ import '../CSS/ChatArea.css'
     and ChatComposer.
 */
 function ChatArea() {
-    const { activeChannel, activeDm, messages, sendMessage, currentUser } = useWorkspace()
+    const { activeChannel, activeDm, messages, sendMessage, currentUser, workspaceId } = useWorkspace()
+    const { memberCount } = useWorkspaceMemberCount(workspaceId)
     const [composerText, setComposerText] = useState('')
     const [activeTab, setActiveTab] = useState('messages')
 
@@ -56,7 +58,7 @@ function ChatArea() {
                     <div className='chat-header__actions'>
                         <button type='button' className='chat-header__members-btn' title='Members'>
                             <IconMembers size={15} />
-                            <span>2</span>
+                            <span>{memberCount}</span>
                         </button>
                         <button type='button' className='chat-header__huddle-btn'>
                             <IconHuddle size={15} />

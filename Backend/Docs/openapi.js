@@ -3,13 +3,14 @@ import userPaths from './paths/user.paths.js'
 import workspacePaths from './paths/workspace.paths.js'
 import { bearerAuth, ErrorResponse, SuccessMessage, commonResponses } from './schemas/common.schemas.js'
 import {
-    User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody,
+    User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody,
     UserListResponse, UserResponse, LoginResponse
 } from './schemas/user.schemas.js'
 import {
     Workspace, MemberSummary, WorkspaceListItem, Member, InvitationSummary,
     CreateWorkspaceBody, UpdateWorkspaceBody, InvitationsBody, JoinBody, JoinResponse,
-    WorkspaceListResponse, CreateWorkspaceResponse, WorkspaceResponse,
+    WorkspaceListResponse, CreateWorkspaceResponse, GetWorkspaceResponse,
+    UpdateWorkspaceResponse, DeleteWorkspaceResponse,
     MembersResponse, DeleteMemberResponse, InvitationSummaryResponse
 } from './schemas/workspace.schemas.js'
 
@@ -53,6 +54,7 @@ const openapiSpec = {
             RegisterBody,
             LoginBody,
             UpdateProfileBody,
+            UpdateStatusBody,
             UserListResponse,
             UserResponse,
             LoginResponse,
@@ -68,7 +70,9 @@ const openapiSpec = {
             JoinResponse,
             WorkspaceListResponse,
             CreateWorkspaceResponse,
-            WorkspaceResponse,
+            GetWorkspaceResponse,
+            UpdateWorkspaceResponse,
+            DeleteWorkspaceResponse,
             MembersResponse,
             DeleteMemberResponse,
             InvitationSummaryResponse

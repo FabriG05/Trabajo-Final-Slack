@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
+import { updateProfilePhoto } from '../../../Services/ProfileService'
+import { compressPhoto } from '../../../Utils/compressPhoto'
 import {
     IconHome,
     IconDMs,
@@ -11,6 +13,13 @@ import {
     IconUser
 } from './SlackIcons'
 import '../CSS/WorkspaceNav.css'
+
+const STATUS_OPTIONS = [
+    { value: 'online', label: 'Online' },
+    { value: 'away', label: 'Away' },
+    { value: 'offline', label: 'Offline' },
+    { value: 'do not disturb', label: 'Do not disturb' }
+]
 
 /*
     WorkspaceNav: slim vertical left navigation bar (approx 65px wide).
@@ -29,7 +38,11 @@ const NAV_ITEMS = [
 ]
 
 function WorkspaceNav() {
-    const { activeNavTab, setActiveNavTab, workspace, currentUser } = useWorkspace()
+    const { activeNavTab, setActiveNavTab, workspace, currentUser, userStatus, setUserStatus } = useWorkspace()
+
+    const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
+    const photoInputRef = useRef(null)
+    const [photoError, setPhotoError] = useState(null)
 
     // Workspace badge abbreviation (e.g. "NW" for "New Workspace")
     const workspaceInitials = (workspace?.name || 'NW')
@@ -38,6 +51,37 @@ function WorkspaceNav() {
         .join('')
         .slice(0, 2)
         .toUpperCase()
+
+    function toggleStatusMenu() {
+        setIsStatusMenuOpen((open) => !open)
+    }
+
+    function handlePickPhoto() {
+        setIsStatusMenuOpen(false)
+        photoInputRef.current?.click()
+    }
+
+    async function handlePhotoChange(event) {
+        const file = event.target.files?.[0]
+        event.target.value = ''
+
+        if (!file) {
+            return
+        }
+
+        if (!file.type.startsWith('image/')) {
+            setPhotoError('Please choose an image file.')
+            return
+        }
+
+        try {
+            const compressedPhoto = await compressPhoto(file)
+            setPhotoError(null)
+            await updateProfilePhoto(compressedPhoto)
+        } catch {
+            setPhotoError('The image could not be read. Please try again.')
+        }
+    }
 
     return (
         <nav className='workspace-nav' aria-label='Primary workspace navigation'>
@@ -103,14 +147,61 @@ function WorkspaceNav() {
                 <button
                     type='button'
                     className='workspace-nav__profile-btn'
+                    onClick={toggleStatusMenu}
                     aria-label={`Profile: ${currentUser.username}`}
                     title={currentUser.username}
                 >
                     <span className='workspace-nav__profile-avatar'>
                         <IconUser size={18} />
-                        <span className='workspace-nav__status-dot' />
+                        <span className='workspace-nav__status-dot' data-status={userStatus} />
                     </span>
                 </button>
+
+                {isStatusMenuOpen && (
+                    <div className='workspace-nav__status-menu' role='menu'>
+                        <ul className='workspace-nav__status-list'>
+                            {STATUS_OPTIONS.map((option) => (
+                                <li key={option.value}>
+                                    <button
+                                        type='button'
+                                        className={'workspace-nav__status-option' + (userStatus === option.value ? ' workspace-nav__status-option--active' : '')}
+                                        onClick={() => {
+                                            setUserStatus(option.value)
+                                            setIsStatusMenuOpen(false)
+                                        }}
+                                        role='menuitemradio'
+                                        aria-checked={userStatus === option.value}
+                                    >
+                                        {option.label}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <button
+                            type='button'
+                            className='workspace-nav__status-photo-btn'
+                            onClick={handlePickPhoto}
+                        >
+                            Change photo
+                        </button>
+
+                        <input
+                            ref={photoInputRef}
+                            type='file'
+                            accept='image/*'
+                            onChange={handlePhotoChange}
+                            tabIndex={-1}
+                            aria-hidden='true'
+                        />
+
+                        {photoError && (
+                            <p className='workspace-nav__photo-error' role='alert'>
+                                {photoError}
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
         </nav>
     )

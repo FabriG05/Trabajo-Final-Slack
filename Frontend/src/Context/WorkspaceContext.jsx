@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { getWorkspaceById } from '../Services/WorkSpaceService'
+import { updateUserStatus } from '../Services/ProfileService'
+import useWorkspaceMembers from '../Hooks/useWorkspaceMembers'
 
 /*
     WorkspaceContext: central state for the Slack workspace interface.
@@ -12,11 +14,6 @@ const INITIAL_CHANNELS = [
     { id: 'all-new-workspace', name: 'all-new-workspace', isPrivate: false },
     { id: 'new-channel', name: 'new-channel', isPrivate: false },
     { id: 'social', name: 'social', isPrivate: false }
-]
-
-const INITIAL_DMS = [
-    { id: 'dm-trabajo', username: 'fabrigulletrabajo', isOnline: true },
-    { id: 'dm-self', username: 'fabrigulle05', isSelf: true, isOnline: true }
 ]
 
 const INITIAL_APPS = [
@@ -51,8 +48,9 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const [activeChannelId, setActiveChannelId] = useState('new-channel')
 
     // Direct Messages and active selection
-    const [directMessages] = useState(INITIAL_DMS)
     const [activeDmId, setActiveDmId] = useState(null)
+
+    const { activeMembers } = useWorkspaceMembers(workspaceId)
 
     // Apps list
     const [apps] = useState(INITIAL_APPS)
@@ -64,12 +62,24 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const [searchQuery, setSearchQuery] = useState('')
 
     // Current logged-in user placeholder/profile
-    const [currentUser] = useState({
+    const [currentUser, setCurrentUser] = useState({
         username: 'fabrigulle05',
         displayName: 'fabrigulle05',
         initials: 'FG',
         status: 'online'
     })
+
+    // Direct messages: one entry per active member of the workspace.
+    const directMessages = activeMembers.map((member) => ({
+        id: member.FK_id_user?._id,
+        username: member.FK_id_user?.name || member.FK_id_user?.email,
+        status: member.FK_id_user?.status,
+        isSelf: member.FK_id_user?.name === currentUser.username
+            || member.FK_id_user?.name === currentUser.displayName
+    }))
+
+    // The user's own presence, from their active member entry.
+    const userStatus = directMessages.find((dm) => dm.isSelf)?.status || currentUser.status
 
     // Fetch workspace metadata when workspaceId is provided
     useEffect(() => {
@@ -122,7 +132,25 @@ export function WorkspaceProvider({ children, workspaceId }) {
     }
 
     function selectDm(dmId) {
+        // Only members of the workspace with an active membership can be opened as a DM.
+        if (!directMessages.some((dm) => dm.id === dmId)) {
+            return
+        }
+
         setActiveDmId(dmId)
+    }
+
+    async function setUserStatus(status) {
+        if (!['online', 'away', 'offline', 'do not disturb'].includes(status)) {
+            return
+        }
+
+        try {
+            await updateUserStatus(status)
+            setCurrentUser((prev) => ({ ...prev, status }))
+        } catch (error) {
+            console.error('Could not update the user status:', error.message)
+        }
     }
 
     function sendMessage(text) {
@@ -170,6 +198,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
         messages: currentMessages,
         sendMessage,
         currentUser,
+        userStatus,
+        setUserStatus,
         searchQuery,
         setSearchQuery
     }

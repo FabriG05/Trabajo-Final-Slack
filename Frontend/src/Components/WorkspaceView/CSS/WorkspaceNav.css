@@ -152,6 +152,7 @@
 }
 
 .workspace-nav__profile-btn {
+    position: relative;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -179,4 +180,88 @@
     background: #2bac76;
     border-radius: 50%;
     border: 2px solid #270629;
+}
+
+/* Status menu (dropdown) in the profile button */
+.workspace-nav__status-menu {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: #302034;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    z-index: 20;
+}
+
+.workspace-nav__status-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.workspace-nav__status-option {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.workspace-nav__status-option:hover {
+    background: #422e48;
+    color: #ffffff;
+}
+
+.workspace-nav__status-option--active {
+    background: #7d3986;
+    color: #ffffff;
+}
+
+.workspace-nav__status-photo-btn {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.workspace-nav__status-photo-btn:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.workspace-nav__photo-error {
+    margin: 0;
+    padding: 0 6px;
+    color: #e05252;
+    font-size: 12px;
+}
+
+.workspace-nav__status-dot[data-status='away'] {
+    background: #ecb22e;
+}
+
+.workspace-nav__status-dot[data-status='offline'] {
+    background: #777;
+    opacity: 0.6;
+}
+
+.workspace-nav__status-dot[data-status='do not disturb'] {
+    background: #e05252;
 }

@@ -28,6 +28,17 @@ class MemberRepository {
         }
     }
 
+    async deleteByWorkspaceId(workspaceId) {
+        try {
+            const result = await Member.deleteMany({ FK_id_workspace: workspaceId });
+            console.log(`Deleted ${result.deletedCount} members of workspace ${workspaceId}`);
+            return result.deletedCount;
+        } catch (error) {
+            console.error('Error in MemberRepository:', error.message);
+            throw error;
+        }
+    }
+
     async delteById(member_id) {
         return await this.deleteById(member_id);
     }
@@ -74,7 +85,7 @@ class MemberRepository {
                 .find({ FK_id_workspace: workspaceId })
                 .populate(
                     'FK_id_user',
-                    'name email active'
+                    'name email active status'
                 );
             console.log('Members of the workspace: ', result);
             return result;

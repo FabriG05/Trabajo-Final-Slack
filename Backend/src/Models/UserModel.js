@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema(
         profile_photo: { type: String, default: null, alias: 'profilePhoto' },
         created_at: { type: Date, default: Date.now },
         active: { type: Boolean, default: true },
-        verified_email: { type: Boolean, default: false }
+        verified_email: { type: Boolean, default: false },
+        status: { type: String, enum: ['online', 'away', 'offline', 'do not disturb'], default: 'online' }
     }
 )
 

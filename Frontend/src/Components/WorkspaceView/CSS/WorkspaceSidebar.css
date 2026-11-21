@@ -253,15 +253,31 @@
     font-size: 14px;
 }
 
-.workspace-sidebar__online-badge {
+.workspace-sidebar__status-badge {
     position: absolute;
     bottom: -1px;
     right: -2px;
     width: 6px;
     height: 6px;
-    background: #2bac76;
     border-radius: 50%;
     border: 1px solid #1e1022;
+}
+
+.workspace-sidebar__status-badge[data-status='online'] {
+    background: #2bac76;
+}
+
+.workspace-sidebar__status-badge[data-status='away'] {
+    background: #ecb22e;
+}
+
+.workspace-sidebar__status-badge[data-status='offline'] {
+    background: #777;
+    opacity: 0.6;
+}
+
+.workspace-sidebar__status-badge[data-status='do not disturb'] {
+    background: #e05252;
 }
 
 .workspace-sidebar__you-badge {

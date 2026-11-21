@@ -57,6 +57,17 @@ class InvitationRepository {
             throw error;
         }
     }
+
+    async deleteByWorkspaceId(workspaceId) {
+        try {
+            const result = await Invitation.deleteMany({ FK_id_workspace: workspaceId });
+            console.log(`Deleted ${result.deletedCount} invitations of workspace ${workspaceId}`);
+            return result.deletedCount;
+        } catch (error) {
+            console.error('Error in InvitationRepository:', error.message);
+            throw error;
+        }
+    }
 }
 
 const Invitation_Repository = new InvitationRepository()

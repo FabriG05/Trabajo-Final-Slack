@@ -9,6 +9,7 @@ export default {
     '/api/auth/register': {
         post: {
             tags: ['Auth'],
+            operationId: 'register',
             summary: 'Register a new user',
             description:
                 'Creates a user with an unverified email and sends a verification email. ' +
@@ -63,6 +64,7 @@ export default {
     '/api/auth/login': {
         post: {
             tags: ['Auth'],
+            operationId: 'login',
             summary: 'Log in',
             description:
                 'Validates the credentials and returns a JWT plus the public payload of the user. ' +
@@ -129,6 +131,7 @@ export default {
     '/api/auth/verify-email': {
         get: {
             tags: ['Auth'],
+            operationId: 'verifyEmail',
             summary: 'Verify the email of an account',
             description:
                 'Marks the account behind the token as verified. The token is a JWT signed for 1 day; ' +
@@ -196,6 +199,7 @@ export default {
     '/api/auth/verify-email/{email}/resend': {
         get: {
             tags: ['Auth'],
+            operationId: 'resendVerificationEmail',
             summary: 'Re-send the verification email',
             description:
                 'Re-creates the verification token and re-sends the email when the account exists, is active ' +
@@ -246,6 +250,7 @@ export default {
     '/api/auth/forgot-password': {
         post: {
             tags: ['Auth'],
+            operationId: 'forgotPassword',
             summary: 'Ask for a password-reset email',
             description:
                 'Sends a reset email with a token valid for 1 hour when the account exists and is active. ' +
@@ -300,6 +305,7 @@ export default {
     '/api/auth/reset-password': {
         post: {
             tags: ['Auth'],
+            operationId: 'resetPassword',
             summary: 'Reset the password with the emailed token',
             description:
                 'Step 2 of the password reset: the token from the email link and the new password travel in the body. ' +

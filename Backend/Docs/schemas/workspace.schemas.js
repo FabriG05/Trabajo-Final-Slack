@@ -220,12 +220,8 @@ export const CreateWorkspaceResponse = {
     }
 }
 
-/*
-    200 payload of get / update / delete workspace. The data key names
-    the retrieved object: selectedWorkspace / updatedWorkspace /
-    deletedWorkspace.
-*/
-export const WorkspaceResponse = {
+/* 200 payload of GET /api/workspace/{workspace_id}. */
+export const GetWorkspaceResponse = {
     type: 'object',
     required: ['ok', 'message', 'data'],
     properties: {
@@ -236,6 +232,40 @@ export const WorkspaceResponse = {
             required: ['selectedWorkspace'],
             properties: {
                 selectedWorkspace: { $ref: '#/components/schemas/Workspace' }
+            }
+        }
+    }
+}
+
+/* 200 payload of PUT /api/workspace/{workspace_id}. */
+export const UpdateWorkspaceResponse = {
+    type: 'object',
+    required: ['ok', 'message', 'data'],
+    properties: {
+        ok: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Workspace updated successfully' },
+        data: {
+            type: 'object',
+            required: ['updatedWorkspace'],
+            properties: {
+                updatedWorkspace: { $ref: '#/components/schemas/Workspace' }
+            }
+        }
+    }
+}
+
+/* 200 payload of DELETE /api/workspace/{workspace_id}. */
+export const DeleteWorkspaceResponse = {
+    type: 'object',
+    required: ['ok', 'message', 'data'],
+    properties: {
+        ok: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Workspace deleted successfully' },
+        data: {
+            type: 'object',
+            required: ['deletedWorkspace'],
+            properties: {
+                deletedWorkspace: { $ref: '#/components/schemas/Workspace' }
             }
         }
     }
@@ -295,6 +325,7 @@ export const InvitationSummaryResponse = {
 export default {
     Workspace, MemberSummary, WorkspaceListItem, Member, InvitationSummary,
     CreateWorkspaceBody, UpdateWorkspaceBody, InvitationsBody, JoinBody, JoinResponse,
-    WorkspaceListResponse, CreateWorkspaceResponse, WorkspaceResponse,
+    WorkspaceListResponse, CreateWorkspaceResponse, GetWorkspaceResponse,
+    UpdateWorkspaceResponse, DeleteWorkspaceResponse,
     MembersResponse, DeleteMemberResponse, InvitationSummaryResponse
 }

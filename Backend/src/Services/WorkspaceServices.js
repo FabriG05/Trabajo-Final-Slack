@@ -69,7 +69,7 @@ class WorkspaceService {
                 _id: workspace._id,
                 name: workspace.name,
                 description: workspace.description,
-                created_at: workspace.created_at,
+                created_at: workspace.createdAt,
                 members: membersByWorkspace.get(String(workspace._id)) ?? []
             };
         });
@@ -193,6 +193,12 @@ class WorkspaceService {
     }
 
     async deleteWorkspace(workspaceId) {
+        // Cascade: remove every membership and pending invitation of this workspace.
+        await Promise.all([
+            memberRepository.deleteByWorkspaceId(workspaceId),
+            invitationRepository.deleteByWorkspaceId(workspaceId)
+        ]);
+
         return workspaceRepository.deleteById(workspaceId);
     }
 

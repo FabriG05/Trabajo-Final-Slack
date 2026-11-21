@@ -22,7 +22,8 @@ export const User = {
         },
         created_at: { type: 'string', format: 'date-time', description: 'Account creation timestamp.' },
         active: { type: 'boolean', example: true, description: 'False when the account was deactivated.' },
-        verified_email: { type: 'boolean', example: true, description: 'True once the email was verified.' }
+        verified_email: { type: 'boolean', example: true, description: 'True once the email was verified.' },
+        status: { type: 'string', enum: ['online', 'away', 'offline', 'do not disturb'], example: 'away', description: 'Presence status of the user.' }
     }
 }
 
@@ -72,6 +73,15 @@ export const UpdateProfileBody = {
             example: 'data:image/jpeg;base64,/9j/4AAQSkZJRg==',
             description: 'Base64 JPEG (max ~500 KB) or null to clear the photo.'
         }
+    }
+}
+
+/* Body of PUT /api/user/status. */
+export const UpdateStatusBody = {
+    type: 'object',
+    required: ['status'],
+    properties: {
+        status: { type: 'string', enum: ['online', 'away', 'offline', 'do not disturb'], example: 'away', description: 'New presence status.' }
     }
 }
 
@@ -131,4 +141,4 @@ export const LoginResponse = {
     }
 }
 
-export default { User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UserListResponse, UserResponse, LoginResponse }
+export default { User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody, UserListResponse, UserResponse, LoginResponse }

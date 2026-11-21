@@ -223,7 +223,7 @@ function WorkspaceSidebar() {
                                     >
                                         <span className='workspace-sidebar__dm-avatar'>
                                             <IconUser size={13} />
-                                            {dm.isOnline && <span className='workspace-sidebar__online-badge' />}
+                                            {dm.status && (<span className='workspace-sidebar__status-badge' data-status={dm.status} />)}
                                         </span>
                                         <span className='workspace-sidebar__item-name'>
                                             {dm.username}

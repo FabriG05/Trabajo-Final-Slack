@@ -88,6 +88,7 @@ export default {
     '/api/workspace': {
         get: {
             tags: ['Workspaces'],
+            operationId: 'getWorkspaces',
             summary: 'List the workspaces of the logged-in user',
             description:
                 'Returns every workspace where the authenticated user holds a membership, each with ' +
@@ -109,6 +110,7 @@ export default {
 
         post: {
             tags: ['Workspaces'],
+            operationId: 'createWorkspace',
             summary: 'Create a workspace',
             description:
                 'Creates the workspace and makes the authenticated user its Owner. `name` is required ' +
@@ -164,6 +166,7 @@ export default {
     '/api/workspace/{workspace_id}': {
         get: {
             tags: ['Workspaces'],
+            operationId: 'getWorkspaceById',
             summary: 'Get a workspace by id',
             description: 'Requires membership in the workspace (any role: Owner, Admin or User).',
             security: [{ bearerAuth: [] }],
@@ -173,7 +176,7 @@ export default {
                     description: 'Workspace found.',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/WorkspaceResponse' }
+                            schema: { $ref: '#/components/schemas/GetWorkspaceResponse' }
                         }
                     }
                 },
@@ -184,6 +187,7 @@ export default {
 
         put: {
             tags: ['Workspaces'],
+            operationId: 'updateWorkspace',
             summary: 'Update a workspace',
             description:
                 'Updates `name` and/or `description`. Requires the Owner or Admin role. ' +
@@ -203,12 +207,7 @@ export default {
                     description: 'Workspace updated (the updated document is returned).',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/WorkspaceResponse' },
-                            example: {
-                                ok: true,
-                                message: 'Workspace updated successfully',
-                                data: { updatedWorkspace: { _id: '675a1c9e2b8d3a0044556677' } }
-                            }
+                            schema: { $ref: '#/components/schemas/UpdateWorkspaceResponse' }
                         }
                     }
                 },
@@ -240,8 +239,9 @@ export default {
 
         delete: {
             tags: ['Workspaces'],
+            operationId: 'deleteWorkspace',
             summary: 'Delete a workspace',
-            description: 'Requires the Owner role. Deletes the workspace document (memberships are left behind and skipped in listings).',
+            description: 'Requires the Owner role. Deletes the workspace document and cascade-deletes every membership and pending invitation that belonged to it.',
             security: [{ bearerAuth: [] }],
             parameters: [workspaceIdParam],
             responses: {
@@ -249,18 +249,12 @@ export default {
                     description: 'Workspace deleted (the deleted document is returned).',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/WorkspaceResponse' },
-                            example: {
-                                ok: true,
-                                message: 'Workspace deleted successfully',
-                                data: { deletedWorkspace: { _id: '675a1c9e2b8d3a0044556677' } }
-                            }
+                            schema: { $ref: '#/components/schemas/DeleteWorkspaceResponse' }
                         }
                     }
                 },
                 ...authResponses,
-                ...roleRestrictedResponses,
-                '500': { $ref: '#/components/responses/InternalServerError' }
+                ...roleRestrictedResponses
             }
         }
     },
@@ -268,6 +262,7 @@ export default {
     '/api/workspace/{workspace_id}/members': {
         get: {
             tags: ['Workspaces'],
+            operationId: 'getWorkspaceMembers',
             summary: 'List the members of a workspace',
             description:
                 'Returns every membership of the workspace (pending invitations included), ' +
@@ -284,8 +279,7 @@ export default {
                     }
                 },
                 ...authResponses,
-                ...memberOnlyResponses,
-                '500': { $ref: '#/components/responses/InternalServerError' }
+                ...memberOnlyResponses
             }
         }
     },
@@ -293,6 +287,7 @@ export default {
     '/api/workspace/{workspace_id}/members/{member_id}': {
         delete: {
             tags: ['Workspaces'],
+            operationId: 'deleteWorkspaceMember',
             summary: 'Remove a member from a workspace',
             description:
                 'Requires the Owner or Admin role. Note: the answer is always 200; when the id does ' +
@@ -319,8 +314,7 @@ export default {
                     }
                 },
                 ...authResponses,
-                ...roleRestrictedResponses,
-                '500': { $ref: '#/components/responses/InternalServerError' }
+                ...roleRestrictedResponses
             }
         }
     },
@@ -328,6 +322,7 @@ export default {
     '/api/workspace/{workspace_id}/join': {
         post: {
             tags: ['Workspaces'],
+            operationId: 'joinWorkspace',
             summary: 'Join a workspace with an invitation token',
             description:
                 'Requires a bearer token: the joiner must be logged in, but they are not a member yet, ' +
@@ -414,6 +409,7 @@ export default {
     '/api/workspace/{workspace_id}/invitations': {
         post: {
             tags: ['Workspaces'],
+            operationId: 'createInvitations',
             summary: 'Invite new members',
             description:
                 'Requires the Owner or Admin role. Creates a pending invitation with a token that ' +
@@ -479,11 +475,12 @@ export default {
     '/api/workspace/{workspace_id}/channels': {
         get: {
             tags: ['Workspaces'],
+            operationId: 'getWorkspaceChannels',
             summary: 'List the channels of a workspace',
             description:
                 'Placeholder route: it currently answers with a fixed confirmation message and no channel data. ' +
-                'Requires membership in the workspace (any role), enforced by WorkspaceMiddleware.',
-            security: [{ bearerAuth: [] }],
+                '**Note:** this endpoint is not yet protected by AuthMiddleware or WorkspaceMiddleware; ' +
+                'any request reaches it without authentication or membership checks.',
             parameters: [workspaceIdParam],
             responses: {
                 '200': {
@@ -495,8 +492,6 @@ export default {
                         }
                     }
                 },
-                ...authResponses,
-                ...memberOnlyResponses,
                 '500': { $ref: '#/components/responses/InternalServerError' }
             }
         }

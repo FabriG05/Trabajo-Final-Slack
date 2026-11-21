@@ -52,3 +52,20 @@ export async function updateProfile(request, response) {
         }
     )
 }
+
+export async function updateStatus(request, response) {
+    const { status } = request.body
+
+    const user = await user_service.updateStatus(request.user.id, status)
+
+    return response.status(200).send(
+        {
+            message: "Status updated successfully",
+            ok: true,
+            data: {
+                user
+            }
+        }
+    )
+}
+
