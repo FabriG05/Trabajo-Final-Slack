@@ -322,6 +322,19 @@
     gap: 6px;
 }
 
+.chat-date-separator__pill:hover {
+    background: #2a2d31;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.chat-date-separator__chevron {
+    transition: transform 0.15s ease;
+}
+
+.chat-date-separator__chevron--collapsed {
+    transform: rotate(-90deg);
+}
+
 /* Messages */
 .chat-messages__list {
     display: flex;

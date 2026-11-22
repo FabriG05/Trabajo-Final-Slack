@@ -1,0 +1,337 @@
+/*
+    Direct messages overview: replaces the ChatArea while the DMs
+    shortcut is active. Dark panel with header, search, invite banner
+    and the conversation list.
+*/
+.dms-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    background: #1a1d21;
+    color: #d1d2d3;
+}
+
+/* Header */
+.dms-view__header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.dms-view__title-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.dms-view__title-btn svg {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.dms-view__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dms-view__toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dms-view__toggle:hover {
+    color: #ffffff;
+}
+
+.dms-view__toggle-track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 30px;
+    height: 16px;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transition: background 0.15s ease;
+}
+
+.dms-view__toggle-track--on {
+    background: #7d3986;
+}
+
+.dms-view__toggle-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 0.15s ease;
+}
+
+.dms-view__toggle-track--on .dms-view__toggle-thumb {
+    transform: translateX(14px);
+}
+
+.dms-view__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+}
+
+.dms-view__icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Search */
+.dms-view__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 16px;
+    padding: 0 10px;
+    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+    background: #222529;
+    flex-shrink: 0;
+}
+
+.dms-view__search-icon {
+    display: inline-flex;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.dms-view__search-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #ffffff;
+    font-size: 13px;
+}
+
+.dms-view__search-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Invite banner */
+.dms-view__banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.dms-view__banner-icon {
+    display: inline-flex;
+    color: #36c5f0;
+    flex-shrink: 0;
+}
+
+.dms-view__banner-text {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.dms-view__banner-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.dms-view__banner-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Conversation list */
+.dms-view__body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.dms-view__notice {
+    margin: 16px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.dms-view__notice--error {
+    color: #e05252;
+}
+
+.dms-view__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dms-view__list > li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dms-view__row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dms-view__row:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.dms-view__avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #2a2d31;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.dms-view__avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.dms-view__status {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1a1d21;
+}
+
+.dms-view__status[data-status='online'] {
+    background: #2bac76;
+}
+
+.dms-view__status[data-status='away'] {
+    background: #ecb22e;
+}
+
+.dms-view__status[data-status='offline'] {
+    background: #777777;
+}
+
+.dms-view__status[data-status='do not disturb'] {
+    background: #e05252;
+}
+
+.dms-view__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dms-view__name {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dms-view__you {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.dms-view__preview {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dms-view__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.dms-view__time {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.dms-view__unread {
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #cfa1de;
+    color: #1e1022;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}

@@ -14,10 +14,16 @@ import authMiddleware from '../Middlewares/AuthMiddleware.js'
 import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
 import channelRouter from './ChannelRouter.js'
 import {
+    getActivity,
+    getDirectMessageSummaries,
     getDirectMessages,
     createDirectMessage,
     deleteMessage
 } from '../Controllers/MessageControllers.js'
+import {
+    markConversationRead,
+    getUnreadCounts
+} from '../Controllers/ReadControllers.js'
 
 const workspaceRouter = express.Router()
 
@@ -77,6 +83,46 @@ workspaceRouter.post(
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin']),
     createInvitations
+)
+
+/*
+    Read state: persisted last-read date per conversation and the unread
+    counts used to rebuild the sidebar badges on load.
+*/
+workspaceRouter.get(
+    "/:workspace_id/unread",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    getUnreadCounts
+)
+
+workspaceRouter.put(
+    "/:workspace_id/reads/:conversation_key",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    markConversationRead
+)
+
+/*
+    Activity feed: channel messages that mention the signed-in user.
+    Unread direct messages are added by the client from its live state.
+*/
+workspaceRouter.get(
+    "/:workspace_id/activity",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    getActivity
+)
+
+/*
+    Latest direct message per conversation partner, used by the DMs
+    screen to render previews without opening every conversation.
+*/
+workspaceRouter.get(
+    "/:workspace_id/direct-messages",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    getDirectMessageSummaries
 )
 
 /*

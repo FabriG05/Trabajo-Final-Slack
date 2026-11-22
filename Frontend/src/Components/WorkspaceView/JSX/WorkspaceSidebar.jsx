@@ -15,7 +15,16 @@ import {
     IconStar,
     IconTrash
 } from './SlackIcons'
+import slackIcon from '../../../assets/SlackHeroIcon.svg'
+import googleCalendarIcon from '../../../assets/GoogleCalendar.png'
+import googleDriveIcon from '../../../assets/GoggleDrive.png'
 import '../CSS/WorkspaceSidebar.css'
+
+const APP_ICONS = {
+    slack: slackIcon,
+    gcal: googleCalendarIcon,
+    gdrive: googleDriveIcon
+}
 
 /*
     WorkspaceSidebar: secondary vertical panel (~250px wide).
@@ -49,6 +58,12 @@ function WorkspaceSidebar() {
     const [channelToDelete, setChannelToDelete] = useState(null)
     const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
     const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useState(false)
+    const [collapsedSections, setCollapsedSections] = useState({
+        starred: false,
+        channels: false,
+        dms: false,
+        apps: false
+    })
 
     const filteredChannels = channels.filter((c) =>
         c.name.toLowerCase().includes(filterQuery.toLowerCase())
@@ -57,6 +72,21 @@ function WorkspaceSidebar() {
     const filteredDms = directMessages.filter((dm) =>
         dm.username.toLowerCase().includes(filterQuery.toLowerCase())
     )
+
+    const isFiltering = filterQuery.trim().length > 0
+    const isSectionOpen = (section) => isFiltering || !collapsedSections[section]
+
+    function toggleSection(section) {
+        const willCollapse = !collapsedSections[section]
+
+        setCollapsedSections((prev) => ({ ...prev, [section]: !prev[section] }))
+
+        if (section === 'channels' && willCollapse) {
+            setIsCreatingChannel(false)
+            setNewChannelName('')
+            clearChannelError()
+        }
+    }
 
     async function handleCreateChannel(e) {
         e.preventDefault()
@@ -172,201 +202,260 @@ function WorkspaceSidebar() {
             <div className='workspace-sidebar__sections'>
                 {/* Starred */}
                 <section className='workspace-sidebar__section'>
-                    <div className='workspace-sidebar__section-header'>
-                        <span className='workspace-sidebar__section-arrow' aria-hidden='true'>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__section-header'
+                        onClick={() => toggleSection('starred')}
+                        aria-expanded={isSectionOpen('starred')}
+                        aria-controls='workspace-sidebar-starred'
+                    >
+                        <span
+                            className={`workspace-sidebar__section-arrow${isSectionOpen('starred') ? ' workspace-sidebar__section-arrow--open' : ''}`}
+                            aria-hidden='true'
+                        >
                             <IconSectionCollapse size={10} />
                         </span>
                         <span className='workspace-sidebar__section-star' aria-hidden='true'>
                             <IconStar size={13} />
                         </span>
                         <span className='workspace-sidebar__section-title'>Starred</span>
-                    </div>
-                    <p className='workspace-sidebar__section-empty'>
-                        Drag and drop important stuff here
-                    </p>
+                    </button>
+
+                    {isSectionOpen('starred') && (
+                        <div id='workspace-sidebar-starred'>
+                            <p className='workspace-sidebar__section-empty'>
+                                Drag and drop important stuff here
+                            </p>
+                        </div>
+                    )}
                 </section>
 
                 {/* Channels */}
                 <section className='workspace-sidebar__section'>
-                    <div className='workspace-sidebar__section-header'>
-                        <span className='workspace-sidebar__section-arrow' aria-hidden='true'>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__section-header'
+                        onClick={() => toggleSection('channels')}
+                        aria-expanded={isSectionOpen('channels')}
+                        aria-controls='workspace-sidebar-channels'
+                    >
+                        <span
+                            className={`workspace-sidebar__section-arrow${isSectionOpen('channels') ? ' workspace-sidebar__section-arrow--open' : ''}`}
+                            aria-hidden='true'
+                        >
                             <IconSectionCollapse size={10} />
                         </span>
                         <span className='workspace-sidebar__section-title'>Channels</span>
-                    </div>
+                    </button>
 
-                    <ul className='workspace-sidebar__list'>
-                        {loadingChannels && (
-                            <li className='workspace-sidebar__section-empty'>Loading channels…</li>
-                        )}
-                        {!loadingChannels && filteredChannels.length === 0 && (
-                            <li className='workspace-sidebar__section-empty'>No channels yet</li>
-                        )}
-                        {filteredChannels.map((channel) => {
-                            const isActive = !activeDm && activeChannel?.id === channel.id
-                            const unreadCount = Number(unreadByConversation[channel.id] || 0)
+                    {isSectionOpen('channels') && (
+                        <div id='workspace-sidebar-channels'>
+                            <ul className='workspace-sidebar__list'>
+                                {loadingChannels && (
+                                    <li className='workspace-sidebar__section-empty'>Loading channels…</li>
+                                )}
+                                {!loadingChannels && filteredChannels.length === 0 && (
+                                    <li className='workspace-sidebar__section-empty'>No channels yet</li>
+                                )}
+                                {filteredChannels.map((channel) => {
+                                    const isActive = !activeDm && activeChannel?.id === channel.id
+                                    const unreadCount = Number(unreadByConversation[channel.id] || 0)
 
-                            return (
-                                <li key={channel.id} className='workspace-sidebar__item'>
-                                    <button
-                                        type='button'
-                                        className={`workspace-sidebar__item-btn${isActive ? ' workspace-sidebar__item-btn--active' : ''}`}
-                                        onClick={() => selectChannel(channel.id)}
-                                    >
-                                        <span className='workspace-sidebar__item-prefix'>#</span>
-                                        <span className='workspace-sidebar__item-name'>{channel.name}</span>
-                                        {unreadCount > 0 && (
-                                            <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
-                                                {unreadCount > 99 ? '99+' : unreadCount}
-                                            </span>
-                                        )}
-                                    </button>
+                                    return (
+                                        <li key={channel.id} className='workspace-sidebar__item'>
+                                            <button
+                                                type='button'
+                                                className={`workspace-sidebar__item-btn${isActive ? ' workspace-sidebar__item-btn--active' : ''}`}
+                                                onClick={() => selectChannel(channel.id)}
+                                            >
+                                                <span className='workspace-sidebar__item-prefix'>#</span>
+                                                <span className='workspace-sidebar__item-name'>{channel.name}</span>
+                                                {unreadCount > 0 && (
+                                                    <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
+                                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                                    </span>
+                                                )}
+                                            </button>
 
-                                    {canManageChannels && channel.name !== 'general' && (
+                                            {canManageChannels && channel.name !== 'general' && (
+                                                <button
+                                                    type='button'
+                                                    className='workspace-sidebar__item-delete'
+                                                    title={`Delete #${channel.name}`}
+                                                    aria-label={`Delete #${channel.name}`}
+                                                    onClick={() => setChannelToDelete(channel)}
+                                                >
+                                                    <IconTrash size={13} />
+                                                </button>
+                                            )}
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+
+                            {isCreatingChannel ? (
+                                <form onSubmit={handleCreateChannel} className='workspace-sidebar__add-form'>
+                                    <input
+                                        type='text'
+                                        className='workspace-sidebar__add-input'
+                                        placeholder='channel-name'
+                                        value={newChannelName}
+                                        onChange={(e) => setNewChannelName(e.target.value)}
+                                        autoFocus
+                                    />
+                                    <div className='workspace-sidebar__add-actions'>
+                                        <button type='submit' className='workspace-sidebar__add-save'>Add</button>
                                         <button
                                             type='button'
-                                            className='workspace-sidebar__item-delete'
-                                            title={`Delete #${channel.name}`}
-                                            aria-label={`Delete #${channel.name}`}
-                                            onClick={() => setChannelToDelete(channel)}
+                                            className='workspace-sidebar__add-cancel'
+                                            onClick={() => {
+                                                setIsCreatingChannel(false)
+                                                setNewChannelName('')
+                                                clearChannelError()
+                                            }}
                                         >
-                                            <IconTrash size={13} />
+                                            Cancel
                                         </button>
+                                    </div>
+                                    {channelError && (
+                                        <p className='workspace-sidebar__section-empty' role='alert'>
+                                            {channelError}
+                                        </p>
                                     )}
-                                </li>
-                            )
-                        })}
-                    </ul>
-
-                    {isCreatingChannel ? (
-                        <form onSubmit={handleCreateChannel} className='workspace-sidebar__add-form'>
-                            <input
-                                type='text'
-                                className='workspace-sidebar__add-input'
-                                placeholder='channel-name'
-                                value={newChannelName}
-                                onChange={(e) => setNewChannelName(e.target.value)}
-                                autoFocus
-                            />
-                            <div className='workspace-sidebar__add-actions'>
-                                <button type='submit' className='workspace-sidebar__add-save'>Add</button>
+                                </form>
+                            ) : (
                                 <button
                                     type='button'
-                                    className='workspace-sidebar__add-cancel'
+                                    className='workspace-sidebar__add-btn'
                                     onClick={() => {
-                                        setIsCreatingChannel(false)
-                                        setNewChannelName('')
+                                        setIsCreatingChannel(true)
                                         clearChannelError()
                                     }}
                                 >
-                                    Cancel
+                                    + Add channels
                                 </button>
-                            </div>
-                            {channelError && (
-                                <p className='workspace-sidebar__section-empty' role='alert'>
-                                    {channelError}
-                                </p>
                             )}
-                        </form>
-                    ) : (
-                        <button
-                            type='button'
-                            className='workspace-sidebar__add-btn'
-                            onClick={() => {
-                                setIsCreatingChannel(true)
-                                clearChannelError()
-                            }}
-                        >
-                            + Add channels
-                        </button>
+                        </div>
                     )}
                 </section>
 
                 {/* Direct messages */}
                 <section className='workspace-sidebar__section'>
-                    <div className='workspace-sidebar__section-header'>
-                        <span className='workspace-sidebar__section-arrow' aria-hidden='true'>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__section-header'
+                        onClick={() => toggleSection('dms')}
+                        aria-expanded={isSectionOpen('dms')}
+                        aria-controls='workspace-sidebar-dms'
+                    >
+                        <span
+                            className={`workspace-sidebar__section-arrow${isSectionOpen('dms') ? ' workspace-sidebar__section-arrow--open' : ''}`}
+                            aria-hidden='true'
+                        >
                             <IconSectionCollapse size={10} />
                         </span>
                         <span className='workspace-sidebar__section-title'>Direct messages</span>
-                    </div>
-
-                    <ul className='workspace-sidebar__list'>
-                        {filteredDms.map((dm) => {
-                            const isActive = activeDm?.id === dm.id
-                            const unreadCount = Number(unreadByConversation[dm.id] || 0)
-
-                            return (
-                                <li key={dm.id}>
-                                    <button
-                                        type='button'
-                                        className={`workspace-sidebar__item-btn${isActive ? ' workspace-sidebar__item-btn--active' : ''}`}
-                                        onClick={() => selectDm(dm.id)}
-                                    >
-                                        <span className='workspace-sidebar__dm-avatar'>
-                                            <IconUser size={13} />
-                                            {dm.status && (<span className='workspace-sidebar__status-badge' data-status={dm.status} />)}
-                                        </span>
-                                        <span className='workspace-sidebar__item-name'>
-                                            {dm.username}
-                                            {dm.isSelf && <span className='workspace-sidebar__you-badge'> you</span>}
-                                        </span>
-                                        {unreadCount > 0 && (
-                                            <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
-                                                {unreadCount > 99 ? '99+' : unreadCount}
-                                            </span>
-                                        )}
-                                    </button>
-                                </li>
-                            )
-                        })}
-                    </ul>
-
-                    <button
-                        type='button'
-                        className='workspace-sidebar__add-btn'
-                    >
-                        + Invite people
                     </button>
+
+                    {isSectionOpen('dms') && (
+                        <div id='workspace-sidebar-dms'>
+                            <ul className='workspace-sidebar__list'>
+                                {filteredDms.map((dm) => {
+                                    const isActive = activeDm?.id === dm.id
+                                    const unreadCount = Number(unreadByConversation[dm.id] || 0)
+
+                                    return (
+                                        <li key={dm.id}>
+                                            <button
+                                                type='button'
+                                                className={`workspace-sidebar__item-btn${isActive ? ' workspace-sidebar__item-btn--active' : ''}`}
+                                                onClick={() => selectDm(dm.id)}
+                                            >
+                                                <span className='workspace-sidebar__dm-avatar'>
+                                                    <IconUser size={13} />
+                                                    {dm.status && (<span className='workspace-sidebar__status-badge' data-status={dm.status} />)}
+                                                </span>
+                                                <span className='workspace-sidebar__item-name'>
+                                                    {dm.username}
+                                                    {dm.isSelf && <span className='workspace-sidebar__you-badge'> you</span>}
+                                                </span>
+                                                {unreadCount > 0 && (
+                                                    <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
+                                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+
+                            <button
+                                type='button'
+                                className='workspace-sidebar__add-btn'
+                            >
+                                + Invite people
+                            </button>
+                        </div>
+                    )}
                 </section>
 
                 {/* Apps */}
                 <section className='workspace-sidebar__section'>
-                    <div className='workspace-sidebar__section-header'>
-                        <span className='workspace-sidebar__section-arrow' aria-hidden='true'>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__section-header'
+                        onClick={() => toggleSection('apps')}
+                        aria-expanded={isSectionOpen('apps')}
+                        aria-controls='workspace-sidebar-apps'
+                    >
+                        <span
+                            className={`workspace-sidebar__section-arrow${isSectionOpen('apps') ? ' workspace-sidebar__section-arrow--open' : ''}`}
+                            aria-hidden='true'
+                        >
                             <IconSectionCollapse size={10} />
                         </span>
                         <span className='workspace-sidebar__section-title'>Apps</span>
-                    </div>
-
-                    <ul className='workspace-sidebar__list'>
-                        {apps.map((app) => (
-                            <li key={app.id}>
-                                <button
-                                    type='button'
-                                    className='workspace-sidebar__item-btn'
-                                >
-                                    <span className='workspace-sidebar__item-prefix'>⚡</span>
-                                    <span className='workspace-sidebar__item-name'>{app.name}</span>
-                                    {app.badge && (
-                                        <span className='workspace-sidebar__item-badge'>{app.badge}</span>
-                                    )}
-                                    {app.external && (
-                                        <span className='workspace-sidebar__external-icon' aria-hidden='true'>
-                                            <IconExternalLink size={12} />
-                                        </span>
-                                    )}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-
-                    <button
-                        type='button'
-                        className='workspace-sidebar__add-btn'
-                    >
-                        + Connect apps
                     </button>
+
+                    {isSectionOpen('apps') && (
+                        <div id='workspace-sidebar-apps'>
+                            <ul className='workspace-sidebar__list'>
+                                {apps.map((app) => (
+                                    <li key={app.id}>
+                                        <button
+                                            type='button'
+                                            className='workspace-sidebar__item-btn'
+                                        >
+                                            {APP_ICONS[app.id] && (
+                                                <img
+                                                    className='workspace-sidebar__app-icon'
+                                                    src={APP_ICONS[app.id]}
+                                                    alt=''
+                                                />
+                                            )}
+                                            <span className='workspace-sidebar__item-name'>{app.name}</span>
+                                            {app.badge && (
+                                                <span className='workspace-sidebar__item-badge'>{app.badge}</span>
+                                            )}
+                                            {app.external && (
+                                                <span className='workspace-sidebar__external-icon' aria-hidden='true'>
+                                                    <IconExternalLink size={12} />
+                                                </span>
+                                            )}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <button
+                                type='button'
+                                className='workspace-sidebar__add-btn'
+                            >
+                                + Connect apps
+                            </button>
+                        </div>
+                    )}
                 </section>
             </div>
 

@@ -447,6 +447,21 @@ export function IconExternalLink({ size = 12, className = '' }) {
     )
 }
 
+export function IconCheck({ size = 16, className = '' }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            className={className}
+            aria-hidden='true'
+        >
+            <path d='M8.2 13.3 4.9 10l-1.3 1.3 4.6 4.6 8.2-8.2-1.3-1.3z' />
+        </svg>
+    )
+}
+
 export function IconBell({ size = 16, className = '' }) {
     return (
         <svg

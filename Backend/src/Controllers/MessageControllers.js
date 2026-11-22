@@ -1,4 +1,5 @@
 import message_service from "../Services/MessageServices.js";
+import read_service from "../Services/ReadServices.js";
 import {
     publishMessage,
     publishMessageDeleted
@@ -45,6 +46,82 @@ export async function createChannelMessage(request, response) {
         message: "Message sent successfully.",
         data: {
             message
+        }
+    });
+}
+
+/*
+    Activity feed: channel messages where the signed-in user was
+    mentioned. Unread direct messages are computed by the client.
+*/
+export async function getActivity(request, response) {
+    const [mentions, readMap] = await Promise.all([
+        message_service.getMentions(
+            request.workspace._id,
+            request.user.id,
+            request.user.name
+        ),
+        read_service.getReadMap(request.workspace._id, request.user.id)
+    ]);
+
+    const fallbackSince = request.membership?.created_at
+        ? new Date(request.membership.created_at)
+        : new Date(0);
+
+    return response.status(200).send({
+        ok: true,
+        message: "Activity retrieved successfully.",
+        data: {
+            mentions: mentions.map((message) => {
+                const channelKey = message.channel_id
+                    ? String(message.channel_id._id)
+                    : null;
+                const readSince = channelKey
+                    ? (readMap[channelKey] || fallbackSince)
+                    : fallbackSince;
+
+                return {
+                    id: message._id,
+                    content: message.content,
+                    created_at: message.created_at,
+                    is_new: Boolean(channelKey)
+                        && new Date(message.created_at) > readSince,
+                    channel: message.channel_id
+                        ? {
+                            id: message.channel_id._id,
+                            name: message.channel_id.name
+                        }
+                        : null,
+                    sender: {
+                        id: message.sender_id?._id,
+                        name: message.sender_id?.name || message.sender_id?.email,
+                        photo: message.sender_id?.profile_photo || null
+                    }
+                };
+            })
+        }
+    });
+}
+
+export async function getDirectMessageSummaries(request, response) {
+    const conversations = await message_service.getDirectMessageSummaries(
+        request.workspace._id,
+        request.user.id
+    );
+
+    return response.status(200).send({
+        ok: true,
+        message: "Direct message summaries retrieved successfully.",
+        data: {
+            conversations: conversations.map((conversation) => ({
+                user_id: conversation._id,
+                last_message: {
+                    id: conversation.lastMessage?._id,
+                    content: conversation.lastMessage?.content,
+                    sender_id: conversation.lastMessage?.sender_id,
+                    created_at: conversation.lastMessage?.created_at
+                }
+            }))
         }
     });
 }

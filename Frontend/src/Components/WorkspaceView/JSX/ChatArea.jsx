@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import useWorkspaceMemberCount from '../../../Hooks/useWorkspaceMemberCount'
+import { formatDayLabel, getDayKey } from '../../../Utils/formatDate'
 import {
     IconStar,
     IconMembers,
@@ -57,6 +58,7 @@ function ChatArea() {
     const [composerText, setComposerText] = useState('')
     const [activeTab, setActiveTab] = useState('messages')
     const [deletingMessageId, setDeletingMessageId] = useState(null)
+    const [collapsedDays, setCollapsedDays] = useState({})
 
     // Auto-scroll state: the feed sticks to the bottom unless the user
     // scrolled up to read older messages.
@@ -84,10 +86,13 @@ function ChatArea() {
     */
     useEffect(() => {
         stickToBottomRef.current = true
-        setShowJumpToLatest(false)
-        setDeletingMessageId(null)
 
-        const frame = requestAnimationFrame(() => scrollToBottom('auto'))
+        const frame = requestAnimationFrame(() => {
+            setShowJumpToLatest(false)
+            setDeletingMessageId(null)
+            setCollapsedDays({})
+            scrollToBottom('auto')
+        })
 
         return () => cancelAnimationFrame(frame)
     }, [conversationKey, scrollToBottom])
@@ -152,6 +157,13 @@ function ChatArea() {
         stickToBottomRef.current = true
         setShowJumpToLatest(false)
         scrollToBottom('smooth')
+    }
+
+    function toggleDay(dayKey) {
+        setCollapsedDays((previous) => ({
+            ...previous,
+            [dayKey]: !previous[dayKey]
+        }))
     }
 
     function canDeleteMessage(message) {
@@ -336,35 +348,31 @@ function ChatArea() {
                     </div>
                 </div>
 
-                {/* Date separator */}
-                <div className='chat-date-separator'>
-                    <button type='button' className='chat-date-separator__pill'>
-                        <span>Sunday, 15 November</span>
-                        <IconChevronDown size={11} />
-                    </button>
-                </div>
-
-                {/* Message list */}
+                {/* Message list with one date separator per day */}
                 <div className='chat-messages__list'>
                     {loadingMessages && messages.length === 0 && (
                         <p className='chat-messages__empty'>Loading messages…</p>
                     )}
-                    {messages.map((msg) => {
-                        if (msg.type === 'system') {
-                            return (
-                                <div key={msg.id} className='chat-message chat-message--system'>
-                                    <span className='chat-message__system-icon'>
-                                        <IconUser size={14} />
-                                    </span>
-                                    <span className='chat-message__system-text'>
-                                        <strong>{msg.user}</strong> {msg.text}
-                                    </span>
-                                    <span className='chat-message__time'>{msg.time}</span>
-                                </div>
-                            )
-                        }
+                    {messages.map((msg, index) => {
+                        const dayKey = getDayKey(msg.createdAt)
+                        const dayLabel = formatDayLabel(msg.createdAt)
+                        const previousDayLabel = index > 0
+                            ? formatDayLabel(messages[index - 1].createdAt)
+                            : null
+                        const showDaySeparator = Boolean(dayLabel) && dayLabel !== previousDayLabel
+                        const isCollapsed = Boolean(dayKey && collapsedDays[dayKey])
 
-                        return (
+                        const messageContent = msg.type === 'system' ? (
+                            <div key={msg.id} className='chat-message chat-message--system'>
+                                <span className='chat-message__system-icon'>
+                                    <IconUser size={14} />
+                                </span>
+                                <span className='chat-message__system-text'>
+                                    <strong>{msg.user}</strong> {msg.text}
+                                </span>
+                                <span className='chat-message__time'>{msg.time}</span>
+                            </div>
+                        ) : (
                             <div key={msg.id} className='chat-message chat-message--user'>
                                 <div className='chat-message__avatar'>
                                     {String(msg.senderId) === String(currentUser.id) && currentUser.photo ? (
@@ -397,6 +405,29 @@ function ChatArea() {
                                     </button>
                                 )}
                             </div>
+                        )
+
+                        return (
+                            <React.Fragment key={msg.id}>
+                                {showDaySeparator && (
+                                    <div className='chat-date-separator'>
+                                        <button
+                                            type='button'
+                                            className='chat-date-separator__pill'
+                                            onClick={() => dayKey && toggleDay(dayKey)}
+                                            aria-expanded={!isCollapsed}
+                                            aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${dayLabel} messages`}
+                                        >
+                                            <span>{dayLabel}</span>
+                                            <IconChevronDown
+                                                size={11}
+                                                className={`chat-date-separator__chevron${isCollapsed ? ' chat-date-separator__chevron--collapsed' : ''}`}
+                                            />
+                                        </button>
+                                    </div>
+                                )}
+                                {!isCollapsed && messageContent}
+                            </React.Fragment>
                         )
                     })}
                     {messageError && (

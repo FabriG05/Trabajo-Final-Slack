@@ -378,6 +378,112 @@ export async function sendChannelMessage(workspaceId, channelId, content) {
     return responseBody
 }
 
+/* Unread counts per conversation, rebuilt from the persisted read state. */
+export async function getUnreadCounts(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/unread`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Persist that a conversation was read by the signed-in user. */
+export async function markConversationRead(workspaceId, conversationKey, type) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/reads/${conversationKey}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ type })
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Activity feed: channel messages that mention the signed-in user. */
+export async function getActivity(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/activity`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Latest direct message per conversation partner, for the DMs screen. */
+export async function getDirectMessageSummaries(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/direct-messages`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
 /* Direct message conversation with another member of the workspace. */
 export async function getDirectMessages(workspaceId, userId) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')

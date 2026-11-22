@@ -54,6 +54,18 @@ class MessageService {
         )
     }
 
+    async getDirectMessageSummaries(workspaceId, userId) {
+        return await messageRepository.getDirectMessageSummaries(workspaceId, userId)
+    }
+
+    async getMentions(workspaceId, userId, username) {
+        if (!username) {
+            return []
+        }
+
+        return await messageRepository.getMentions(workspaceId, userId, username)
+    }
+
     async getDirectMessages(workspaceId, userId, otherUserId) {
         await this.validateDirectMessageTarget(workspaceId, otherUserId)
 

@@ -1,10 +1,12 @@
 import React from 'react'
 import { useParams } from 'react-router'
-import { WorkspaceProvider } from '../../../Context/WorkspaceContext'
+import { WorkspaceProvider, useWorkspace } from '../../../Context/WorkspaceContext'
 import WorkspaceTopBar from '../../../Components/WorkspaceView/JSX/WorkspaceTopBar'
 import WorkspaceNav from '../../../Components/WorkspaceView/JSX/WorkspaceNav'
 import WorkspaceSidebar from '../../../Components/WorkspaceView/JSX/WorkspaceSidebar'
 import ChatArea from '../../../Components/WorkspaceView/JSX/ChatArea'
+import DirectMessagesView from '../../../Components/WorkspaceView/JSX/DirectMessagesView'
+import ActivityView from '../../../Components/WorkspaceView/JSX/ActivityView'
 import '../CSS/WorkspaceScreen.css'
 
 /*
@@ -13,13 +15,17 @@ import '../CSS/WorkspaceScreen.css'
     channels/DMs Sidebar, and the central ChatArea.
 */
 function WorkspaceScreenContent() {
+    const { activeNavTab } = useWorkspace()
+
     return (
         <div className='workspace-layout'>
             <WorkspaceTopBar />
             <div className='workspace-body'>
                 <WorkspaceNav />
                 <WorkspaceSidebar />
-                <ChatArea />
+                {activeNavTab === 'dms' && <DirectMessagesView />}
+                {activeNavTab === 'activity' && <ActivityView />}
+                {activeNavTab !== 'dms' && activeNavTab !== 'activity' && <ChatArea />}
             </div>
         </div>
     )

@@ -10,7 +10,9 @@ import {
     getChannelMessages,
     sendChannelMessage,
     getDirectMessages,
-    sendDirectMessage
+    sendDirectMessage,
+    getUnreadCounts,
+    markConversationRead as markConversationReadRequest
 } from '../Services/WorkSpaceService'
 import { updateUserStatus, updateProfilePhoto, getCurrentUser } from '../Services/ProfileService'
 import { connectSocket, disconnectSocket, getSocket } from '../Services/SocketService'
@@ -32,7 +34,7 @@ import useWorkspaceMembers from '../Hooks/useWorkspaceMembers'
 const WorkspaceContext = createContext(null)
 
 const INITIAL_APPS = [
-    { id: 'slack', name: 'Slack', badge: 1 },
+    { id: 'slack', name: 'Slack' },
     { id: 'gcal', name: 'Google Calendar', external: true },
     { id: 'gdrive', name: 'Google Drive', external: true }
 ]
@@ -51,8 +53,7 @@ function mapMessage(message) {
         senderId: String(sender?._id ?? message.sender_id ?? ''),
         user: sender?.name || sender?.email || 'Unknown user',
         text: message.content,
-        time: createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: 'Today',
+        time: createdAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         createdAt: createdAt.getTime()
     }
 }
@@ -137,6 +138,9 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const typingStopTimerRef = useRef(null)
     const typingTimersRef = useRef({})
 
+    // Throttles the "mark as read" request for the open conversation.
+    const lastReadMarkRef = useRef({ key: null, at: 0 })
+
     // Global search input
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -164,6 +168,9 @@ export function WorkspaceProvider({ children, workspaceId }) {
                 id,
                 username: member.FK_id_user.name || member.FK_id_user.email,
                 status: isSelf ? currentUser.status : member.FK_id_user.status,
+                photo: isSelf
+                    ? currentUser.photo
+                    : member.FK_id_user.profile_photo || null,
                 isSelf
             }
         })
@@ -188,6 +195,63 @@ export function WorkspaceProvider({ children, workspaceId }) {
         currentUserIdRef.current = currentUser.id
         channelsRef.current = channels
     }, [activeChannelId, activeDmId, currentUser.id, channels])
+
+    // Rebuild the unread badges from the persisted read state.
+    useEffect(() => {
+        if (!workspaceId) {
+            return
+        }
+
+        let isMounted = true
+
+        getUnreadCounts(workspaceId)
+            .then((response) => {
+                if (!isMounted) {
+                    return
+                }
+
+                const counts = response?.data?.counts || {}
+
+                setUnreadByConversation((previous) => {
+                    const merged = { ...counts }
+
+                    Object.entries(previous).forEach(([key, value]) => {
+                        merged[key] = Math.max(Number(merged[key] || 0), Number(value || 0))
+                    })
+
+                    // The conversation already open counts as read.
+                    if (activeChannelIdRef.current) {
+                        merged[String(activeChannelIdRef.current)] = 0
+                    }
+
+                    if (activeDmIdRef.current) {
+                        merged[String(activeDmIdRef.current)] = 0
+                    }
+
+                    return merged
+                })
+            })
+            .catch((error) => {
+                console.warn('Could not load the unread counts:', error.message)
+            })
+
+        return () => {
+            isMounted = false
+        }
+    }, [workspaceId])
+
+    const persistReadState = useCallback((conversationKey, conversationType) => {
+        if (!workspaceId || !conversationKey) {
+            return
+        }
+
+        lastReadMarkRef.current = { key: conversationKey, at: Date.now() }
+
+        markConversationReadRequest(workspaceId, conversationKey, conversationType)
+            .catch((error) => {
+                console.warn('Could not mark the conversation as read:', error.message)
+            })
+    }, [workspaceId])
 
     // Fetch workspace metadata when workspaceId is provided
     useEffect(() => {
@@ -565,6 +629,15 @@ export function WorkspaceProvider({ children, workspaceId }) {
                         : previous
                 ))
 
+                // Persist the read state, throttled so a busy channel does
+                // not send one request per message.
+                const now = Date.now()
+                const lastMark = lastReadMarkRef.current
+
+                if (lastMark.key !== conversationKey || now - lastMark.at > 3000) {
+                    persistReadState(conversationKey, isDirect ? 'direct' : 'channel')
+                }
+
                 return
             }
 
@@ -754,7 +827,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
             disconnectSocket()
         }
-    }, [workspaceId, upsertMessage, removeChannelLocally, removeMessageLocally, navigate])
+    }, [workspaceId, persistReadState, upsertMessage, removeChannelLocally, removeMessageLocally, navigate])
 
     // Clear the outgoing typing timer when the screen unmounts.
     useEffect(() => {
@@ -822,6 +895,10 @@ export function WorkspaceProvider({ children, workspaceId }) {
     }
 
     function selectChannel(channelId) {
+        // Any conversation opens in the chat pane, leaving overview screens
+        // such as the Direct messages list.
+        setActiveNavTab('home')
+
         // Clicking the conversation already open would leave the loading flag on,
         // because the messages effect would not run again.
         if (channelId === activeChannelId && !activeDmId) {
@@ -830,6 +907,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
         stopTyping()
         clearUnread(String(channelId))
+        persistReadState(String(channelId), 'channel')
         setLoadingMessages(true)
         setActiveChannelId(channelId)
         setActiveDmId(null)
@@ -841,12 +919,15 @@ export function WorkspaceProvider({ children, workspaceId }) {
             return
         }
 
+        setActiveNavTab('home')
+
         if (dmId === activeDmId) {
             return
         }
 
         stopTyping()
         clearUnread(String(dmId))
+        persistReadState(String(dmId), 'direct')
         setLoadingMessages(true)
         setActiveDmId(dmId)
     }

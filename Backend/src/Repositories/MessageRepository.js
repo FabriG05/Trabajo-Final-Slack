@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Message from "../Models/MessageModel.js";
 
 class MessageRepository {
@@ -84,6 +85,103 @@ class MessageRepository {
             return result.deletedCount;
         } catch (error) {
             console.error('Error in MessageRepository.deleteByWorkspaceId:', error.message);
+            throw error;
+        }
+    }
+
+    /*
+        Latest direct message per conversation partner. The DMs screen
+        uses it to render previews and dates without loading every
+        conversation of the workspace.
+    */
+    async getDirectMessageSummaries(workspaceId, userId) {
+        try {
+            const workspaceObjectId = new mongoose.Types.ObjectId(workspaceId)
+            const userObjectId = new mongoose.Types.ObjectId(userId)
+
+            return await Message.aggregate([
+                {
+                    $match: {
+                        workspace_id: workspaceObjectId,
+                        message_type: 'direct'
+                    }
+                },
+                { $sort: { created_at: -1 } },
+                {
+                    $group: {
+                        _id: {
+                            $cond: [
+                                { $eq: ['$sender_id', userObjectId] },
+                                '$receiver_id',
+                                '$sender_id'
+                            ]
+                        },
+                        lastMessage: { $first: '$$ROOT' }
+                    }
+                },
+                { $sort: { 'lastMessage.created_at': -1 } }
+            ])
+        } catch (error) {
+            console.error('Error in MessageRepository.getDirectMessageSummaries:', error.message);
+            throw error;
+        }
+    }
+
+    /*
+        Messages received after `since`, used to rebuild unread badges
+        when the user loads the workspace.
+    */
+    async countUnreadChannelMessages(channelId, excludeUserId, since) {
+        try {
+            return await Message.countDocuments({
+                channel_id: channelId,
+                message_type: 'channel',
+                sender_id: { $ne: excludeUserId },
+                created_at: { $gt: since }
+            });
+        } catch (error) {
+            console.error('Error in MessageRepository.countUnreadChannelMessages:', error.message);
+            throw error;
+        }
+    }
+
+    async countUnreadDirectMessages(workspaceId, userId, partnerId, since) {
+        try {
+            return await Message.countDocuments({
+                workspace_id: workspaceId,
+                message_type: 'direct',
+                sender_id: partnerId,
+                receiver_id: userId,
+                created_at: { $gt: since }
+            });
+        } catch (error) {
+            console.error('Error in MessageRepository.countUnreadDirectMessages:', error.message);
+            throw error;
+        }
+    }
+
+    /*
+        Channel messages that mention a user, newest first. Only the last
+        30 days are scanned to keep the Activity feed small.
+    */
+    async getMentions(workspaceId, excludeUserId, username, limit = 50) {
+        try {
+            const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            const escapedName = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+            return await Message.find({
+                workspace_id: workspaceId,
+                message_type: 'channel',
+                sender_id: { $ne: excludeUserId },
+                content: { $regex: `@${escapedName}\\b`, $options: 'i' },
+                created_at: { $gte: since }
+            })
+                .populate('sender_id', 'name email profile_photo')
+                .populate('channel_id', 'name')
+                .sort({ created_at: -1 })
+                .limit(limit)
+        } catch (error) {
+            console.error('Error in MessageRepository.getMentions:', error.message);
             throw error;
         }
     }

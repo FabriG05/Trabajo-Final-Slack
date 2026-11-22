@@ -1,0 +1,241 @@
+/*
+    Activity overview: mentions and unread direct messages. Replaces the
+    ChatArea while the Activity shortcut is active.
+*/
+.activity-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    background: #1a1d21;
+    color: #d1d2d3;
+}
+
+/* Header */
+.activity-view__header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.activity-view__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.activity-view__toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.activity-view__toggle:hover {
+    color: #ffffff;
+}
+
+.activity-view__toggle-track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 30px;
+    height: 16px;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transition: background 0.15s ease;
+}
+
+.activity-view__toggle-track--on {
+    background: #7d3986;
+}
+
+.activity-view__toggle-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 0.15s ease;
+}
+
+.activity-view__toggle-track--on .activity-view__toggle-thumb {
+    transform: translateX(14px);
+}
+
+/* Body */
+.activity-view__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.activity-view__notice {
+    margin: 16px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.activity-view__notice--error {
+    color: #e05252;
+}
+
+/* Empty state */
+.activity-view__empty {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 24px;
+    max-width: 420px;
+    text-align: center;
+}
+
+.activity-view__empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #2eb67d;
+    color: #ffffff;
+}
+
+.activity-view__empty-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.activity-view__empty-text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Activity list */
+.activity-view__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.activity-view__list > li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.activity-view__row {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.activity-view__row:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.activity-view__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #2a2d31;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.activity-view__avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.activity-view__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.activity-view__headline {
+    font-size: 14px;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-view__actor {
+    font-weight: 700;
+}
+
+.activity-view__action {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+}
+
+.activity-view__snippet {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-view__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.activity-view__time {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.activity-view__badge {
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #cfa1de;
+    color: #1e1022;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}

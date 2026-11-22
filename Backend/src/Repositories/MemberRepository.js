@@ -85,7 +85,7 @@ class MemberRepository {
                 .find({ FK_id_workspace: workspaceId })
                 .populate(
                     'FK_id_user',
-                    'name email active status'
+                    'name email active status profile_photo'
                 );
             console.log('Members of the workspace: ', result);
             return result;
