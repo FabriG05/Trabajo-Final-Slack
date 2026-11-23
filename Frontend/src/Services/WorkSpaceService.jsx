@@ -297,6 +297,34 @@ export async function deleteMessage(workspaceId, messageId) {
     return responseBody
 }
 
+/* Edits the text of a message (author only). */
+export async function updateMessage(workspaceId, messageId, content) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/messages/${messageId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ content })
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
 /* Deletes the whole workspace (owner only). */
 export async function deleteWorkspace(workspaceId) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
@@ -504,6 +532,82 @@ export async function markConversationRead(workspaceId, conversationKey, type) {
 
     if (!responseHttp.ok) {
         throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Starred/saved messages for the signed-in user. */
+export async function getStarredMessages(workspaceId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/starred`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+export async function starMessage(workspaceId, messageId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/starred/${messageId}`,
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+export async function unstarMessage(workspaceId, messageId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/starred/${messageId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
     }
 
     const responseBody = await responseHttp.json()

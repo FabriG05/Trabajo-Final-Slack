@@ -48,17 +48,23 @@ function ChatArea() {
         loadingMessages,
         messageError,
         sendMessage,
+        editMessage,
         deleteMessage,
         canDeleteAnyMessage,
         typingUsers,
         notifyTyping,
         currentUser,
-        workspaceId
+        workspaceId,
+        starredMessageIds,
+        toggleStarMessage
     } = useWorkspace()
     const { memberCount } = useWorkspaceMemberCount(workspaceId)
     const [composerText, setComposerText] = useState('')
     const [activeTab, setActiveTab] = useState('messages')
     const [deletingMessageId, setDeletingMessageId] = useState(null)
+    const [editingMessageId, setEditingMessageId] = useState(null)
+    const [editingText, setEditingText] = useState('')
+    const [savingEdit, setSavingEdit] = useState(false)
     const [collapsedDays, setCollapsedDays] = useState({})
     const [selectedAttachment, setSelectedAttachment] = useState(null)
     const [attachmentError, setAttachmentError] = useState(null)
@@ -94,6 +100,9 @@ function ChatArea() {
         const frame = requestAnimationFrame(() => {
             setShowJumpToLatest(false)
             setDeletingMessageId(null)
+            setEditingMessageId(null)
+            setEditingText('')
+            setSavingEdit(false)
             setCollapsedDays({})
             setSelectedAttachment(null)
             setAttachmentError(null)
@@ -189,6 +198,39 @@ function ChatArea() {
         setDeletingMessageId(messageId)
         await deleteMessage(messageId)
         setDeletingMessageId(null)
+    }
+
+    function startEditingMessage(message) {
+        setEditingMessageId(message.id)
+        setEditingText(message.text || '')
+    }
+
+    function cancelEditingMessage() {
+        setEditingMessageId(null)
+        setEditingText('')
+        setSavingEdit(false)
+    }
+
+    async function saveEditingMessage(message) {
+        const trimmedText = editingText.trim()
+        const hasAttachment = Boolean(message.attachment?.data)
+
+        if (!trimmedText && !hasAttachment) {
+            return
+        }
+
+        if (trimmedText === (message.text || '')) {
+            cancelEditingMessage()
+            return
+        }
+
+        setSavingEdit(true)
+        const saved = await editMessage(message.id, trimmedText)
+        setSavingEdit(false)
+
+        if (saved) {
+            cancelEditingMessage()
+        }
     }
 
     async function handleSend() {
@@ -417,9 +459,35 @@ function ChatArea() {
                                 <div className='chat-message__body'>
                                     <div className='chat-message__meta'>
                                         <span className='chat-message__author'>{msg.user}</span>
-                                        <span className='chat-message__time'>{msg.time}</span>
+                                        <span className='chat-message__time'>
+                                            {msg.time}
+                                            {msg.edited ? <span className='chat-message__edited'> (edited)</span> : null}
+                                        </span>
                                     </div>
-                                    {msg.text && <p className='chat-message__content'>{msg.text}</p>}
+                                    {String(editingMessageId) === String(msg.id) ? (
+                                        <div className='chat-message__edit'>
+                                            <textarea
+                                                className='chat-message__edit-input'
+                                                value={editingText}
+                                                onChange={(event) => setEditingText(event.target.value)}
+                                                rows={2}
+                                                disabled={savingEdit}
+                                            />
+                                            <div className='chat-message__edit-actions'>
+                                                <button type='button' className='chat-message__edit-btn' onClick={cancelEditingMessage} disabled={savingEdit}>Cancel</button>
+                                                <button
+                                                    type='button'
+                                                    className='chat-message__edit-btn chat-message__edit-btn--save'
+                                                    onClick={() => saveEditingMessage(msg)}
+                                                    disabled={savingEdit || (!editingText.trim() && !msg.attachment?.data)}
+                                                >
+                                                    {savingEdit ? 'Saving…' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        msg.text && <p className='chat-message__content'>{msg.text}</p>
+                                    )}
                                     {msg.attachment && (
                                         msg.attachment.mimeType?.startsWith('image/') ? (
                                             <a
@@ -452,18 +520,40 @@ function ChatArea() {
                                         )
                                     )}
                                 </div>
-                                {canDeleteMessage(msg) && (
+                                <div className='chat-message__actions'>
                                     <button
                                         type='button'
-                                        className='chat-message__delete'
-                                        title='Delete message'
-                                        aria-label='Delete message'
-                                        onClick={() => handleDeleteMessage(msg.id)}
-                                        disabled={String(deletingMessageId) === String(msg.id)}
+                                        className={`chat-message__action-btn${starredMessageIds?.has(String(msg.id)) ? ' chat-message__action-btn--starred' : ''}`}
+                                        title={starredMessageIds?.has(String(msg.id)) ? 'Unstar message' : 'Star message'}
+                                        aria-label={starredMessageIds?.has(String(msg.id)) ? 'Unstar message' : 'Star message'}
+                                        onClick={() => toggleStarMessage(msg.id)}
                                     >
-                                        <IconTrash size={14} />
+                                        <IconStar size={14} />
                                     </button>
-                                )}
+                                    {String(msg.senderId) === String(currentUser.id) && String(editingMessageId) !== String(msg.id) && (
+                                        <button
+                                            type='button'
+                                            className='chat-message__action-btn'
+                                            title='Edit message'
+                                            aria-label='Edit message'
+                                            onClick={() => startEditingMessage(msg)}
+                                        >
+                                            ✎
+                                        </button>
+                                    )}
+                                    {canDeleteMessage(msg) && (
+                                        <button
+                                            type='button'
+                                            className='chat-message__action-btn chat-message__action-btn--danger'
+                                            title='Delete message'
+                                            aria-label='Delete message'
+                                            onClick={() => handleDeleteMessage(msg.id)}
+                                            disabled={String(deletingMessageId) === String(msg.id)}
+                                        >
+                                            <IconTrash size={14} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         )
 

@@ -6,6 +6,7 @@ import {
     createChannel,
     deleteChannel as deleteChannelRequest,
     deleteMessage as deleteMessageRequest,
+    updateMessage as updateMessageRequest,
     deleteWorkspace as deleteWorkspaceRequest,
     updateWorkspace as updateWorkspaceRequest,
     deleteWorkspaceMember as deleteWorkspaceMemberRequest,
@@ -15,7 +16,10 @@ import {
     getDirectMessages,
     sendDirectMessage,
     getUnreadCounts,
-    markConversationRead as markConversationReadRequest
+    markConversationRead as markConversationReadRequest,
+    getStarredMessages,
+    starMessage as starMessageRequest,
+    unstarMessage as unstarMessageRequest
 } from '../Services/WorkSpaceService'
 import { updateUserStatus, updateProfilePhoto, getCurrentUser } from '../Services/ProfileService'
 import { connectSocket, disconnectSocket, getSocket } from '../Services/SocketService'
@@ -66,6 +70,7 @@ function mapMessage(message) {
         user: sender?.name || sender?.email || 'Unknown user',
         text: message.content || '',
         attachment,
+        edited: Boolean(message.edited),
         time: createdAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         createdAt: createdAt.getTime()
     }
@@ -136,6 +141,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
     // Unread counters and "typing" state, both keyed by conversation.
     const [unreadByConversation, setUnreadByConversation] = useState({})
     const [typingByConversation, setTypingByConversation] = useState({})
+    const [starredMessages, setStarredMessages] = useState([])
+    const [loadingStarred, setLoadingStarred] = useState(false)
 
     // Incremented after a socket reconnection to refetch what was missed.
     const [realtimeRefreshToken, setRealtimeRefreshToken] = useState(0)
@@ -246,6 +253,34 @@ export function WorkspaceProvider({ children, workspaceId }) {
             })
             .catch((error) => {
                 console.warn('Could not load the unread counts:', error.message)
+            })
+
+        return () => {
+            isMounted = false
+        }
+    }, [workspaceId])
+
+    useEffect(() => {
+        if (!workspaceId) {
+            return
+        }
+
+        let isMounted = true
+        setLoadingStarred(true)
+
+        getStarredMessages(workspaceId)
+            .then((response) => {
+                if (isMounted) {
+                    setStarredMessages(response?.data?.starred || [])
+                }
+            })
+            .catch((error) => {
+                console.warn('Could not load starred messages:', error.message)
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setLoadingStarred(false)
+                }
             })
 
         return () => {
@@ -660,6 +695,22 @@ export function WorkspaceProvider({ children, workspaceId }) {
             }))
         }
 
+        function handleMessageUpdated(payload) {
+            const message = payload?.message
+
+            if (!message) {
+                return
+            }
+
+            const conversationKey = getConversationKey(message, currentUserIdRef.current)
+
+            if (!conversationKey) {
+                return
+            }
+
+            upsertMessage(conversationKey, message)
+        }
+
         function handleChannelCreated(payload) {
             const channel = payload?.channel
 
@@ -689,10 +740,14 @@ export function WorkspaceProvider({ children, workspaceId }) {
                 return
             }
 
-            removeMessageLocally(
-                conversationKey,
-                payload.messageId ?? message._id
-            )
+            const deletedId = String(payload.messageId ?? message._id ?? '')
+
+            removeMessageLocally(conversationKey, deletedId)
+            if (deletedId) {
+                setStarredMessages((previous) => previous.filter(
+                    (item) => String(item?.message_id?._id || item?.message_id || '') !== deletedId
+                ))
+            }
 
             // If it was an unread message of another person, lower the badge.
             const senderId = String(message.sender_id?._id ?? message.sender_id ?? '')
@@ -732,6 +787,21 @@ export function WorkspaceProvider({ children, workspaceId }) {
             // The workspace no longer exists: leave the screen. The member
             // who deleted it navigates here too, so this is idempotent.
             navigate('/home', { replace: true })
+        }
+
+        async function handleMembersChanged() {
+            const response = await refreshMembers()
+            const members = response?.data?.members || []
+            const currentUserId = String(currentUserIdRef.current || '')
+            const isStillMember = members.some((member) => {
+                const invitationAccepted = member.invitation_accepted ?? member.invitationAccepted
+                const memberId = String(member?.FK_id_user?._id || member?.FK_id_user || '')
+                return invitationAccepted && memberId === currentUserId
+            })
+
+            if (currentUserId && !isStillMember) {
+                navigate('/home', { replace: true })
+            }
         }
 
         function removeTypingUser(conversationKey, userId) {
@@ -818,20 +888,24 @@ export function WorkspaceProvider({ children, workspaceId }) {
         }
 
         socket.on('message:created', handleMessageCreated)
+        socket.on('message:updated', handleMessageUpdated)
         socket.on('message:deleted', handleMessageDeleted)
         socket.on('channel:created', handleChannelCreated)
         socket.on('channel:deleted', handleChannelDeleted)
         socket.on('workspace:deleted', handleWorkspaceDeleted)
+        socket.on('workspace:members-changed', handleMembersChanged)
         socket.on('typing:start', handleTypingStart)
         socket.on('typing:stop', handleTypingStop)
 
         return () => {
             socket.off('connect', handleConnect)
             socket.off('message:created', handleMessageCreated)
+            socket.off('message:updated', handleMessageUpdated)
             socket.off('message:deleted', handleMessageDeleted)
             socket.off('channel:created', handleChannelCreated)
             socket.off('channel:deleted', handleChannelDeleted)
             socket.off('workspace:deleted', handleWorkspaceDeleted)
+            socket.off('workspace:members-changed', handleMembersChanged)
             socket.off('typing:start', handleTypingStart)
             socket.off('typing:stop', handleTypingStop)
 
@@ -840,7 +914,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
             disconnectSocket()
         }
-    }, [workspaceId, persistReadState, upsertMessage, removeChannelLocally, removeMessageLocally, navigate])
+    }, [workspaceId, persistReadState, upsertMessage, removeChannelLocally, removeMessageLocally, navigate, refreshMembers])
 
     // Clear the outgoing typing timer when the screen unmounts.
     useEffect(() => {
@@ -1038,6 +1112,31 @@ export function WorkspaceProvider({ children, workspaceId }) {
         return true
     }
 
+    async function editMessage(messageId, content) {
+        if (!workspaceId || !messageId) {
+            return false
+        }
+
+        const conversationKey = currentConversationKey
+            ? String(currentConversationKey)
+            : null
+
+        try {
+            const response = await updateMessageRequest(workspaceId, messageId, content)
+            const updatedMessage = response?.data?.message
+
+            if (updatedMessage && conversationKey) {
+                upsertMessage(conversationKey, updatedMessage)
+            }
+
+            setMessageError(null)
+            return true
+        } catch (error) {
+            setMessageError(error.message)
+            return false
+        }
+    }
+
     /*
         Deletes a channel and everything cached for it. Throws on failure so
         the confirmation dialog can show the server message.
@@ -1146,6 +1245,34 @@ export function WorkspaceProvider({ children, workspaceId }) {
         setChannelError(null)
     }
 
+    const starredMessageIds = new Set(
+        starredMessages
+            .map((item) => String(item?.message_id?._id || item?.message_id || ''))
+            .filter(Boolean)
+    )
+
+    async function toggleStarMessage(messageId) {
+        if (!workspaceId || !messageId) {
+            return
+        }
+
+        const key = String(messageId)
+        const isStarred = starredMessageIds.has(key)
+
+        try {
+            if (isStarred) {
+                await unstarMessageRequest(workspaceId, key)
+            } else {
+                await starMessageRequest(workspaceId, key)
+            }
+
+            const response = await getStarredMessages(workspaceId)
+            setStarredMessages(response?.data?.starred || [])
+        } catch (error) {
+            console.warn('Could not update starred message:', error.message)
+        }
+    }
+
     const value = {
         workspaceId,
         workspace,
@@ -1164,10 +1291,15 @@ export function WorkspaceProvider({ children, workspaceId }) {
         activeDm,
         selectDm,
         apps,
+        starredMessages,
+        loadingStarred,
+        starredMessageIds,
+        toggleStarMessage,
         messages: currentMessages,
         loadingMessages,
         messageError,
         sendMessage,
+        editMessage,
         deleteMessage,
         deleteChannel,
         deleteWorkspace,

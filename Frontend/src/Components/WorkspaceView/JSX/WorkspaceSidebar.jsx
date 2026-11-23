@@ -51,7 +51,9 @@ function WorkspaceSidebar() {
         directMessages,
         activeDm,
         selectDm,
-        apps
+        apps,
+        setActiveNavTab,
+        starredMessages
     } = useWorkspace()
 
     const [isCreatingChannel, setIsCreatingChannel] = useState(false)
@@ -210,29 +212,18 @@ function WorkspaceSidebar() {
                     <button
                         type='button'
                         className='workspace-sidebar__section-header'
-                        onClick={() => toggleSection('starred')}
-                        aria-expanded={isSectionOpen('starred')}
-                        aria-controls='workspace-sidebar-starred'
+                        onClick={() => setActiveNavTab('starred')}
                     >
-                        <span
-                            className={`workspace-sidebar__section-arrow${isSectionOpen('starred') ? ' workspace-sidebar__section-arrow--open' : ''}`}
-                            aria-hidden='true'
-                        >
-                            <IconSectionCollapse size={10} />
-                        </span>
                         <span className='workspace-sidebar__section-star' aria-hidden='true'>
                             <IconStar size={13} />
                         </span>
                         <span className='workspace-sidebar__section-title'>Starred</span>
+                        {starredMessages.length > 0 && (
+                            <span className='workspace-sidebar__item-badge workspace-sidebar__item-badge--unread'>
+                                {starredMessages.length > 99 ? '99+' : starredMessages.length}
+                            </span>
+                        )}
                     </button>
-
-                    {isSectionOpen('starred') && (
-                        <div id='workspace-sidebar-starred'>
-                            <p className='workspace-sidebar__section-empty'>
-                                Drag and drop important stuff here
-                            </p>
-                        </div>
-                    )}
                 </section>
 
                 {/* Channels */}

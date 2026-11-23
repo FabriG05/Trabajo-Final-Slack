@@ -2,7 +2,8 @@ import message_service from "../Services/MessageServices.js";
 import read_service from "../Services/ReadServices.js";
 import {
     publishMessage,
-    publishMessageDeleted
+    publishMessageDeleted,
+    publishMessageUpdated
 } from "../Realtime/SocketServer.js";
 
 /*
@@ -189,6 +190,28 @@ export async function createDirectMessage(request, response) {
     return response.status(201).send({
         ok: true,
         message: "Direct message sent successfully.",
+        data: {
+            message
+        }
+    });
+}
+
+export async function updateMessage(request, response) {
+    const { message_id } = request.params;
+    const { content } = request.body;
+
+    const message = await message_service.updateMessage(
+        request.workspace._id,
+        message_id,
+        request.user.id,
+        content
+    );
+
+    publishMessageUpdated(message);
+
+    return response.status(200).send({
+        ok: true,
+        message: "Message updated successfully.",
         data: {
             message
         }

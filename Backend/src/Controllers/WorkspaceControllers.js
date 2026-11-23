@@ -1,5 +1,8 @@
 import workspace_service from "../Services/WorkspaceServices.js";
-import { publishWorkspaceDeleted } from "../Realtime/SocketServer.js";
+import {
+    publishWorkspaceDeleted,
+    publishWorkspaceMembersChanged
+} from "../Realtime/SocketServer.js";
 
 /*
     To send information to an API we use the request body.
@@ -116,6 +119,8 @@ export async function deleteWorkspaceMember(request, response) {
         member_id
     );
 
+    publishWorkspaceMembersChanged(request.workspace._id);
+
     return response.status(200).send({
         ok: true,
         message: "Member deleted successfully.",
@@ -134,6 +139,8 @@ export async function updateWorkspaceMemberRole(request, response) {
         member_id,
         role
     );
+
+    publishWorkspaceMembersChanged(request.workspace._id);
 
     return response.status(200).send({
         ok: true,

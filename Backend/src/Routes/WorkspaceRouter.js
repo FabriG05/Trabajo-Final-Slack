@@ -19,12 +19,18 @@ import {
     getDirectMessageSummaries,
     getDirectMessages,
     createDirectMessage,
-    deleteMessage
+    deleteMessage,
+    updateMessage
 } from '../Controllers/MessageControllers.js'
 import {
     markConversationRead,
     getUnreadCounts
 } from '../Controllers/ReadControllers.js'
+import {
+    getStarredMessages,
+    starMessage,
+    unstarMessage
+} from '../Controllers/StarredMessageControllers.js'
 
 const workspaceRouter = express.Router()
 
@@ -111,6 +117,27 @@ workspaceRouter.put(
     markConversationRead
 )
 
+workspaceRouter.get(
+    "/:workspace_id/starred",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    getStarredMessages
+)
+
+workspaceRouter.post(
+    "/:workspace_id/starred/:message_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    starMessage
+)
+
+workspaceRouter.delete(
+    "/:workspace_id/starred/:message_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    unstarMessage
+)
+
 /*
     Activity feed: channel messages that mention the signed-in user.
     Unread direct messages are added by the client from its live state.
@@ -156,6 +183,13 @@ workspaceRouter.post(
     service checks that it belongs to this workspace and that the
     requester is the author, an admin or the owner.
 */
+workspaceRouter.put(
+    "/:workspace_id/messages/:message_id",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    updateMessage
+)
+
 workspaceRouter.delete(
     "/:workspace_id/messages/:message_id",
     authMiddleware,

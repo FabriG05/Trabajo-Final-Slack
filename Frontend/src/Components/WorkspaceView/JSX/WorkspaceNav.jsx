@@ -154,24 +154,26 @@ function WorkspaceNav() {
 
             {/* Bottom utility icons */}
             <div className='workspace-nav__bottom'>
-                <div className='workspace-nav__create-more-wrapper'>
-                    <button
-                        type='button'
-                        className={`workspace-nav__util-btn${isCreateMenuOpen ? ' workspace-nav__util-btn--active' : ''}`}
-                        aria-label='Create more'
-                        title='Create more'
-                        onClick={() => {
-                            setIsAdminMenuOpen(false)
-                            setIsStatusMenuOpen(false)
-                            setIsCreateMenuOpen((open) => !open)
-                        }}
-                    >
-                        +
-                    </button>
-                    {isCreateMenuOpen && (
-                        <CreateMoreMenu onClose={() => setIsCreateMenuOpen(false)} />
-                    )}
-                </div>
+                {['Owner', 'Admin'].includes(currentUserRole) && (
+                    <div className='workspace-nav__create-more-wrapper'>
+                        <button
+                            type='button'
+                            className={`workspace-nav__util-btn${isCreateMenuOpen ? ' workspace-nav__util-btn--active' : ''}`}
+                            aria-label='Create more'
+                            title='Create more'
+                            onClick={() => {
+                                setIsAdminMenuOpen(false)
+                                setIsStatusMenuOpen(false)
+                                setIsCreateMenuOpen((open) => !open)
+                            }}
+                        >
+                            +
+                        </button>
+                        {isCreateMenuOpen && (
+                            <CreateMoreMenu onClose={() => setIsCreateMenuOpen(false)} />
+                        )}
+                    </div>
+                )}
                 <button
                     type='button'
                     className='workspace-nav__util-btn'

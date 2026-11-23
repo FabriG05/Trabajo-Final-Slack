@@ -202,6 +202,35 @@ class MessageService {
         return deletedMessage ?? message
     }
 
+    /* Edits a message. Only the author can edit their own message. */
+    async updateMessage(workspaceId, messageId, requesterId, content) {
+        const message = await messageRepository.getById(messageId)
+
+        if (!message || String(message.workspace_id) !== String(workspaceId)) {
+            throw new ServerError("Message not found.", 404)
+        }
+
+        if (String(message.sender_id) !== String(requesterId)) {
+            throw new ServerError("You can only edit your own messages.", 403)
+        }
+
+        const hasAttachment = Boolean(message.attachment?.data)
+        const normalizedContent = typeof content === 'string' ? content.trim() : ''
+
+        if (!normalizedContent && !hasAttachment) {
+            throw new ServerError("Message content or attachment is required.", 400)
+        }
+
+        if (normalizedContent.length > MAX_MESSAGE_LENGTH) {
+            throw new ServerError(
+                `Message content cannot be longer than ${MAX_MESSAGE_LENGTH} characters.`,
+                400
+            )
+        }
+
+        return await messageRepository.updateContentById(messageId, normalizedContent)
+    }
+
     async validateDirectMessageTarget(workspaceId, otherUserId) {
         // The other side of the conversation must be an active member of
         // this workspace, otherwise the DM would be unreachable for them.

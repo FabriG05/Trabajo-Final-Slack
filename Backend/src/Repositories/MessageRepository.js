@@ -58,6 +58,21 @@ class MessageRepository {
         }
     }
 
+    async updateContentById(messageId, content) {
+        try {
+            return await Message.findByIdAndUpdate(
+                messageId,
+                { content, edited: true },
+                { new: true, runValidators: true }
+            )
+                .populate('sender_id', 'name email')
+                .populate('receiver_id', 'name email');
+        } catch (error) {
+            console.error('Error in MessageRepository.updateContentById:', error.message);
+            throw error;
+        }
+    }
+
     async getByChannelId(channelId) {
         try {
             const messages = await Message

@@ -202,6 +202,41 @@ export function publishMessage(message) {
     });
 }
 
+/* Publishes an edited message to everyone who can see it. */
+export function publishMessageUpdated(message) {
+    if (!io || !message) {
+        return;
+    }
+
+    if (message.message_type === "direct") {
+        const senderId = message.sender_id?._id ?? message.sender_id;
+        const receiverId = message.receiver_id?._id ?? message.receiver_id;
+        const payload = { scope: "direct", message };
+
+        if (senderId) {
+            io.to(userRoom(senderId)).emit("message:updated", payload);
+        }
+
+        if (receiverId) {
+            io.to(userRoom(receiverId)).emit("message:updated", payload);
+        }
+
+        return;
+    }
+
+    const workspaceId = message.workspace_id?._id ?? message.workspace_id;
+
+    if (!workspaceId) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("message:updated", {
+        scope: "channel",
+        channelId: message.channel_id,
+        message
+    });
+}
+
 /* Publishes a newly created channel to the members of its workspace. */
 export function publishChannel(workspaceId, channel) {
     if (!io || !workspaceId || !channel) {
@@ -268,4 +303,13 @@ export function publishWorkspaceDeleted(workspaceId) {
     }
 
     io.to(workspaceRoom(workspaceId)).emit("workspace:deleted", { workspaceId });
+}
+
+/* Tells workspace members to refresh member/role data. */
+export function publishWorkspaceMembersChanged(workspaceId) {
+    if (!io || !workspaceId) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("workspace:members-changed", { workspaceId });
 }

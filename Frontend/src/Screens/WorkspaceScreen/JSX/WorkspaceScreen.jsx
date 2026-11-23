@@ -7,6 +7,7 @@ import WorkspaceSidebar from '../../../Components/WorkspaceView/JSX/WorkspaceSid
 import ChatArea from '../../../Components/WorkspaceView/JSX/ChatArea'
 import DirectMessagesView from '../../../Components/WorkspaceView/JSX/DirectMessagesView'
 import ActivityView from '../../../Components/WorkspaceView/JSX/ActivityView'
+import StarredMessagesView from '../../../Components/WorkspaceView/JSX/StarredMessagesView'
 import '../CSS/WorkspaceScreen.css'
 
 /*
@@ -25,7 +26,8 @@ function WorkspaceScreenContent() {
                 <WorkspaceSidebar />
                 {activeNavTab === 'dms' && <DirectMessagesView />}
                 {activeNavTab === 'activity' && <ActivityView />}
-                {activeNavTab !== 'dms' && activeNavTab !== 'activity' && <ChatArea />}
+                {activeNavTab === 'starred' && <StarredMessagesView />}
+                {!['dms', 'activity', 'starred'].includes(activeNavTab) && <ChatArea />}
             </div>
         </div>
     )
