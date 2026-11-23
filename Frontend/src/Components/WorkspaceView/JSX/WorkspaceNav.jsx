@@ -37,7 +37,7 @@ const NAV_ITEMS = [
 ]
 
 function WorkspaceNav() {
-    const { activeNavTab, setActiveNavTab, workspace, currentUser, currentUserRole, userStatus, setUserStatus, changeProfilePhoto } = useWorkspace()
+    const { activeNavTab, setActiveNavTab, openDmsTab, workspace, currentUser, currentUserRole, userStatus, setUserStatus, changeProfilePhoto } = useWorkspace()
 
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false)
@@ -133,6 +133,12 @@ function WorkspaceNav() {
                                     }
 
                                     setIsAdminMenuOpen(false)
+
+                                    if (item.id === 'dms') {
+                                        openDmsTab()
+                                        return
+                                    }
+
                                     setActiveNavTab(item.id)
                                 }}
                                 aria-label={item.label}

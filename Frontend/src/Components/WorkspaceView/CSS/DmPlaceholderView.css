@@ -1,0 +1,40 @@
+.dm-placeholder {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1d21;
+    color: #fff;
+    padding: 24px;
+}
+
+.dm-placeholder__content {
+    text-align: center;
+    max-width: 420px;
+}
+
+.dm-placeholder__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 16px;
+    background: rgba(127, 44, 136, 0.2);
+    color: #d1a3d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dm-placeholder__title {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.dm-placeholder__text {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.5;
+}

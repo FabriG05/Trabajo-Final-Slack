@@ -5,9 +5,10 @@ import WorkspaceTopBar from '../../../Components/WorkspaceView/JSX/WorkspaceTopB
 import WorkspaceNav from '../../../Components/WorkspaceView/JSX/WorkspaceNav'
 import WorkspaceSidebar from '../../../Components/WorkspaceView/JSX/WorkspaceSidebar'
 import ChatArea from '../../../Components/WorkspaceView/JSX/ChatArea'
-import DirectMessagesView from '../../../Components/WorkspaceView/JSX/DirectMessagesView'
 import ActivityView from '../../../Components/WorkspaceView/JSX/ActivityView'
 import StarredMessagesView from '../../../Components/WorkspaceView/JSX/StarredMessagesView'
+import DmPlaceholderView from '../../../Components/WorkspaceView/JSX/DmPlaceholderView'
+import DirectoryView from '../../../Components/WorkspaceView/JSX/DirectoryView'
 import '../CSS/WorkspaceScreen.css'
 
 /*
@@ -16,7 +17,7 @@ import '../CSS/WorkspaceScreen.css'
     channels/DMs Sidebar, and the central ChatArea.
 */
 function WorkspaceScreenContent() {
-    const { activeNavTab } = useWorkspace()
+    const { activeNavTab, activeDm } = useWorkspace()
 
     return (
         <div className='workspace-layout'>
@@ -24,10 +25,11 @@ function WorkspaceScreenContent() {
             <div className='workspace-body'>
                 <WorkspaceNav />
                 <WorkspaceSidebar />
-                {activeNavTab === 'dms' && <DirectMessagesView />}
+                {activeNavTab === 'dms' && (activeDm ? <ChatArea /> : <DmPlaceholderView />)}
                 {activeNavTab === 'activity' && <ActivityView />}
                 {activeNavTab === 'starred' && <StarredMessagesView />}
-                {!['dms', 'activity', 'starred'].includes(activeNavTab) && <ChatArea />}
+                {activeNavTab === 'directory' && <DirectoryView />}
+                {!['dms', 'activity', 'starred', 'directory'].includes(activeNavTab) && <ChatArea />}
             </div>
         </div>
     )

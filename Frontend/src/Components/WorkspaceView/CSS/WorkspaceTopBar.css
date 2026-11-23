@@ -35,9 +35,14 @@
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-.workspace-topbar__btn:hover {
+.workspace-topbar__btn:hover:not(:disabled) {
     background: #302034;
     color: #ffffff;
+}
+
+.workspace-topbar__btn:disabled {
+    opacity: 0.35;
+    cursor: default;
 }
 
 .workspace-topbar__search-container {
@@ -91,4 +96,71 @@
     width: 240px;
     display: flex;
     justify-content: flex-end;
+}
+
+.workspace-topbar__history-menu-wrapper {
+    position: relative;
+}
+
+.workspace-topbar__history-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #302034;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    padding: 8px;
+    z-index: 40;
+}
+
+.workspace-topbar__history-title {
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.workspace-topbar__history-empty {
+    margin: 0;
+    padding: 10px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.workspace-topbar__history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.workspace-topbar__history-item {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.workspace-topbar__history-item:hover {
+    background: #422e48;
+    color: #fff;
+}
+
+.workspace-topbar__history-item--active {
+    background: #7d3986;
+    color: #fff;
 }

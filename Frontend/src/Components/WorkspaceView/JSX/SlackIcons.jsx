@@ -504,3 +504,37 @@ export function IconTrash({ size = 16, className = '' }) {
         </svg>
     )
 }
+
+export function IconHash({ size = 16, className = '' }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            className={className}
+            aria-hidden='true'
+        >
+            <path
+                fillRule='evenodd'
+                clipRule='evenodd'
+                d='M8.28 2.47a.75.75 0 0 1 .59.88L8.38 6h3.99l.56-2.65a.75.75 0 1 1 1.46.3L13.9 6h2.35a.75.75 0 0 1 0 1.5h-2.67l-.84 4h2.51a.75.75 0 0 1 0 1.5h-2.83l-.56 2.65a.75.75 0 1 1-1.46-.3l.49-2.35H6.9l-.56 2.65a.75.75 0 1 1-1.46-.3l.49-2.35H3a.75.75 0 0 1 0-1.5h2.69l.84-4H3.75a.75.75 0 0 1 0-1.5h3.1l.56-2.65a.75.75 0 0 1 .87-.58M8.06 7.5l-.84 4h3.99l.84-4z'
+            />
+        </svg>
+    )
+}
+
+export function IconApps({ size = 16, className = '' }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            className={className}
+            aria-hidden='true'
+        >
+            <path d='M3.5 3.5h5v5h-5zm8 0h5v5h-5zm-8 8h5v5h-5zm8 0h5v5h-5z' />
+        </svg>
+    )
+}

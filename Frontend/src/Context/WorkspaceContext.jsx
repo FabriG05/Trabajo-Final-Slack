@@ -161,6 +161,12 @@ export function WorkspaceProvider({ children, workspaceId }) {
     // Throttles the "mark as read" request for the open conversation.
     const lastReadMarkRef = useRef({ key: null, at: 0 })
 
+    // In-app navigation history (back/forward in top bar).
+    const navHistoryRef = useRef([])
+    const navHistoryIndexRef = useRef(-1)
+    const isHistoryNavRef = useRef(false)
+    const [navHistoryState, setNavHistoryState] = useState({ index: -1, length: 0, entries: [] })
+
     // Global search input
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -443,6 +449,91 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const currentTypingUsers = currentConversationKey
         ? Object.values(typingByConversation[String(currentConversationKey)] || {})
         : []
+
+    useEffect(() => {
+        const state = {
+            navTab: activeNavTab,
+            channelId: activeChannelId ? String(activeChannelId) : null,
+            dmId: activeDmId ? String(activeDmId) : null
+        }
+
+        if (isHistoryNavRef.current) {
+            isHistoryNavRef.current = false
+            return
+        }
+
+        const current = navHistoryRef.current[navHistoryIndexRef.current]
+        if (
+            current
+            && current.navTab === state.navTab
+            && current.channelId === state.channelId
+            && current.dmId === state.dmId
+        ) {
+            return
+        }
+
+        navHistoryRef.current = navHistoryRef.current.slice(0, navHistoryIndexRef.current + 1)
+        navHistoryRef.current.push(state)
+        navHistoryIndexRef.current = navHistoryRef.current.length - 1
+        setNavHistoryState({
+            index: navHistoryIndexRef.current,
+            length: navHistoryRef.current.length,
+            entries: [...navHistoryRef.current]
+        })
+    }, [activeNavTab, activeChannelId, activeDmId])
+
+    function applyNavHistoryState(state) {
+        if (!state) {
+            return
+        }
+
+        isHistoryNavRef.current = true
+        setActiveNavTab(state.navTab || 'home')
+        setActiveChannelId(state.channelId || null)
+        setActiveDmId(state.dmId || null)
+    }
+
+    function goBack() {
+        if (navHistoryIndexRef.current <= 0) {
+            return
+        }
+
+        navHistoryIndexRef.current -= 1
+        setNavHistoryState({
+            index: navHistoryIndexRef.current,
+            length: navHistoryRef.current.length,
+            entries: [...navHistoryRef.current]
+        })
+        applyNavHistoryState(navHistoryRef.current[navHistoryIndexRef.current])
+    }
+
+    function goForward() {
+        if (navHistoryIndexRef.current >= navHistoryRef.current.length - 1) {
+            return
+        }
+
+        navHistoryIndexRef.current += 1
+        setNavHistoryState({
+            index: navHistoryIndexRef.current,
+            length: navHistoryRef.current.length,
+            entries: [...navHistoryRef.current]
+        })
+        applyNavHistoryState(navHistoryRef.current[navHistoryIndexRef.current])
+    }
+
+    function goToHistoryIndex(index) {
+        if (index < 0 || index >= navHistoryRef.current.length || index === navHistoryIndexRef.current) {
+            return
+        }
+
+        navHistoryIndexRef.current = index
+        setNavHistoryState({
+            index: navHistoryIndexRef.current,
+            length: navHistoryRef.current.length,
+            entries: [...navHistoryRef.current]
+        })
+        applyNavHistoryState(navHistoryRef.current[navHistoryIndexRef.current])
+    }
 
     /*
         Adds a message only if its id is not already stored. Both the REST
@@ -1006,7 +1097,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
             return
         }
 
-        setActiveNavTab('home')
+        setActiveNavTab((current) => (current === 'dms' ? 'dms' : 'home'))
 
         if (dmId === activeDmId) {
             return
@@ -1017,6 +1108,13 @@ export function WorkspaceProvider({ children, workspaceId }) {
         persistReadState(String(dmId), 'direct')
         setLoadingMessages(true)
         setActiveDmId(dmId)
+    }
+
+    function openDmsTab() {
+        stopTyping()
+        setActiveDmId(null)
+        setActiveChannelId(null)
+        setActiveNavTab('dms')
     }
 
     async function setUserStatus(status) {
@@ -1290,6 +1388,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         directMessages,
         activeDm,
         selectDm,
+        openDmsTab,
         apps,
         starredMessages,
         loadingStarred,
@@ -1307,6 +1406,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         removeWorkspaceMember,
         changeWorkspaceMemberRole,
         workspaceMembers,
+        activeMembers,
         refreshMembers,
         currentUserRole,
         canManageChannels,
@@ -1321,7 +1421,13 @@ export function WorkspaceProvider({ children, workspaceId }) {
         setUserStatus,
         changeProfilePhoto,
         searchQuery,
-        setSearchQuery
+        setSearchQuery,
+        canGoBack: navHistoryState.index > 0,
+        canGoForward: navHistoryState.index < navHistoryState.length - 1,
+        goBack,
+        goForward,
+        goToHistoryIndex,
+        navHistory: navHistoryState
     }
 
     return (
