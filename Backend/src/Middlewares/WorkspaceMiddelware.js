@@ -26,7 +26,6 @@ function workspaceMiddleware(validRoles = []) {
         }
 
         const membership = await memberRepository.getMembershipByUserAndWorkspace(request.user.id, workspace_id)
-        console.log('[WorkspaceMiddleware]:', membership, workspace_id, request.user)
 
         if (!membership) {
             throw new ServerError(

@@ -50,6 +50,13 @@ app.use('/api/auth', auth_router)
 app.use('/api/user', user_router)
 app.use('/api/workspace', workspaceRouter)
 
+app.use((request, response) => {
+    return response.status(404).send({
+        ok: false,
+        message: 'Route not found.'
+    })
+})
+
 app.use(errorMiddleware)
 
 /*

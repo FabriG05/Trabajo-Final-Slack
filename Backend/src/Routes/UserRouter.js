@@ -6,6 +6,7 @@ const user_router = express.Router()
 
 user_router.get(
     '/',
+    authMiddleware,
     getUsers
 )
 
@@ -18,6 +19,7 @@ user_router.get(
 
 user_router.get(
     '/:user_id',
+    authMiddleware,
     getUserById
 )
 

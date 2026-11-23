@@ -8,14 +8,14 @@ function authMiddleware(request, response, next) {
         const authHeader = request.headers.authorization
 
         if (!authHeader) {
-            throw new ServerError("Auth header is required.", 400)
+            throw new ServerError("Auth header is required.", 401)
         }
 
         const authParts = authHeader.split(" ") // "Bearer tokenValue" --> Here there are two parts. I need the second one, on the right.
         const authToken = authParts[1] // tokenValue
 
         if (!authToken || authParts[0] !== "Bearer") {
-            throw new ServerError("Auth token is required or malformed.", 400)
+            throw new ServerError("Auth token is required or malformed.", 401)
         }
 
         const { id, name, email } = jwt.verify(authToken, ENVIRONMENT.JWT_SECRET_KEY) // Verifies the signature to see if they match.

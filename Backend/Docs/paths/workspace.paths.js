@@ -62,25 +62,19 @@ const memberOnlyResponses = {
 
 /* Auth responses reused by every protected endpoint. */
 const authResponses = {
-    '400': {
-        description: 'Authorization header missing or malformed (AuthMiddleware).',
+    '401': {
+        description: 'Missing, malformed or invalid JWT (AuthMiddleware).',
         content: {
             'application/json': {
                 schema: { $ref: '#/components/schemas/ErrorResponse' },
                 examples: {
-                    AuthHeaderMissing: {
-                        summary: 'No Authorization header',
-                        value: { ok: false, message: 'Auth header is required.' }
-                    },
-                    AuthHeaderMalformed: {
-                        summary: 'The header is not "Bearer <token>"',
-                        value: { ok: false, message: 'Auth token is required or malformed.' }
-                    }
+                    AuthHeaderMissing: { value: { ok: false, message: 'Auth header is required.' } },
+                    AuthHeaderMalformed: { value: { ok: false, message: 'Auth token is required or malformed.' } },
+                    InvalidToken: { value: { ok: false, message: 'Auth token is invalid.' } }
                 }
             }
         }
     },
-    '401': { ...commonResponses.Unauthorized },
     '500': { $ref: '#/components/responses/InternalServerError' }
 }
 
@@ -134,21 +128,11 @@ export default {
                     }
                 },
                 '400': {
-                    description:
-                        'Authorization header missing / malformed, or Mongoose validation failure ' +
-                        'on `name` / `description` (ErrorMiddleware).',
+                    description: 'Mongoose validation failure on `name` / `description` (ErrorMiddleware).',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },
                             examples: {
-                                AuthHeaderMissing: {
-                                    summary: 'No Authorization header',
-                                    value: { ok: false, message: 'Auth header is required.' }
-                                },
-                                AuthHeaderMalformed: {
-                                    summary: 'The header is not "Bearer <token>"',
-                                    value: { ok: false, message: 'Auth token is required or malformed.' }
-                                },
                                 ValidationError: {
                                     summary: 'Schema validation (missing name, too long, wrong type...)',
                                     value: { ok: false, message: 'Workspace validation failed: name: Path `name` is required.' }
@@ -212,17 +196,11 @@ export default {
                     }
                 },
                 '400': {
-                    description:
-                        'Authorization header missing / malformed, or Mongoose validation failure ' +
-                        'on the update (ErrorMiddleware).',
+                    description: 'Mongoose validation failure on the update (ErrorMiddleware).',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },
                             examples: {
-                                AuthHeaderMissing: {
-                                    summary: 'No Authorization header',
-                                    value: { ok: false, message: 'Auth header is required.' }
-                                },
                                 ValidationError: {
                                     summary: 'Schema validation (empty name, too long, wrong type...)',
                                     value: { ok: false, message: 'Workspace validation failed: name: Path `name` is required.' }
@@ -439,16 +417,11 @@ export default {
                     }
                 },
                 '400': {
-                    description:
-                        'Authorization header missing / malformed, or invalid body (WorkspaceService / ErrorMiddleware).',
+                    description: 'Invalid body (WorkspaceService / ErrorMiddleware).',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },
                             examples: {
-                                AuthHeaderMissing: {
-                                    summary: 'No Authorization header',
-                                    value: { ok: false, message: 'Auth header is required.' }
-                                },
                                 NotArray: {
                                     summary: '`emails` is not an array',
                                     value: { ok: false, message: 'Emails must be an array.' }
@@ -472,28 +445,4 @@ export default {
         }
     },
 
-    '/api/workspace/{workspace_id}/channels': {
-        get: {
-            tags: ['Workspaces'],
-            operationId: 'getWorkspaceChannels',
-            summary: 'List the channels of a workspace',
-            description:
-                'Placeholder route: it currently answers with a fixed confirmation message and no channel data. ' +
-                '**Note:** this endpoint is not yet protected by AuthMiddleware or WorkspaceMiddleware; ' +
-                'any request reaches it without authentication or membership checks.',
-            parameters: [workspaceIdParam],
-            responses: {
-                '200': {
-                    description: 'Current stub answer.',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/SuccessMessage' },
-                            example: { ok: true, message: 'Channel' }
-                        }
-                    }
-                },
-                '500': { $ref: '#/components/responses/InternalServerError' }
-            }
-        }
-    }
 }

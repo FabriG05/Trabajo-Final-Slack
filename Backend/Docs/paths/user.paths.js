@@ -1,6 +1,5 @@
 /*
-    Paths of /api/user. `GET /` and `GET /{user_id}` are public;
-    `PUT /profile` and `PUT /status` require a bearer token.
+    Paths of /api/user. All endpoints require a bearer token.
 */
 
 import { commonResponses } from '../schemas/common.schemas.js'
@@ -12,14 +11,64 @@ export default {
             operationId: 'getUsers',
             summary: 'List all users',
             description:
-                'Returns every user in the database. Public endpoint: it does not require a token. ' +
+                'Returns every active user in the database. Requires authentication. ' +
                 'The bcrypt password hash is stripped from every user.',
+            security: [{ bearerAuth: [] }],
             responses: {
                 '200': {
-                    description: 'Full list of users (possibly empty).',
+                    description: 'Full list of active users (possibly empty).',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/UserListResponse' }
+                        }
+                    }
+                },
+                '401': {
+                    description: 'Missing, malformed or invalid JWT (AuthMiddleware).',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ErrorResponse' },
+                            examples: {
+                                AuthHeaderMissing: { value: { ok: false, message: 'Auth header is required.' } },
+                                AuthHeaderMalformed: { value: { ok: false, message: 'Auth token is required or malformed.' } },
+                                Unauthorized: { value: { ok: false, message: 'Auth token is invalid.' } }
+                            }
+                        }
+                    }
+                },
+                '500': { $ref: '#/components/responses/InternalServerError' }
+            }
+        }
+    },
+
+    '/api/user/me': {
+        get: {
+            tags: ['Users'],
+            operationId: 'getCurrentUser',
+            summary: 'Get the authenticated user',
+            description: 'Returns the profile of the user identified by the bearer token.',
+            security: [{ bearerAuth: [] }],
+            responses: {
+                '200': {
+                    description: 'Current user profile.',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/UserResponse' },
+                            example: {
+                                ok: true,
+                                message: 'Current user retrieved successfully',
+                                data: { user: { _id: '674f1c9e2b8d3a0011223344', name: 'Fabri', email: 'someone@test.com' } }
+                            }
+                        }
+                    }
+                },
+                '401': { $ref: '#/components/responses/Unauthorized' },
+                '404': {
+                    description: 'The token user no longer exists.',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ErrorResponse' },
+                            example: { ok: false, message: 'User not found' }
                         }
                     }
                 },
@@ -33,7 +82,8 @@ export default {
             tags: ['Users'],
             operationId: 'getUserById',
             summary: 'Get a user by id',
-            description: 'Public endpoint: it does not require a token.',
+            description: 'Requires authentication.',
+            security: [{ bearerAuth: [] }],
             parameters: [
                 {
                     name: 'user_id',
@@ -53,6 +103,16 @@ export default {
                         }
                     }
                 },
+                '400': {
+                    description: 'Invalid id format.',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ErrorResponse' },
+                            example: { ok: false, message: 'Invalid id format.' }
+                        }
+                    }
+                },
+                '401': { $ref: '#/components/responses/Unauthorized' },
                 '404': {
                     description: 'No user with that id (UserService).',
                     content: {
@@ -62,12 +122,7 @@ export default {
                         }
                     }
                 },
-                '500': {
-                    description:
-                        'Unexpected failure; also returned when `user_id` is not a valid ObjectId ' +
-                        '(Mongoose CastError reaches the ErrorMiddleware without a status).',
-                    ...commonResponses.InternalServerError
-                }
+                '500': { $ref: '#/components/responses/InternalServerError' }
             }
         }
     },
@@ -105,36 +160,18 @@ export default {
                     }
                 },
                 '400': {
-                    description:
-                        'Validation failure, from the service or from AuthMiddleware / ErrorMiddleware.',
+                    description: 'Validation failure.',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },
                             examples: {
-                                AuthHeaderMissing: {
-                                    summary: 'No Authorization header (AuthMiddleware)',
-                                    value: { ok: false, message: 'Auth header is required.' }
-                                },
-                                AuthHeaderMalformed: {
-                                    summary: 'The header is not "Bearer <token>" (AuthMiddleware)',
-                                    value: { ok: false, message: 'Auth token is required or malformed.' }
-                                },
-                                EmptyName: {
-                                    summary: 'The new name is empty after trimming',
-                                    value: { ok: false, message: 'Name cannot be empty.' }
-                                },
-                                InvalidPhoto: {
-                                    summary: 'The photo is neither a base64 string nor null',
-                                    value: { ok: false, message: 'Profile photo must be a base64 string.' }
-                                }
+                                EmptyName: { value: { ok: false, message: 'Name cannot be empty.' } },
+                                InvalidPhoto: { value: { ok: false, message: 'Profile photo must be a base64 string.' } }
                             }
                         }
                     }
                 },
-                '401': {
-                    description: 'The JWT is invalid or expired (AuthMiddleware).',
-                    ...commonResponses.Unauthorized
-                },
+                '401': { $ref: '#/components/responses/Unauthorized' },
                 '404': {
                     description: 'The token user no longer exists (UserService).',
                     content: {
@@ -163,9 +200,7 @@ export default {
             tags: ['Users'],
             operationId: 'updateUserStatus',
             summary: 'Set the status of the logged-in user',
-            description:
-                'Sets the presence status of the authenticated user: online, away or offline. ' +
-                'Requires authentication; only the user can change their own status.',
+            description: 'Sets the presence status of the authenticated user. Requires authentication.',
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
@@ -180,38 +215,20 @@ export default {
                     description: 'Status updated.',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/UserResponse' },
-                            example: {
-                                message: 'Status updated successfully',
-                                ok: true,
-                                data: { user: { _id: '674f1c9e2b8d3a0011223344' } }
-                            }
+                            schema: { $ref: '#/components/schemas/UserResponse' }
                         }
                     }
                 },
                 '400': {
-                    description:
-                        'Validation failure, from the service or from AuthMiddleware / ErrorMiddleware.',
+                    description: 'Invalid status value.',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },
-                            examples: {
-                                AuthHeaderMissing: {
-                                    summary: 'No Authorization header (AuthMiddleware)',
-                                    value: { ok: false, message: 'Auth header is required.' }
-                                },
-                                InvalidStatus: {
-                                    summary: 'The status is not one of online, away, offline or do not disturb (UserService).',
-                                    value: { ok: false, message: 'Status must be online, away, offline or do not disturb.' }
-                                }
-                            }
+                            example: { ok: false, message: 'Status must be online, away, offline or do not disturb.' }
                         }
                     }
                 },
-                '401': {
-                    description: 'The JWT is invalid or expired (AuthMiddleware).',
-                    ...commonResponses.Unauthorized
-                },
+                '401': { $ref: '#/components/responses/Unauthorized' },
                 '404': {
                     description: 'The token user no longer exists (UserService).',
                     content: {

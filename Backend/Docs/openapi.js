@@ -1,6 +1,8 @@
 import authPaths from './paths/auth.paths.js'
 import userPaths from './paths/user.paths.js'
 import workspacePaths from './paths/workspace.paths.js'
+import channelPaths from './paths/channel.paths.js'
+import messagePaths from './paths/message.paths.js'
 import { bearerAuth, ErrorResponse, SuccessMessage, commonResponses } from './schemas/common.schemas.js'
 import {
     User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody,
@@ -13,6 +15,8 @@ import {
     UpdateWorkspaceResponse, DeleteWorkspaceResponse,
     MembersResponse, DeleteMemberResponse, InvitationSummaryResponse
 } from './schemas/workspace.schemas.js'
+import channelSchemas from './schemas/channel.schemas.js'
+import messageSchemas from './schemas/message.schemas.js'
 
 const openapiSpec = {
     openapi: '3.0.3',
@@ -39,7 +43,9 @@ const openapiSpec = {
     tags: [
         { name: 'Auth', description: 'Registration, login, email verification and password reset.' },
         { name: 'Users', description: 'User listing and profile management.' },
-        { name: 'Workspaces', description: 'Workspaces, members, invitations and channels.' }
+        { name: 'Workspaces', description: 'Workspaces, members and invitations.' },
+        { name: 'Channels', description: 'Workspace channels.' },
+        { name: 'Messages', description: 'Channel messages, DMs, unread/read state and activity.' }
     ],
 
     components: {
@@ -75,7 +81,9 @@ const openapiSpec = {
             DeleteWorkspaceResponse,
             MembersResponse,
             DeleteMemberResponse,
-            InvitationSummaryResponse
+            InvitationSummaryResponse,
+            ...channelSchemas,
+            ...messageSchemas
         },
         responses: commonResponses
     },
@@ -83,7 +91,9 @@ const openapiSpec = {
     paths: {
         ...authPaths,
         ...userPaths,
-        ...workspacePaths
+        ...workspacePaths,
+        ...channelPaths,
+        ...messagePaths
     }
 }
 

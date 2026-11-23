@@ -115,8 +115,9 @@ class AuthService {
         }
 
         const passwordHash = await generateHash(password, 12);
+        let createdUser
         try {
-            await user_repository.create(
+            createdUser = await user_repository.create(
                 normalizedUsername,
                 normalizedEmail,
                 passwordHash
@@ -130,7 +131,16 @@ class AuthService {
 
         // The token is signed with the normalized email, which is the one
         // actually stored in the database, so verifyEmail can find the user.
-        await sendVerificationEmail(normalizedEmail)
+        try {
+            await sendVerificationEmail(normalizedEmail)
+        } catch (error) {
+            try {
+                await user_repository.deleteById(createdUser._id)
+            } catch (rollbackError) {
+                console.error('Register rollback failed after email error:', rollbackError.message)
+            }
+            throw new ServerError("We couldn't send the verification email. Please try again.", 503)
+        }
     }
 
     async login(email, password) {
@@ -160,8 +170,8 @@ class AuthService {
         const user = await user_repository.getByEmail(normalizedEmail); //Looks the user up by email to make sure it exists.
         if (!user) {
             throw new ServerError(
-                "User not found",
-                404
+                "Invalid email or password",
+                401
             );
         }
 
