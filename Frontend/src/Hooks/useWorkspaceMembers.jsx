@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import useRequest from './useRequest'
 import { getWorkspaceMembers } from '../Services/WorkSpaceService'
 
@@ -10,18 +10,17 @@ import { getWorkspaceMembers } from '../Services/WorkSpaceService'
 function useWorkspaceMembers(workspaceId) {
     const { response, error, loading, sendRequest } = useRequest()
 
-    useEffect(
-        () => {
-            if (!workspaceId) {
-                return
-            }
+    const refreshMembers = useCallback(() => {
+        if (!workspaceId) {
+            return Promise.resolve()
+        }
 
-            sendRequest(
-                () => getWorkspaceMembers(workspaceId)
-            )
-        },
-        [sendRequest, workspaceId]
-    )
+        return sendRequest(() => getWorkspaceMembers(workspaceId))
+    }, [sendRequest, workspaceId])
+
+    useEffect(() => {
+        refreshMembers()
+    }, [refreshMembers])
 
     const members = response?.data?.members || []
 
@@ -31,9 +30,11 @@ function useWorkspaceMembers(workspaceId) {
     })
 
     return {
+        members,
         activeMembers,
         members_error: error,
-        members_loading: loading
+        members_loading: loading,
+        refreshMembers
     }
 }
 

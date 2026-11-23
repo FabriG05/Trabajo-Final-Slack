@@ -111,13 +111,35 @@ export async function getWorkspaceMembers(request, response) {
 export async function deleteWorkspaceMember(request, response) {
     const { member_id } = request.params;
 
-    const deletedMember = await workspace_service.deleteWorkspaceMember(member_id);
+    const deletedMember = await workspace_service.deleteWorkspaceMember(
+        request.workspace._id,
+        member_id
+    );
 
     return response.status(200).send({
         ok: true,
         message: "Member deleted successfully.",
         data: {
             deletedMember
+        }
+    });
+}
+
+export async function updateWorkspaceMemberRole(request, response) {
+    const { member_id } = request.params;
+    const { role } = request.body;
+
+    const updatedMember = await workspace_service.updateWorkspaceMemberRole(
+        request.workspace._id,
+        member_id,
+        role
+    );
+
+    return response.status(200).send({
+        ok: true,
+        message: "Member role updated successfully.",
+        data: {
+            updatedMember
         }
     });
 }

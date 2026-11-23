@@ -7,6 +7,9 @@ import {
     deleteChannel as deleteChannelRequest,
     deleteMessage as deleteMessageRequest,
     deleteWorkspace as deleteWorkspaceRequest,
+    updateWorkspace as updateWorkspaceRequest,
+    deleteWorkspaceMember as deleteWorkspaceMemberRequest,
+    updateMemberRole as updateMemberRoleRequest,
     getChannelMessages,
     sendChannelMessage,
     getDirectMessages,
@@ -47,12 +50,22 @@ function mapMessage(message) {
     const createdAt = message.created_at ? new Date(message.created_at) : new Date()
     const sender = message.sender_id
 
+    const attachment = message.attachment?.data
+        ? {
+            data: message.attachment.data,
+            name: message.attachment.name || 'Attachment',
+            mimeType: message.attachment.mimeType || '',
+            size: Number(message.attachment.size || 0)
+        }
+        : null
+
     return {
         id: message._id,
         type: 'user',
         senderId: String(sender?._id ?? message.sender_id ?? ''),
         user: sender?.name || sender?.email || 'Unknown user',
-        text: message.content,
+        text: message.content || '',
+        attachment,
         time: createdAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         createdAt: createdAt.getTime()
     }
@@ -98,7 +111,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const [loadingWorkspace, setLoadingWorkspace] = useState(Boolean(workspaceId))
     const [workspaceError, setWorkspaceError] = useState(null)
 
-    // Left navigation bar selection ('home', 'dms', 'activity', 'files', 'agents', 'admin')
+    // Left navigation bar selection ('home', 'dms', 'activity', 'files', 'admin')
     const [activeNavTab, setActiveNavTab] = useState('home')
 
     // Channels and active selection
@@ -110,7 +123,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     // Direct Messages and active selection
     const [activeDmId, setActiveDmId] = useState(null)
 
-    const { activeMembers } = useWorkspaceMembers(workspaceId)
+    const { members: workspaceMembers, activeMembers, refreshMembers } = useWorkspaceMembers(workspaceId)
 
     // Apps list
     const [apps] = useState(INITIAL_APPS)
@@ -960,10 +973,10 @@ export function WorkspaceProvider({ children, workspaceId }) {
         Sends a message to the active conversation. Returns true when the
         server stored it, so the composer only clears the input on success.
     */
-    async function sendMessage(text) {
-        const content = text?.trim()
+    async function sendMessage(text, attachment = null) {
+        const content = text?.trim() || ''
 
-        if (!content || !workspaceId || !currentConversationKey) {
+        if ((!content && !attachment) || !workspaceId || !currentConversationKey) {
             return false
         }
 
@@ -975,8 +988,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
         try {
             const response = dmId
-                ? await sendDirectMessage(workspaceId, dmId, content)
-                : await sendChannelMessage(workspaceId, channelId, content)
+                ? await sendDirectMessage(workspaceId, dmId, content, attachment)
+                : await sendChannelMessage(workspaceId, channelId, content, attachment)
 
             const createdMessage = response?.data?.message
 
@@ -1054,6 +1067,46 @@ export function WorkspaceProvider({ children, workspaceId }) {
         navigate('/home', { replace: true })
     }
 
+    /* Renames the workspace (Owner/Admin). */
+    async function renameWorkspace(name) {
+        const trimmedName = name?.trim()
+
+        if (!workspaceId || !trimmedName) {
+            throw new Error('Workspace name is required.')
+        }
+
+        const response = await updateWorkspaceRequest(workspaceId, trimmedName)
+        const updatedWorkspace = response?.data?.updatedWorkspace
+
+        setWorkspace((previous) => ({
+            ...(previous || {}),
+            ...(updatedWorkspace || {}),
+            name: updatedWorkspace?.name || trimmedName
+        }))
+
+        return updatedWorkspace
+    }
+
+    /* Removes a member from the workspace (Owner/Admin). */
+    async function removeWorkspaceMember(memberId) {
+        if (!workspaceId || !memberId) {
+            throw new Error('Member not found.')
+        }
+
+        await deleteWorkspaceMemberRequest(workspaceId, memberId)
+        await refreshMembers()
+    }
+
+    /* Changes a member role between User/Admin (Owner/Admin). */
+    async function changeWorkspaceMemberRole(memberId, role) {
+        if (!workspaceId || !memberId) {
+            throw new Error('Member not found.')
+        }
+
+        await updateMemberRoleRequest(workspaceId, memberId, role)
+        await refreshMembers()
+    }
+
     /*
         Creates a channel in the workspace. Returns true when the server
         stored it, so the sidebar can keep the form open on error.
@@ -1118,6 +1171,11 @@ export function WorkspaceProvider({ children, workspaceId }) {
         deleteMessage,
         deleteChannel,
         deleteWorkspace,
+        renameWorkspace,
+        removeWorkspaceMember,
+        changeWorkspaceMemberRole,
+        workspaceMembers,
+        refreshMembers,
         currentUserRole,
         canManageChannels,
         canDeleteAnyMessage,

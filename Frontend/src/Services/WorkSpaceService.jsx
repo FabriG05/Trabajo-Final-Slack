@@ -323,6 +323,88 @@ export async function deleteWorkspace(workspaceId) {
     return responseBody
 }
 
+/* Renames the workspace (Owner/Admin). */
+export async function updateWorkspace(workspaceId, name) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ name })
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Removes a member from the workspace (Owner/Admin). */
+export async function deleteWorkspaceMember(workspaceId, memberId) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/members/${memberId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+/* Changes a member role (Owner/Admin). */
+export async function updateMemberRole(workspaceId, memberId, role) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/members/${memberId}/role`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ role })
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
 /* Messages of a channel, oldest first. */
 export async function getChannelMessages(workspaceId, channelId) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
@@ -349,7 +431,7 @@ export async function getChannelMessages(workspaceId, channelId) {
     return responseBody
 }
 
-export async function sendChannelMessage(workspaceId, channelId, content) {
+export async function sendChannelMessage(workspaceId, channelId, content, attachment = null) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
     const responseHttp = await fetch(
         API_URL + `/api/workspace/${workspaceId}/channels/${channelId}/messages`,
@@ -360,7 +442,8 @@ export async function sendChannelMessage(workspaceId, channelId, content) {
                 'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
-                content: content
+                content: content,
+                attachment
             })
         }
     )
@@ -510,7 +593,7 @@ export async function getDirectMessages(workspaceId, userId) {
     return responseBody
 }
 
-export async function sendDirectMessage(workspaceId, userId, content) {
+export async function sendDirectMessage(workspaceId, userId, content, attachment = null) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
     const responseHttp = await fetch(
         API_URL + `/api/workspace/${workspaceId}/direct-messages/${userId}`,
@@ -521,7 +604,8 @@ export async function sendDirectMessage(workspaceId, userId, content) {
                 'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
-                content: content
+                content: content,
+                attachment
             })
         }
     )

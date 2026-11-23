@@ -2,14 +2,15 @@ import mongoose from "mongoose";
 import Message from "../Models/MessageModel.js";
 
 class MessageRepository {
-    async createChannelMessage(workspaceId, channelId, senderId, content) {
+    async createChannelMessage(workspaceId, channelId, senderId, content, attachment = null) {
         try {
             const message = await Message.create({
                 workspace_id: workspaceId,
                 channel_id: channelId,
                 sender_id: senderId,
                 message_type: 'channel',
-                content
+                content,
+                attachment
             });
             // The response is rendered directly by the client, so the sender
             // goes populated with the same shape as the message list.
@@ -20,14 +21,15 @@ class MessageRepository {
         }
     }
 
-    async createDirectMessage(workspaceId, senderId, receiverId, content) {
+    async createDirectMessage(workspaceId, senderId, receiverId, content, attachment = null) {
         try {
             const message = await Message.create({
                 workspace_id: workspaceId,
                 sender_id: senderId,
                 receiver_id: receiverId,
                 message_type: 'direct',
-                content
+                content,
+                attachment
             });
             await message.populate('sender_id', 'name email');
             await message.populate('receiver_id', 'name email');

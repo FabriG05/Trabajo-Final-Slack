@@ -7,6 +7,7 @@ import {
     updateWorkspace,
     getWorkspaceMembers,
     deleteWorkspaceMember,
+    updateWorkspaceMemberRole,
     joinWorkspace,
     createInvitations
 } from '../Controllers/WorkspaceControllers.js'
@@ -64,6 +65,13 @@ workspaceRouter.delete(
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin']),
     deleteWorkspaceMember
+)
+
+workspaceRouter.put(
+    "/:workspace_id/members/:member_id/role",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin']),
+    updateWorkspaceMemberRole
 )
 
 /*

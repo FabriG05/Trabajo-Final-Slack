@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import ConfirmDialog from '../../Common/JSX/ConfirmDialog'
+import InvitePeopleDialog from './InvitePeopleDialog'
+import NewMessageDialog from './NewMessageDialog'
 import {
     IconSettingsSliders,
     IconCompose,
@@ -58,6 +60,8 @@ function WorkspaceSidebar() {
     const [channelToDelete, setChannelToDelete] = useState(null)
     const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
     const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useState(false)
+    const [isInviteOpen, setIsInviteOpen] = useState(false)
+    const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
     const [collapsedSections, setCollapsedSections] = useState({
         starred: false,
         channels: false,
@@ -158,6 +162,7 @@ function WorkspaceSidebar() {
                         className='workspace-sidebar__icon-btn'
                         title='New message'
                         aria-label='New message'
+                        onClick={() => setIsNewMessageOpen(true)}
                     >
                         <IconCompose size={15} />
                     </button>
@@ -393,6 +398,7 @@ function WorkspaceSidebar() {
                             <button
                                 type='button'
                                 className='workspace-sidebar__add-btn'
+                                onClick={() => setIsInviteOpen(true)}
                             >
                                 + Invite people
                             </button>
@@ -499,6 +505,9 @@ function WorkspaceSidebar() {
                     }}
                 />
             )}
+
+            {isInviteOpen && <InvitePeopleDialog onClose={() => setIsInviteOpen(false)} />}
+            {isNewMessageOpen && <NewMessageDialog onClose={() => setIsNewMessageOpen(false)} />}
         </aside>
     )
 }

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import useWorkspaceMemberCount from '../../../Hooks/useWorkspaceMemberCount'
 import { formatDayLabel, getDayKey } from '../../../Utils/formatDate'
+import { readFileAsAttachment, formatFileSize } from '../../../Utils/fileAttachment'
 import {
     IconStar,
     IconMembers,
@@ -59,6 +60,9 @@ function ChatArea() {
     const [activeTab, setActiveTab] = useState('messages')
     const [deletingMessageId, setDeletingMessageId] = useState(null)
     const [collapsedDays, setCollapsedDays] = useState({})
+    const [selectedAttachment, setSelectedAttachment] = useState(null)
+    const [attachmentError, setAttachmentError] = useState(null)
+    const fileInputRef = useRef(null)
 
     // Auto-scroll state: the feed sticks to the bottom unless the user
     // scrolled up to read older messages.
@@ -91,6 +95,8 @@ function ChatArea() {
             setShowJumpToLatest(false)
             setDeletingMessageId(null)
             setCollapsedDays({})
+            setSelectedAttachment(null)
+            setAttachmentError(null)
             scrollToBottom('auto')
         })
 
@@ -186,15 +192,17 @@ function ChatArea() {
     }
 
     async function handleSend() {
-        if (!composerText.trim() || !isConversationOpen) {
+        if ((!composerText.trim() && !selectedAttachment) || !isConversationOpen) {
             return
         }
 
         // The input is only cleared once the server stored the message.
-        const sent = await sendMessage(composerText)
+        const sent = await sendMessage(composerText, selectedAttachment)
 
         if (sent) {
             setComposerText('')
+            setSelectedAttachment(null)
+            setAttachmentError(null)
         }
     }
 
@@ -210,6 +218,27 @@ function ChatArea() {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             handleSend()
+        }
+    }
+
+    function handleAttachmentButtonClick() {
+        fileInputRef.current?.click()
+    }
+
+    async function handleFileChange(event) {
+        const file = event.target.files?.[0]
+        event.target.value = ''
+
+        if (!file) {
+            return
+        }
+
+        try {
+            const attachment = await readFileAsAttachment(file)
+            setSelectedAttachment(attachment)
+            setAttachmentError(null)
+        } catch (error) {
+            setAttachmentError(error.message || 'Could not attach the file.')
         }
     }
 
@@ -390,7 +419,38 @@ function ChatArea() {
                                         <span className='chat-message__author'>{msg.user}</span>
                                         <span className='chat-message__time'>{msg.time}</span>
                                     </div>
-                                    <p className='chat-message__content'>{msg.text}</p>
+                                    {msg.text && <p className='chat-message__content'>{msg.text}</p>}
+                                    {msg.attachment && (
+                                        msg.attachment.mimeType?.startsWith('image/') ? (
+                                            <a
+                                                className='chat-message__attachment chat-message__attachment--image'
+                                                href={msg.attachment.data}
+                                                download={msg.attachment.name}
+                                                target='_blank'
+                                                rel='noreferrer'
+                                            >
+                                                <img
+                                                    className='chat-message__attachment-image'
+                                                    src={msg.attachment.data}
+                                                    alt={msg.attachment.name || 'Image attachment'}
+                                                />
+                                            </a>
+                                        ) : (
+                                            <a
+                                                className='chat-message__attachment chat-message__attachment--file'
+                                                href={msg.attachment.data}
+                                                download={msg.attachment.name}
+                                                target='_blank'
+                                                rel='noreferrer'
+                                            >
+                                                <span className='chat-message__attachment-file-icon'><IconFiles size={18} /></span>
+                                                <span className='chat-message__attachment-file-info'>
+                                                    <span className='chat-message__attachment-file-name'>{msg.attachment.name || 'Attachment'}</span>
+                                                    <span className='chat-message__attachment-file-meta'>PDF{msg.attachment.size ? ` · ${formatFileSize(msg.attachment.size)}` : ''}</span>
+                                                </span>
+                                            </a>
+                                        )
+                                    )}
                                 </div>
                                 {canDeleteMessage(msg) && (
                                     <button
@@ -484,10 +544,58 @@ function ChatArea() {
                         disabled={!isConversationOpen}
                     />
 
+                    {selectedAttachment && (
+                        <div className='chat-composer__attachment' aria-label='Selected attachment'>
+                            {selectedAttachment.mimeType.startsWith('image/') ? (
+                                <img className='chat-composer__attachment-image' src={selectedAttachment.data} alt={selectedAttachment.name} />
+                            ) : (
+                                <div className='chat-composer__attachment-file'>
+                                    <IconFiles size={16} />
+                                    <span>PDF</span>
+                                </div>
+                            )}
+                            <div className='chat-composer__attachment-info'>
+                                <span className='chat-composer__attachment-name'>{selectedAttachment.name}</span>
+                                <span className='chat-composer__attachment-size'>{formatFileSize(selectedAttachment.size)}</span>
+                            </div>
+                            <button
+                                type='button'
+                                className='chat-composer__attachment-remove'
+                                onClick={() => setSelectedAttachment(null)}
+                                aria-label='Remove attachment'
+                                title='Remove attachment'
+                            >
+                                ×
+                            </button>
+                        </div>
+                    )}
+
+                    {attachmentError && (
+                        <p className='chat-composer__attachment-error' role='alert'>{attachmentError}</p>
+                    )}
+
                     {/* Action utilities & Send button */}
                     <div className='chat-composer__footer'>
                         <div className='chat-composer__actions-left'>
-                            <button type='button' className='chat-composer__action-btn' title='Add attachment'>+</button>
+                            <button
+                                type='button'
+                                className='chat-composer__action-btn'
+                                title='Add attachment'
+                                aria-label='Add attachment'
+                                onClick={handleAttachmentButtonClick}
+                                disabled={!isConversationOpen}
+                            >
+                                +
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type='file'
+                                accept='image/*,application/pdf,.pdf'
+                                className='chat-composer__file-input'
+                                onChange={handleFileChange}
+                                tabIndex={-1}
+                                aria-hidden='true'
+                            />
                             <button type='button' className='chat-composer__action-btn' title='Format'>Aa</button>
                             <button type='button' className='chat-composer__action-btn' title='Emoji'>☺</button>
                             <button type='button' className='chat-composer__action-btn' title='Mention'>@</button>
@@ -498,9 +606,9 @@ function ChatArea() {
                         <div className='chat-composer__actions-right'>
                             <button
                                 type='button'
-                                className={`chat-composer__send-btn${composerText.trim() && isConversationOpen ? ' chat-composer__send-btn--active' : ''}`}
+                                className={`chat-composer__send-btn${(composerText.trim() || selectedAttachment) && isConversationOpen ? ' chat-composer__send-btn--active' : ''}`}
                                 onClick={handleSend}
-                                disabled={!composerText.trim() || !isConversationOpen}
+                                disabled={(!composerText.trim() && !selectedAttachment) || !isConversationOpen}
                                 aria-label='Send message'
                             >
                                 <IconSend size={14} />

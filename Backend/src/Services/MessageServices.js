@@ -12,6 +12,15 @@ import ServerError from "../Utils/Error.Utils.js";
 */
 
 const MAX_MESSAGE_LENGTH = 4000
+const MAX_ATTACHMENT_SIZE_BYTES = 2 * 1024 * 1024
+const MAX_ATTACHMENT_DATA_LENGTH = 4 * 1024 * 1024
+const ALLOWED_ATTACHMENT_MIME_TYPES = new Set([
+    'application/pdf',
+    'image/gif',
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+])
 
 class MessageService {
     normalizeContent(content) {
@@ -35,6 +44,83 @@ class MessageService {
         return normalizedContent
     }
 
+    normalizeAttachment(attachment) {
+        if (attachment === undefined || attachment === null) {
+            return null
+        }
+
+        if (typeof attachment !== 'object' || Array.isArray(attachment)) {
+            throw new ServerError("Attachment is invalid.", 400)
+        }
+
+        const name = typeof attachment.name === 'string' ? attachment.name.trim() : ''
+        const mimeType = typeof attachment.mimeType === 'string' ? attachment.mimeType.trim().toLowerCase() : ''
+        const data = typeof attachment.data === 'string' ? attachment.data : ''
+        const size = Number(attachment.size)
+
+        if (!name || !mimeType || !data || !Number.isFinite(size) || size <= 0) {
+            throw new ServerError("Attachment is invalid.", 400)
+        }
+
+        if (!ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType) && !mimeType.startsWith('image/')) {
+            throw new ServerError("Only images and PDF files are allowed.", 400)
+        }
+
+        if (mimeType.startsWith('image/') && !ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType)) {
+            throw new ServerError("Only GIF, JPEG, PNG, WEBP images and PDF files are allowed.", 400)
+        }
+
+        if (size > MAX_ATTACHMENT_SIZE_BYTES) {
+            throw new ServerError("Attachment is too large. Maximum size is 2MB.", 413)
+        }
+
+        if (data.length > MAX_ATTACHMENT_DATA_LENGTH) {
+            throw new ServerError("Attachment is too large.", 413)
+        }
+
+        const expectedPrefix = `data:${mimeType};base64,`
+        if (!data.startsWith(expectedPrefix)) {
+            throw new ServerError("Attachment data is invalid.", 400)
+        }
+
+        return {
+            data,
+            name: name.slice(0, 255),
+            mimeType,
+            size: Math.round(size)
+        }
+    }
+
+    normalizeMessagePayload(content, attachment) {
+        const normalizedAttachment = this.normalizeAttachment(attachment)
+        const hasAttachment = Boolean(normalizedAttachment)
+
+        if (typeof content !== 'string') {
+            if (hasAttachment) {
+                return { content: '', attachment: normalizedAttachment }
+            }
+            throw new ServerError("Message content is required.", 400)
+        }
+
+        const normalizedContent = content.trim()
+
+        if (!normalizedContent && !hasAttachment) {
+            throw new ServerError("Message content or attachment is required.", 400)
+        }
+
+        if (normalizedContent.length > MAX_MESSAGE_LENGTH) {
+            throw new ServerError(
+                `Message content cannot be longer than ${MAX_MESSAGE_LENGTH} characters.`,
+                400
+            )
+        }
+
+        return {
+            content: normalizedContent,
+            attachment: normalizedAttachment
+        }
+    }
+
     async getChannelMessages(workspaceId, channelId) {
         // Throws 404 when the channel does not belong to this workspace.
         await channelService.getChannelById(workspaceId, channelId)
@@ -42,15 +128,18 @@ class MessageService {
         return await messageRepository.getByChannelId(channelId)
     }
 
-    async createChannelMessage(workspaceId, channelId, senderId, content) {
+    async createChannelMessage(workspaceId, channelId, senderId, content, attachment) {
         // Throws 404 when the channel does not belong to this workspace.
         await channelService.getChannelById(workspaceId, channelId)
+
+        const normalizedMessage = this.normalizeMessagePayload(content, attachment)
 
         return await messageRepository.createChannelMessage(
             workspaceId,
             channelId,
             senderId,
-            this.normalizeContent(content)
+            normalizedMessage.content,
+            normalizedMessage.attachment
         )
     }
 
@@ -72,14 +161,17 @@ class MessageService {
         return await messageRepository.getDirectMessages(workspaceId, userId, otherUserId)
     }
 
-    async createDirectMessage(workspaceId, senderId, otherUserId, content) {
+    async createDirectMessage(workspaceId, senderId, otherUserId, content, attachment) {
         await this.validateDirectMessageTarget(workspaceId, otherUserId)
+
+        const normalizedMessage = this.normalizeMessagePayload(content, attachment)
 
         return await messageRepository.createDirectMessage(
             workspaceId,
             senderId,
             otherUserId,
-            this.normalizeContent(content)
+            normalizedMessage.content,
+            normalizedMessage.attachment
         )
     }
 

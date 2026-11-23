@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import { compressPhoto } from '../../../Utils/compressPhoto'
+import WorkspaceAdminMenu from './WorkspaceAdminMenu'
+import CreateMoreMenu from './CreateMoreMenu'
 import {
     IconHome,
     IconDMs,
     IconActivity,
     IconFiles,
-    IconAgents,
     IconAdmin,
     IconMoon,
     IconUser
@@ -23,7 +24,7 @@ const STATUS_OPTIONS = [
 /*
     WorkspaceNav: slim vertical left navigation bar (approx 65px wide).
     Displays the active workspace icon, primary section shortcuts
-    (Home, DMs, Activity, Files, Agents, Admin), and bottom utilities
+    (Home, DMs, Activity, Files, Admin), and bottom utilities
     (Add, Theme toggle, User Profile).
 */
 const NAV_ITEMS = [
@@ -31,15 +32,16 @@ const NAV_ITEMS = [
     { id: 'dms', label: 'DMs', Icon: IconDMs },
     { id: 'activity', label: 'Activity', Icon: IconActivity },
     { id: 'files', label: 'Files', Icon: IconFiles },
-    { id: 'agents', label: 'Agents & tools', Icon: IconAgents },
     { id: 'divider', isDivider: true },
     { id: 'admin', label: 'Admin', Icon: IconAdmin, badge: true }
 ]
 
 function WorkspaceNav() {
-    const { activeNavTab, setActiveNavTab, workspace, currentUser, userStatus, setUserStatus, changeProfilePhoto } = useWorkspace()
+    const { activeNavTab, setActiveNavTab, workspace, currentUser, currentUserRole, userStatus, setUserStatus, changeProfilePhoto } = useWorkspace()
 
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
+    const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false)
+    const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
     const photoInputRef = useRef(null)
     const [photoError, setPhotoError] = useState(null)
     const [statusError, setStatusError] = useState(null)
@@ -109,20 +111,30 @@ function WorkspaceNav() {
 
             {/* Navigation links */}
             <ul className='workspace-nav__list'>
-                {NAV_ITEMS.map((item) => {
+                {NAV_ITEMS.filter((item) => item.id !== 'admin' || ['Owner', 'Admin'].includes(currentUserRole)).map((item) => {
                     if (item.isDivider) {
                         return <li key={item.id} className='workspace-nav__divider' />
                     }
 
-                    const isActive = activeNavTab === item.id
+                    const isActive = item.id === 'admin' ? isAdminMenuOpen : activeNavTab === item.id
                     const IconComponent = item.Icon
 
                     return (
-                        <li key={item.id} className='workspace-nav__item'>
+                        <li key={item.id} className='workspace-nav__item workspace-nav__item--relative'>
                             <button
                                 type='button'
                                 className={`workspace-nav__btn${isActive ? ' workspace-nav__btn--active' : ''}`}
-                                onClick={() => setActiveNavTab(item.id)}
+                                onClick={() => {
+                                    if (item.id === 'admin') {
+                                        setIsCreateMenuOpen(false)
+                                        setIsStatusMenuOpen(false)
+                                        setIsAdminMenuOpen((open) => !open)
+                                        return
+                                    }
+
+                                    setIsAdminMenuOpen(false)
+                                    setActiveNavTab(item.id)
+                                }}
                                 aria-label={item.label}
                                 title={item.label}
                             >
@@ -132,6 +144,9 @@ function WorkspaceNav() {
                                 </span>
                                 <span className='workspace-nav__label'>{item.label}</span>
                             </button>
+                            {item.id === 'admin' && isAdminMenuOpen && (
+                                <WorkspaceAdminMenu onClose={() => setIsAdminMenuOpen(false)} />
+                            )}
                         </li>
                     )
                 })}
@@ -139,14 +154,24 @@ function WorkspaceNav() {
 
             {/* Bottom utility icons */}
             <div className='workspace-nav__bottom'>
-                <button
-                    type='button'
-                    className='workspace-nav__util-btn'
-                    aria-label='Add more'
-                    title='Add'
-                >
-                    +
-                </button>
+                <div className='workspace-nav__create-more-wrapper'>
+                    <button
+                        type='button'
+                        className={`workspace-nav__util-btn${isCreateMenuOpen ? ' workspace-nav__util-btn--active' : ''}`}
+                        aria-label='Create more'
+                        title='Create more'
+                        onClick={() => {
+                            setIsAdminMenuOpen(false)
+                            setIsStatusMenuOpen(false)
+                            setIsCreateMenuOpen((open) => !open)
+                        }}
+                    >
+                        +
+                    </button>
+                    {isCreateMenuOpen && (
+                        <CreateMoreMenu onClose={() => setIsCreateMenuOpen(false)} />
+                    )}
+                </div>
                 <button
                     type='button'
                     className='workspace-nav__util-btn'

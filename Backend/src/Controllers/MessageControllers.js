@@ -29,13 +29,14 @@ export async function getChannelMessages(request, response) {
 
 export async function createChannelMessage(request, response) {
     const { channel_id } = request.params;
-    const { content } = request.body;
+    const { content, attachment } = request.body;
 
     const message = await message_service.createChannelMessage(
         request.workspace._id,
         channel_id,
         request.user.id,
-        content
+        content,
+        attachment
     );
 
     // Notify the rest of the workspace in real time.
@@ -172,13 +173,14 @@ export async function deleteMessage(request, response) {
 
 export async function createDirectMessage(request, response) {
     const { user_id } = request.params;
-    const { content } = request.body;
+    const { content, attachment } = request.body;
 
     const message = await message_service.createDirectMessage(
         request.workspace._id,
         request.user.id,
         user_id,
-        content
+        content,
+        attachment
     );
 
     // Notify both participants in real time.

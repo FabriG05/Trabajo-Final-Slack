@@ -274,3 +274,18 @@
 .workspace-nav__status-dot[data-status='do not disturb'] {
     background: #e05252;
 }
+
+.workspace-nav__item--relative,
+.workspace-nav__create-more-wrapper {
+    position: relative;
+}
+
+.workspace-nav__create-more-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.workspace-nav__util-btn--active {
+    background: #7d3986;
+}

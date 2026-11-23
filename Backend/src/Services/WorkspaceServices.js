@@ -221,15 +221,55 @@ class WorkspaceService {
     }
 
     async updateWorkspace(workspaceId, name, description) {
-        return workspaceRepository.updateById(workspaceId, { name, description });
+        const updateData = {}
+
+        if (name !== undefined) {
+            updateData.name = name
+        }
+
+        if (description !== undefined) {
+            updateData.description = description
+        }
+
+        return workspaceRepository.updateById(workspaceId, updateData);
     }
 
     async getWorkspaceMembers(workspaceId) {
         return memberRepository.getByWorkspaceId(workspaceId);
     }
 
-    async deleteWorkspaceMember(memberId) {
+    async deleteWorkspaceMember(workspaceId, memberId) {
+        const member = await memberRepository.getById(memberId)
+
+        if (!member || String(member.FK_id_workspace) !== String(workspaceId)) {
+            throw new ServerError("Member not found in this workspace.", 404)
+        }
+
+        if (member.role === 'Owner') {
+            throw new ServerError("The workspace owner cannot be removed.", 403)
+        }
+
         return memberRepository.deleteById(memberId);
+    }
+
+    async updateWorkspaceMemberRole(workspaceId, memberId, role) {
+        const allowedRoles = ['User', 'Admin']
+
+        if (!allowedRoles.includes(role)) {
+            throw new ServerError("Role must be User or Admin.", 400)
+        }
+
+        const member = await memberRepository.getById(memberId)
+
+        if (!member || String(member.FK_id_workspace) !== String(workspaceId)) {
+            throw new ServerError("Member not found in this workspace.", 404)
+        }
+
+        if (member.role === 'Owner') {
+            throw new ServerError("The workspace owner's role cannot be changed.", 403)
+        }
+
+        return memberRepository.updateRoleById(memberId, role)
     }
 
     async createInvitations(workspaceId, inviterName, emails) {

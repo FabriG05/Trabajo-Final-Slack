@@ -1,0 +1,118 @@
+.create-more-menu {
+    position: absolute;
+    left: calc(100% + 8px);
+    bottom: 80px;
+    min-width: 220px;
+    background: #302034;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    padding: 8px;
+    z-index: 30;
+}
+
+.create-more-menu__title {
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.create-more-menu__item {
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.create-more-menu__item:hover {
+    background: #422e48;
+    color: #fff;
+}
+
+.create-more-menu__people {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    max-height: 320px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.create-more-menu__person {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    cursor: pointer;
+    text-align: left;
+}
+
+.create-more-menu__person:hover {
+    background: #422e48;
+}
+
+.create-more-menu__person-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #7d3986;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.create-more-menu__person-name {
+    font-size: 14px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.create-more-menu__empty {
+    padding: 10px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+}
+
+.create-more-menu__invite-result {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.create-more-menu__invite-result p {
+    margin: 0 0 4px;
+}
+
+.create-more-menu__invite-result p:last-child {
+    margin-bottom: 0;
+}
+
+.workspace-admin-dialog__textarea {
+    resize: vertical;
+    min-height: 96px;
+    font-family: inherit;
+}

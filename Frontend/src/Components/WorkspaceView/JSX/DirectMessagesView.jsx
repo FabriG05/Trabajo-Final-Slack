@@ -3,6 +3,8 @@ import { useWorkspace } from '../../../Context/WorkspaceContext'
 import { getDirectMessageSummaries } from '../../../Services/WorkSpaceService'
 import { getSocket } from '../../../Services/SocketService'
 import { formatConversationTimestamp } from '../../../Utils/formatDate'
+import InvitePeopleDialog from './InvitePeopleDialog'
+import NewMessageDialog from './NewMessageDialog'
 import {
     IconCompose,
     IconChevronDown,
@@ -40,6 +42,8 @@ function DirectMessagesView() {
     const [loadingSummaries, setLoadingSummaries] = useState(true)
     const [summariesError, setSummariesError] = useState(null)
     const [refreshToken, setRefreshToken] = useState(0)
+    const [isInviteOpen, setIsInviteOpen] = useState(false)
+    const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)
 
     useEffect(() => {
         if (!workspaceId) {
@@ -215,6 +219,7 @@ function DirectMessagesView() {
                         className='dms-view__icon-btn'
                         title='New message'
                         aria-label='New message'
+                        onClick={() => setIsNewMessageOpen(true)}
                     >
                         <IconCompose size={16} />
                     </button>
@@ -243,7 +248,7 @@ function DirectMessagesView() {
                 <p className='dms-view__banner-text'>
                     Anyone missing? Add your whole team and get the conversation started.
                 </p>
-                <button type='button' className='dms-view__banner-btn'>
+                <button type='button' className='dms-view__banner-btn' onClick={() => setIsInviteOpen(true)}>
                     Add colleagues
                 </button>
             </div>
@@ -325,6 +330,9 @@ function DirectMessagesView() {
                     })}
                 </ul>
             </div>
+
+            {isInviteOpen && <InvitePeopleDialog onClose={() => setIsInviteOpen(false)} />}
+            {isNewMessageOpen && <NewMessageDialog onClose={() => setIsNewMessageOpen(false)} />}
         </main>
     )
 }

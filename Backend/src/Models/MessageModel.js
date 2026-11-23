@@ -33,8 +33,14 @@ const messageSchema = new mongoose.Schema(
         },
         content: { 
             type: String, 
-            required: true, 
+            default: '',
             trim: true 
+        },
+        attachment: {
+            data: { type: String, default: null },
+            name: { type: String, default: null },
+            mimeType: { type: String, default: null },
+            size: { type: Number, default: null }
         },
         edited: { 
             type: Boolean, 
@@ -46,6 +52,15 @@ const messageSchema = new mongoose.Schema(
         }
     }
 )
+
+messageSchema.pre('validate', function () {
+    const hasContent = typeof this.content === 'string' && this.content.trim().length > 0
+    const hasAttachment = Boolean(this.attachment?.data && this.attachment?.name && this.attachment?.mimeType)
+
+    if (!hasContent && !hasAttachment) {
+        this.invalidate('content', 'Message content or attachment is required.')
+    }
+})
 
 messageSchema.index({ channel_id: 1, created_at: 1 })
 messageSchema.index({ workspace_id: 1, message_type: 1, created_at: 1 })

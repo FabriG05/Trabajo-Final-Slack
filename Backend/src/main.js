@@ -36,7 +36,7 @@ app.use((request, response, next) => {
     next();
 });
 
-app.use(express.json()) // Configure our API so the body can be JSON. This is called a middleware.
+app.use(express.json({ limit: '6mb' })) // Configure our API so the body can be JSON. Limit raised for small file attachments.
 // Every time a request arrives, the middleware checks the request header['Content-Type']
 
 app.use(loggerMiddleware) // Logs every request (ip, url, endpoint, method, status, user id, duration) to MongoDB. The body is never logged.
