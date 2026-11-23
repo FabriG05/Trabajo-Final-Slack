@@ -67,6 +67,7 @@ function mapMessage(message) {
         id: message._id,
         type: 'user',
         senderId: String(sender?._id ?? message.sender_id ?? ''),
+        senderPhoto: sender?.profile_photo || sender?.profilePhoto || null,
         user: sender?.name || sender?.email || 'Unknown user',
         text: message.content || '',
         attachment,

@@ -9,7 +9,7 @@ class StarredMessageRepository {
                 populate: [
                     { path: 'sender_id', select: 'name email profile_photo' },
                     { path: 'channel_id', select: 'name' },
-                    { path: 'receiver_id', select: 'name email' }
+                    { path: 'receiver_id', select: 'name email profile_photo' }
                 ]
             })
             .sort({ created_at: -1 });

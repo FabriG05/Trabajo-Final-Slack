@@ -14,7 +14,7 @@ class MessageRepository {
             });
             // The response is rendered directly by the client, so the sender
             // goes populated with the same shape as the message list.
-            return await message.populate('sender_id', 'name email');
+            return await message.populate('sender_id', 'name email profile_photo');
         } catch (error) {
             console.error('Error in MessageRepository.createChannelMessage:', error.message);
             throw error;
@@ -31,8 +31,8 @@ class MessageRepository {
                 content,
                 attachment
             });
-            await message.populate('sender_id', 'name email');
-            await message.populate('receiver_id', 'name email');
+            await message.populate('sender_id', 'name email profile_photo');
+            await message.populate('receiver_id', 'name email profile_photo');
             return message;
         } catch (error) {
             console.error('Error in MessageRepository.createDirectMessage:', error.message);
@@ -65,8 +65,8 @@ class MessageRepository {
                 { content, edited: true },
                 { new: true, runValidators: true }
             )
-                .populate('sender_id', 'name email')
-                .populate('receiver_id', 'name email');
+                .populate('sender_id', 'name email profile_photo')
+                .populate('receiver_id', 'name email profile_photo');
         } catch (error) {
             console.error('Error in MessageRepository.updateContentById:', error.message);
             throw error;
@@ -77,7 +77,7 @@ class MessageRepository {
         try {
             const messages = await Message
                 .find({ channel_id: channelId, message_type: 'channel' })
-                .populate('sender_id', 'name email')
+                .populate('sender_id', 'name email profile_photo')
                 .sort({ created_at: 1 });
             return messages;
         } catch (error) {
@@ -214,8 +214,8 @@ class MessageRepository {
                         { sender_id: user2Id, receiver_id: user1Id }
                     ]
                 })
-                .populate('sender_id', 'name email')
-                .populate('receiver_id', 'name email')
+                .populate('sender_id', 'name email profile_photo')
+                .populate('receiver_id', 'name email profile_photo')
                 .sort({ created_at: 1 });
             return messages;
         } catch (error) {

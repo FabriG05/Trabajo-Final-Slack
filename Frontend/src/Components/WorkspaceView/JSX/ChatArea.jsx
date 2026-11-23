@@ -446,15 +446,20 @@ function ChatArea() {
                         ) : (
                             <div key={msg.id} className='chat-message chat-message--user'>
                                 <div className='chat-message__avatar'>
-                                    {String(msg.senderId) === String(currentUser.id) && currentUser.photo ? (
-                                        <img
-                                            className='chat-message__avatar-image'
-                                            src={currentUser.photo}
-                                            alt=''
-                                        />
-                                    ) : (
-                                        msg.user.slice(0, 2).toUpperCase()
-                                    )}
+                                    {(() => {
+                                        const photo = String(msg.senderId) === String(currentUser.id)
+                                            ? (currentUser.photo || msg.senderPhoto)
+                                            : msg.senderPhoto
+                                        return photo ? (
+                                            <img
+                                                className='chat-message__avatar-image'
+                                                src={photo}
+                                                alt=''
+                                            />
+                                        ) : (
+                                            msg.user.slice(0, 2).toUpperCase()
+                                        )
+                                    })()}
                                 </div>
                                 <div className='chat-message__body'>
                                     <div className='chat-message__meta'>
