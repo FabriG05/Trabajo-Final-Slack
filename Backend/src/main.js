@@ -1,34 +1,40 @@
-import connectMongoDB from "./Config/mongo.config.js";
-import express, { request, response } from 'express'
-import swaggerUi from 'swagger-ui-express';
-import openapiSpec from '../Docs/openapi.js';
-import auth_router from "./Routes/AuthRouter.js";
-import user_router from "./Routes/UserRouter.js"
-import workspaceRouter from "./Routes/WorkspaceRouter.js";
-import errorMiddleware from "./Middlewares/ErrorMiddleware.js";
-import authMiddleware from "./Middlewares/AuthMiddleware.js";
-import loggerMiddleware from "./Middlewares/LoggerMiddleware.js";
-import blacklistMiddleware from "./Middlewares/BlacklistMiddleware.js";
-import whitelistMiddleware, { isOriginWhitelisted } from "./Middlewares/WhitelistMiddleware.js";
-import { generalApiRateLimiter } from "./Middlewares/RateLimitMiddleware.js";
-import mailer_transporter from "./Config/Mailer.config.js";
-import ENVIRONMENT from "./Config/Environment.config.js";
-import user_repository from "./Repositories/UserRepository.js";
-import ServerError from "./Utils/Error.Utils.js";
-import { verifyEmail } from "./Controllers/AuthControllers.js";
-import { initSocketServer } from "./Realtime/SocketServer.js";
+import express from 'express'
+import swaggerUi from 'swagger-ui-express'
 
+// Config & Database
+import connectMongoDB from './Config/mongo.config.js'
+import ENVIRONMENT from './Config/Environment.config.js'
+import openapiSpec from '../Docs/openapi.js'
 
+// Middlewares
+import errorMiddleware from './Middlewares/ErrorMiddleware.js'
+import loggerMiddleware from './Middlewares/LoggerMiddleware.js'
+import blacklistMiddleware from './Middlewares/BlacklistMiddleware.js'
+import whitelistMiddleware, { isOriginWhitelisted } from './Middlewares/WhitelistMiddleware.js'
+import { generalApiRateLimiter } from './Middlewares/RateLimitMiddleware.js'
+
+// Routes
+import auth_router from './Routes/AuthRouter.js'
+import user_router from './Routes/UserRouter.js'
+import workspaceRouter from './Routes/WorkspaceRouter.js'
+
+// Realtime (Socket.IO)
+import { initSocketServer } from './Realtime/SocketServer.js'
+
+// Database connection
 connectMongoDB()
 
-/* To build an HTTP server with NODE.js we'll use a library called express.js (another option for TS could be nest.js) */
+const app = express()
+const PORT = process.env.PORT || 8080
 
-const PORT = process.env.PORT || 8080 // Vercel/Render/Railway inject the port; local development falls back to 8080.
-const app = express() // With this we create an express app (HTTP server).
+// Trust the reverse proxy (Vercel / Render / Cloudflare) to retrieve the client's real IP
+app.set('trust proxy', 1)
 
-app.set('trust proxy', 1) // Trust the first proxy (Vercel) so request.ip returns the real client IP.
+// ==========================================
+// Global Middlewares
+// ==========================================
 
-// Middleware to enable CORS (Cross-Origin Resource Sharing)
+// 1. CORS (Cross-Origin Resource Sharing)
 app.use((request, response, next) => {
     const requestOrigin = request.headers.origin
     const originWhitelistActive = ENVIRONMENT.WHITELIST_ENABLED && Array.isArray(ENVIRONMENT.WHITELIST_ORIGINS) && ENVIRONMENT.WHITELIST_ORIGINS.length > 0
@@ -42,8 +48,9 @@ app.use((request, response, next) => {
         response.setHeader('Access-Control-Allow-Origin', '*')
     }
 
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+
     if (request.method === 'OPTIONS') {
         if (originWhitelistActive && requestOrigin && !isOriginWhitelisted(requestOrigin)) {
             return response.status(403).send({
@@ -51,28 +58,35 @@ app.use((request, response, next) => {
                 message: 'Access denied: origin is not whitelisted.'
             })
         }
-        return response.sendStatus(200);
+        return response.sendStatus(200)
     }
-    next();
-});
+    next()
+})
 
-app.use(express.json({ limit: '6mb' })) // Configure our API so the body can be JSON. Limit raised for small file attachments.
-// Every time a request arrives, the middleware checks the request header['Content-Type']
+// 2. Body parser (6MB limit to support small attachments and avatar uploads)
+app.use(express.json({ limit: '6mb' }))
 
+// 3. Security, access control lists, rate limiting, and request logging
 app.use(blacklistMiddleware)
 app.use(whitelistMiddleware)
 app.use('/api', generalApiRateLimiter)
-app.use(loggerMiddleware) // Logs every request (ip, url, endpoint, method, status, user id, duration) to MongoDB. The body is never logged.
+app.use(loggerMiddleware)
 
-/* Swagger UI: interactive documentation of every endpoint, served from the OpenAPI spec in ../Docs */
+// ==========================================
+// Swagger / OpenAPI Documentation
+// ==========================================
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpec))
 
-
-/* All requests that arrive at /api/auth will be handled by auth_router */
+// ==========================================
+// REST API Routes
+// ==========================================
 app.use('/api/auth', auth_router)
 app.use('/api/user', user_router)
 app.use('/api/workspace', workspaceRouter)
 
+// ==========================================
+// 404 Handler & Centralized Error Middleware
+// ==========================================
 app.use((request, response) => {
     return response.status(404).send({
         ok: false,
@@ -82,16 +96,14 @@ app.use((request, response) => {
 
 app.use(errorMiddleware)
 
-/*
-    Socket.IO shares the HTTP server with Express. On environments that do
-    not support persistent connections (for example Vercel serverless),
-    initSocketServer is a no-op and the REST API keeps working.
-*/
-const httpServer = app.listen(
-    PORT, // If this listen method succeeds, it runs this callback function.
-    () => {
-        console.log(`El servidor se está escuchando correctamente en http://localhost:${PORT}`)
-    }
-)
+// ==========================================
+// HTTP Server & Socket.IO Initialization
+// ==========================================
+const httpServer = app.listen(PORT, () => {
+    console.log(`Server listening on http://localhost:${PORT}`)
+})
 
+// Socket.IO shares the HTTP server (operates as a safe no-op in serverless environments)
 initSocketServer(httpServer)
+
+export default app
