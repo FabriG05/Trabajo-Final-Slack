@@ -22,6 +22,17 @@ El servidor escucha en el puerto **8080** (`src/main.js`).
 | `GMAIL_USER` / `GMAIL_PASSWORD` | Credenciales SMTP para el envío de emails (Nodemailer) |
 | `URL_BACKEND` | URL base para armar links de verificación/reset |
 | `URL_FRONTEND` | URL del frontend incluida en los emails |
+| `WHITELIST_ENABLED` | Enables the whitelist middleware (`true`/`false`, default `false`) |
+| `WHITELIST_IPS` | Comma-separated IP allowlist (enforced only when whitelist is enabled and non-empty) |
+| `WHITELIST_ORIGINS` | Comma-separated Origin allowlist (enforced only when whitelist is enabled and non-empty; requests without `Origin` are allowed) |
+| `WHITELIST_IDENTIFIERS` | Comma-separated user identifier allowlist (`id` or `email`, enforced after authentication) |
+| `BLACKLIST_IPS` | Comma-separated IP denylist (returns `403`) |
+| `BLACKLIST_IDENTIFIERS` | Comma-separated user identifier denylist (`id` or `email`, returns `403`) |
+| `BLACKLIST_TOKENS` | Comma-separated revoked JWT denylist (returns `401`) |
+| `RATE_LIMIT_WINDOW_MS` | General API rate limit window in milliseconds (default `900000`, 15 minutes) |
+| `RATE_LIMIT_MAX` | Maximum requests per IP per general window (default `100`) |
+| `AUTH_RATE_LIMIT_WINDOW_MS` | Sensitive auth rate limit window in milliseconds (default `900000`, 15 minutes) |
+| `AUTH_RATE_LIMIT_MAX` | Maximum requests per IP per auth window for sensitive endpoints (default `10`) |
 
 > El proyecto incluye `vercel.json`, por lo que también puede desplegarse en Vercel como función serverless (`src/main.js`).
 
@@ -58,9 +69,14 @@ Todos los endpoints responden con un envelope JSON consistente: `{ ok, message, 
 
 | Middleware | Dónde aplica | Qué hace |
 |---|---|---|
-| **CORS** (inline en `main.js`) | Todos los endpoints | Permite cualquier origen, métodos GET/POST/PUT/DELETE y headers estándar + `Authorization`. Responde `OPTIONS` con 200. |
+| **CORS** (inline en `main.js`) | Todos los endpoints | Permite cualquier origen por defecto. Si `WHITELIST_ENABLED=true` y `WHITELIST_ORIGINS` tiene valores, solo refleja orígenes permitidos y responde `403` en preflight para orígenes no permitidos. Responde `OPTIONS` con 200 en el caso permitido. |
+| **`blacklistMiddleware`** (`BlacklistMiddleware.js`) | Global (antes de rutas) | Bloquea IPs en `BLACKLIST_IPS` con **403**. También expone validación de auth para tokens revocados (`401`) e identificadores de usuario bloqueados (`403`). Si la lista está vacía, no bloquea. |
+| **`whitelistMiddleware`** (`WhitelistMiddleware.js`) | Global (antes de rutas) | Si `WHITELIST_ENABLED=true`, permite solo IPs/orígenes configurados. Si está deshabilitado o las listas están vacías, no bloquea tráfico normal. La whitelist de identificadores se valida después de autenticar. |
+| **`generalApiRateLimiter`** (`RateLimitMiddleware.js`) | Global en `/api` | Limita requests por IP en ventana configurable. Cuando se excede, responde **429** con el envelope estándar `{ ok: false, message }`. |
+| **`authRateLimiter`** (`RateLimitMiddleware.js`) | Rutas sensibles de `/api/auth` | Límite más estricto para register/login/forgot/reset/resend. Cuando se excede, responde **429** con el envelope estándar. |
 | **`express.json()`** | Todos los endpoints | Parsea el body JSON de las peticiones. |
-| **`authMiddleware`** (`AuthMiddleware.js`) | Endpoints protegidos | Lee el header `Authorization: Bearer <token>`, verifica la firma y expiración del JWT y expone `request.user = { id, name, email }`. Devuelve **400** si falta el header/token, **401** si el token es inválido o expiró. |
+| **`loggerMiddleware`** (`LoggerMiddleware.js`) | Global (después de access control) | Registra requests en MongoDB al finalizar la respuesta (sin body). |
+| **`authMiddleware`** (`AuthMiddleware.js`) | Endpoints protegidos | Lee el header `Authorization: Bearer <token>`, verifica la firma y expiración del JWT y expone `request.user = { id, name, email }`. Devuelve **401** si falta/está malformado/inválido/expirado/revocado. Devuelve **403** si el identificador está bloqueado o no está en whitelist de identificadores activa. |
 | **`workspaceMiddleware(validRoles)`** (`WorkspaceMiddelware.js`) | Endpoints de workspace con `:workspace_id` | Valida que el workspace exista (**404**), que el usuario autenticado sea miembro (**403**) y que su rol esté dentro de `validRoles` (**403**). Expone `request.workspace` y `request.membership`. |
 | **`errorMiddleware`** (`ErrorMiddleware.js`) | Global (al final de `main.js`) | Captura errores: usa `error.status` si es un error controlado, mapea `ValidationError` de Mongoose a **400**, y cualquier otro error a **500** genérico. |
 

@@ -8,6 +8,9 @@ import workspaceRouter from "./Routes/WorkspaceRouter.js";
 import errorMiddleware from "./Middlewares/ErrorMiddleware.js";
 import authMiddleware from "./Middlewares/AuthMiddleware.js";
 import loggerMiddleware from "./Middlewares/LoggerMiddleware.js";
+import blacklistMiddleware from "./Middlewares/BlacklistMiddleware.js";
+import whitelistMiddleware, { isOriginWhitelisted } from "./Middlewares/WhitelistMiddleware.js";
+import { generalApiRateLimiter } from "./Middlewares/RateLimitMiddleware.js";
 import mailer_transporter from "./Config/Mailer.config.js";
 import ENVIRONMENT from "./Config/Environment.config.js";
 import user_repository from "./Repositories/UserRepository.js";
@@ -27,10 +30,27 @@ app.set('trust proxy', 1) // Trust the first proxy (Vercel) so request.ip return
 
 // Middleware to enable CORS (Cross-Origin Resource Sharing)
 app.use((request, response, next) => {
-    response.setHeader('Access-Control-Allow-Origin', '*');
+    const requestOrigin = request.headers.origin
+    const originWhitelistActive = ENVIRONMENT.WHITELIST_ENABLED && Array.isArray(ENVIRONMENT.WHITELIST_ORIGINS) && ENVIRONMENT.WHITELIST_ORIGINS.length > 0
+
+    if (originWhitelistActive) {
+        if (requestOrigin && isOriginWhitelisted(requestOrigin)) {
+            response.setHeader('Access-Control-Allow-Origin', requestOrigin)
+            response.setHeader('Vary', 'Origin')
+        }
+    } else {
+        response.setHeader('Access-Control-Allow-Origin', '*')
+    }
+
     response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     if (request.method === 'OPTIONS') {
+        if (originWhitelistActive && requestOrigin && !isOriginWhitelisted(requestOrigin)) {
+            return response.status(403).send({
+                ok: false,
+                message: 'Access denied: origin is not whitelisted.'
+            })
+        }
         return response.sendStatus(200);
     }
     next();
@@ -39,6 +59,9 @@ app.use((request, response, next) => {
 app.use(express.json({ limit: '6mb' })) // Configure our API so the body can be JSON. Limit raised for small file attachments.
 // Every time a request arrives, the middleware checks the request header['Content-Type']
 
+app.use(blacklistMiddleware)
+app.use(whitelistMiddleware)
+app.use('/api', generalApiRateLimiter)
 app.use(loggerMiddleware) // Logs every request (ip, url, endpoint, method, status, user id, duration) to MongoDB. The body is never logged.
 
 /* Swagger UI: interactive documentation of every endpoint, served from the OpenAPI spec in ../Docs */

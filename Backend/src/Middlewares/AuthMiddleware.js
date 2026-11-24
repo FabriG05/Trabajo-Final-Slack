@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken"
 import ENVIRONMENT from "../Config/Environment.config.js"
 import ServerError from "../Utils/Error.Utils.js"
+import { assertNotBlacklistedAuth } from "./BlacklistMiddleware.js"
+import { assertWhitelistedIdentifier } from "./WhitelistMiddleware.js"
 
 function authMiddleware(request, response, next) {
     try {
@@ -24,6 +26,9 @@ function authMiddleware(request, response, next) {
             name: name,
             email: email
         }
+
+        assertNotBlacklistedAuth({ token: authToken, user: request.user })
+        assertWhitelistedIdentifier(request.user)
 
         next() // This moves on to the next middleware / controller.
 
