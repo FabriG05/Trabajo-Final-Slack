@@ -183,13 +183,30 @@ class AuthService {
             );
         }
 
+        if (!user.active) {
+            throw new ServerError(
+                "Your account is inactive. Please contact support.",
+                403
+            );
+        }
+
+        if (!user.verified_email) {
+            throw new ServerError(
+                "Please verify your email before logging in. Check your inbox for the activation link.",
+                403
+            );
+        }
+
         const authToken = jwt.sign(
             { //This is the information to store as the credential.
                 id: user._id,
                 name: user.name,
                 email: user.email
             },
-            ENVIRONMENT.JWT_SECRET_KEY
+            ENVIRONMENT.JWT_SECRET_KEY,
+            {
+                expiresIn: ENVIRONMENT.JWT_EXPIRES_IN || "24h"
+            }
         )
 
         return {

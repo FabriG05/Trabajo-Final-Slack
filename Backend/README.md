@@ -25,6 +25,7 @@ El servidor escucha en `PORT` (por defecto `8080`). Swagger UI está disponible 
 | `MONGO_URI` | Cadena de conexión a MongoDB |
 | `MONGO_DB_NAME` | Nombre de la base de datos |
 | `JWT_SECRET_KEY` | Firma de tokens JWT (auth, verificación, reset) |
+| `JWT_EXPIRES_IN` | Tiempo de expiración del JWT de sesión (opcional, default `24h`) |
 | `PORT` | Puerto del servidor (opcional, default `8080`) |
 | `URL_BACKEND` | URL pública del backend |
 | `URL_FRONTEND` | URL pública del frontend (links en emails) |

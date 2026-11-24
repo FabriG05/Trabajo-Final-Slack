@@ -27,6 +27,7 @@ const ENVIRONMENT = {
     MONGO_URI: process.env.MONGO_URI,
     MONGO_DB_NAME: process.env.MONGO_DB_NAME,
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
     GMAIL_USER: process.env.GMAIL_USER,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
     URL_BACKEND: process.env.URL_BACKEND,
