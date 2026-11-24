@@ -21,7 +21,7 @@ import {
     starMessage as starMessageRequest,
     unstarMessage as unstarMessageRequest
 } from '../Services/WorkSpaceService'
-import { updateUserStatus, updateProfilePhoto, getCurrentUser } from '../Services/ProfileService'
+import { updateUserStatus, updateProfile, updateProfilePhoto, getCurrentUser } from '../Services/ProfileService'
 import { connectSocket, disconnectSocket, getSocket } from '../Services/SocketService'
 import useWorkspaceMembers from '../Hooks/useWorkspaceMembers'
 
@@ -117,7 +117,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const [loadingWorkspace, setLoadingWorkspace] = useState(Boolean(workspaceId))
     const [workspaceError, setWorkspaceError] = useState(null)
 
-    // Left navigation bar selection ('home', 'dms', 'activity', 'files', 'admin')
+    // Left navigation bar selection ('home', 'dms', 'activity', 'admin')
     const [activeNavTab, setActiveNavTab] = useState('home')
 
     // Channels and active selection
@@ -176,6 +176,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         id: null,
         username: '',
         displayName: '',
+        email: '',
         initials: '',
         status: 'online',
         photo: null
@@ -359,6 +360,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
                         id: user._id,
                         username: user.name,
                         displayName: user.name,
+                        email: user.email || '',
                         initials: (user.name || '').slice(0, 2).toUpperCase(),
                         status: user.status || 'online',
                         photo: user.profile_photo || null
@@ -979,6 +981,86 @@ export function WorkspaceProvider({ children, workspaceId }) {
             }
         }
 
+        function handleUserStatusChanged(payload) {
+            const userId = String(payload?.userId || '')
+            const status = payload?.status
+
+            if (!userId || !status) {
+                return
+            }
+
+            if (userId === String(currentUserIdRef.current)) {
+                setCurrentUser((previous) => (
+                    previous.status === status ? previous : { ...previous, status }
+                ))
+            }
+
+            refreshMembers()
+        }
+
+        function handleUserProfileChanged(payload) {
+            const userId = String(payload?.userId || '')
+
+            if (!userId) {
+                return
+            }
+
+            const hasName = typeof payload.name === 'string' && payload.name.trim()
+            const nextName = hasName ? payload.name.trim() : null
+            const nextPhoto = payload.profile_photo ?? null
+
+            if (userId === String(currentUserIdRef.current)) {
+                setCurrentUser((previous) => ({
+                    ...previous,
+                    ...(nextName
+                        ? {
+                            username: nextName,
+                            displayName: nextName,
+                            initials: nextName.slice(0, 2).toUpperCase()
+                        }
+                        : {}),
+                    photo: nextPhoto
+                }))
+            }
+
+            setMessagesByConversation((previous) => {
+                let changed = false
+                const next = {}
+
+                for (const [conversationKey, messages] of Object.entries(previous)) {
+                    let conversationChanged = false
+                    const nextMessages = messages.map((message) => {
+                        if (String(message.senderId) !== userId) {
+                            return message
+                        }
+
+                        const updatedMessage = {
+                            ...message,
+                            ...(nextName ? { user: nextName } : {}),
+                            senderPhoto: nextPhoto
+                        }
+
+                        if (
+                            updatedMessage.user === message.user &&
+                            updatedMessage.senderPhoto === message.senderPhoto
+                        ) {
+                            return message
+                        }
+
+                        conversationChanged = true
+                        changed = true
+                        return updatedMessage
+                    })
+
+                    next[conversationKey] = conversationChanged ? nextMessages : messages
+                }
+
+                return changed ? next : previous
+            })
+
+            refreshMembers()
+        }
+
         socket.on('message:created', handleMessageCreated)
         socket.on('message:updated', handleMessageUpdated)
         socket.on('message:deleted', handleMessageDeleted)
@@ -986,6 +1068,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
         socket.on('channel:deleted', handleChannelDeleted)
         socket.on('workspace:deleted', handleWorkspaceDeleted)
         socket.on('workspace:members-changed', handleMembersChanged)
+        socket.on('user:status-changed', handleUserStatusChanged)
+        socket.on('user:profile-changed', handleUserProfileChanged)
         socket.on('typing:start', handleTypingStart)
         socket.on('typing:stop', handleTypingStop)
 
@@ -998,6 +1082,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
             socket.off('channel:deleted', handleChannelDeleted)
             socket.off('workspace:deleted', handleWorkspaceDeleted)
             socket.off('workspace:members-changed', handleMembersChanged)
+            socket.off('user:status-changed', handleUserStatusChanged)
+            socket.off('user:profile-changed', handleUserProfileChanged)
             socket.off('typing:start', handleTypingStart)
             socket.off('typing:stop', handleTypingStop)
 
@@ -1140,6 +1226,26 @@ export function WorkspaceProvider({ children, workspaceId }) {
     async function changeProfilePhoto(profilePhoto) {
         await updateProfilePhoto(profilePhoto)
         setCurrentUser((prev) => ({ ...prev, photo: profilePhoto }))
+    }
+
+    async function updateProfileName(name) {
+        const trimmedName = typeof name === 'string' ? name.trim() : ''
+
+        if (!trimmedName) {
+            throw new Error('Name cannot be empty.')
+        }
+
+        const response = await updateProfile(trimmedName, undefined)
+        const updatedUser = response?.data?.user
+
+        setCurrentUser((prev) => ({
+            ...prev,
+            username: updatedUser?.name || trimmedName,
+            displayName: updatedUser?.name || trimmedName,
+            initials: (updatedUser?.name || trimmedName).slice(0, 2).toUpperCase()
+        }))
+
+        return updatedUser
     }
 
     /*
@@ -1421,6 +1527,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         userStatus,
         setUserStatus,
         changeProfilePhoto,
+        updateProfileName,
         searchQuery,
         setSearchQuery,
         canGoBack: navHistoryState.index > 0,

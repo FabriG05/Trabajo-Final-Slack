@@ -313,3 +313,44 @@ export function publishWorkspaceMembersChanged(workspaceId) {
 
     io.to(workspaceRoom(workspaceId)).emit("workspace:members-changed", { workspaceId });
 }
+
+/* Publishes a user status change to all workspaces they belong to. */
+export function publishUserStatusChanged(workspaceIds, userId, status) {
+    if (!io || !Array.isArray(workspaceIds) || !userId || !status) {
+        return;
+    }
+
+    const payload = {
+        userId: String(userId),
+        status
+    };
+
+    for (const workspaceId of workspaceIds) {
+        if (!workspaceId) {
+            continue;
+        }
+
+        io.to(workspaceRoom(workspaceId)).emit("user:status-changed", payload);
+    }
+}
+
+/* Publishes a user profile change to all workspaces they belong to. */
+export function publishUserProfileChanged(workspaceIds, userId, profile) {
+    if (!io || !Array.isArray(workspaceIds) || !userId || !profile) {
+        return;
+    }
+
+    const payload = {
+        userId: String(userId),
+        name: profile.name,
+        profile_photo: profile.profile_photo ?? null
+    };
+
+    for (const workspaceId of workspaceIds) {
+        if (!workspaceId) {
+            continue;
+        }
+
+        io.to(workspaceRoom(workspaceId)).emit("user:profile-changed", payload);
+    }
+}

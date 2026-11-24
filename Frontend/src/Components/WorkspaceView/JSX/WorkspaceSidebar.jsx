@@ -180,7 +180,15 @@ function WorkspaceSidebar() {
                                             onClick={() => selectDm(dm.id)}
                                         >
                                             <span className='workspace-sidebar__dm-avatar'>
-                                                <IconUser size={13} />
+                                                {dm.photo ? (
+                                                    <img
+                                                        className='workspace-sidebar__dm-avatar-image'
+                                                        src={dm.photo}
+                                                        alt=''
+                                                    />
+                                                ) : (
+                                                    <IconUser size={13} />
+                                                )}
                                                 {dm.status && (<span className='workspace-sidebar__status-badge' data-status={dm.status} />)}
                                             </span>
                                             <span className='workspace-sidebar__item-name'>
@@ -422,7 +430,15 @@ function WorkspaceSidebar() {
                                                         onClick={() => selectDm(dm.id)}
                                                     >
                                                         <span className='workspace-sidebar__dm-avatar'>
-                                                            <IconUser size={13} />
+                                                            {dm.photo ? (
+                                                                <img
+                                                                    className='workspace-sidebar__dm-avatar-image'
+                                                                    src={dm.photo}
+                                                                    alt=''
+                                                                />
+                                                            ) : (
+                                                                <IconUser size={13} />
+                                                            )}
                                                             {dm.status && (<span className='workspace-sidebar__status-badge' data-status={dm.status} />)}
                                                         </span>
                                                         <span className='workspace-sidebar__item-name'>

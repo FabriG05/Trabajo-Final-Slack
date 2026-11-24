@@ -151,6 +151,13 @@
     background: #302034;
 }
 
+.workspace-nav__profile-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .workspace-nav__profile-btn {
     position: relative;
     background: transparent;
@@ -159,7 +166,8 @@
     padding: 0;
 }
 
-.workspace-nav__profile-avatar {
+.workspace-nav__profile-avatar,
+.workspace-nav__profile-card-avatar {
     position: relative;
     width: 34px;
     height: 34px;
@@ -170,6 +178,7 @@
     justify-content: center;
     font-size: 16px;
     overflow: visible;
+    flex-shrink: 0;
 }
 
 .workspace-nav__profile-photo {
@@ -191,21 +200,86 @@
     border: 2px solid #270629;
 }
 
-/* Status menu (dropdown) in the profile button */
+.workspace-nav__status-dot[data-status='away'],
+.workspace-nav__status-option-dot[data-status='away'] {
+    background: #ecb22e;
+}
+
+.workspace-nav__status-dot[data-status='offline'],
+.workspace-nav__status-option-dot[data-status='offline'] {
+    background: #777;
+}
+
+.workspace-nav__status-dot[data-status='do not disturb'],
+.workspace-nav__status-option-dot[data-status='do not disturb'] {
+    background: #e05252;
+}
+
+.workspace-nav__status-dot[data-status='online'],
+.workspace-nav__status-option-dot[data-status='online'] {
+    background: #2bac76;
+}
+
+/* Profile card */
 .workspace-nav__status-menu {
     position: absolute;
-    bottom: calc(100% + 10px);
-    right: 0;
-    min-width: 220px;
+    left: calc(100% + 10px);
+    bottom: 0;
+    width: 240px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 10px;
+    padding: 12px;
     background: #302034;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    z-index: 20;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    z-index: 30;
+}
+
+.workspace-nav__profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 4px;
+}
+
+.workspace-nav__profile-card-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.workspace-nav__profile-card-name {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workspace-nav__profile-card-status {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.workspace-nav__menu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.workspace-nav__menu-section-title {
+    margin: 0;
+    padding: 0 6px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .workspace-nav__status-list {
@@ -214,45 +288,91 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .workspace-nav__status-option {
     width: 100%;
-    padding: 8px 10px;
+    padding: 7px 8px;
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.88);
     font-size: 13px;
     text-align: left;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.workspace-nav__status-option:hover {
+.workspace-nav__status-option:hover:not(:disabled) {
     background: #422e48;
     color: #ffffff;
 }
 
 .workspace-nav__status-option--active {
-    background: #7d3986;
+    background: rgba(125, 57, 134, 0.35);
     color: #ffffff;
 }
 
-.workspace-nav__status-photo-btn {
+.workspace-nav__status-option:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.workspace-nav__status-option-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.workspace-nav__status-saving {
+    margin-left: auto;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.workspace-nav__menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 2px 0;
+}
+
+.workspace-nav__menu-action {
     width: 100%;
-    padding: 8px 10px;
-    border: 1px dashed rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    border: none;
     border-radius: 6px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.88);
     font-size: 13px;
+    text-align: left;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-.workspace-nav__status-photo-btn:hover {
+.workspace-nav__menu-action:hover:not(:disabled) {
+    background: #422e48;
     color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.workspace-nav__menu-action:disabled {
+    color: rgba(255, 255, 255, 0.45);
+    cursor: default;
+}
+
+.workspace-nav__menu-soon {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.workspace-nav__photo-input {
+    display: none;
 }
 
 .workspace-nav__photo-error {
@@ -260,19 +380,6 @@
     padding: 0 6px;
     color: #e05252;
     font-size: 12px;
-}
-
-.workspace-nav__status-dot[data-status='away'] {
-    background: #ecb22e;
-}
-
-.workspace-nav__status-dot[data-status='offline'] {
-    background: #777;
-    opacity: 0.6;
-}
-
-.workspace-nav__status-dot[data-status='do not disturb'] {
-    background: #e05252;
 }
 
 .workspace-nav__item--relative,

@@ -9,6 +9,7 @@ import ActivityView from '../../../Components/WorkspaceView/JSX/ActivityView'
 import StarredMessagesView from '../../../Components/WorkspaceView/JSX/StarredMessagesView'
 import DmPlaceholderView from '../../../Components/WorkspaceView/JSX/DmPlaceholderView'
 import DirectoryView from '../../../Components/WorkspaceView/JSX/DirectoryView'
+import ProfileView from '../../../Components/WorkspaceView/JSX/ProfileView'
 import '../CSS/WorkspaceScreen.css'
 
 /*
@@ -29,7 +30,8 @@ function WorkspaceScreenContent() {
                 {activeNavTab === 'activity' && <ActivityView />}
                 {activeNavTab === 'starred' && <StarredMessagesView />}
                 {activeNavTab === 'directory' && <DirectoryView />}
-                {!['dms', 'activity', 'starred', 'directory'].includes(activeNavTab) && <ChatArea />}
+                {activeNavTab === 'profile' && <ProfileView />}
+                {!['dms', 'activity', 'starred', 'directory', 'profile'].includes(activeNavTab) && <ChatArea />}
             </div>
         </div>
     )
