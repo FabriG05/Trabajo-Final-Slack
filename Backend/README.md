@@ -1,149 +1,149 @@
-# Backend — Clon de Slack (API REST)
+# Backend — Clon de Slack (API REST + Socket.IO)
 
-API REST construida con **Node.js + Express 5** y **MongoDB (Mongoose)** que implementa el núcleo de una aplicación tipo Slack: autenticación de usuarios con verificación por email, perfiles, workspaces con membresías y roles, sistema de invitaciones y (en progreso) canales.
+API construida con **Node.js + Express 5**, **MongoDB (Mongoose)** y **Socket.IO**. Implementa autenticación, perfiles, workspaces, membresías, invitaciones, canales, mensajes de canal, mensajes directos, estado de lectura, mensajes destacados y actividad.
 
-## 🚀 Cómo ejecutar
+## Requisitos
+
+- Node.js 20+
+- MongoDB (local o Atlas)
+- Cuenta SMTP/Gmail para emails de verificación, reset e invitaciones
+
+## Ejecución
 
 ```bash
 npm install
-npm run dev      # modo desarrollo (node --watch src/main.js)
-npm start        # modo producción
+npm run dev      # desarrollo (node --watch src/main.js)
+npm start        # producción
 ```
 
-El servidor escucha en el puerto **8080** (`src/main.js`).
+El servidor escucha en `PORT` (por defecto `8080`). Swagger UI está disponible en `http://localhost:8080/api-docs`.
 
-### Variables de entorno (`.env`)
+## Variables de entorno (`.env`)
 
 | Variable | Uso |
 |---|---|
 | `MONGO_URI` | Cadena de conexión a MongoDB |
 | `MONGO_DB_NAME` | Nombre de la base de datos |
-| `JWT_SECRET_KEY` | Firma de los tokens JWT (auth y verificación) |
-| `GMAIL_USER` / `GMAIL_PASSWORD` | Credenciales SMTP para el envío de emails (Nodemailer) |
-| `URL_BACKEND` | URL base para armar links de verificación/reset |
-| `URL_FRONTEND` | URL del frontend incluida en los emails |
-| `WHITELIST_ENABLED` | Enables the whitelist middleware (`true`/`false`, default `false`) |
-| `WHITELIST_IPS` | Comma-separated IP allowlist (enforced only when whitelist is enabled and non-empty) |
-| `WHITELIST_ORIGINS` | Comma-separated Origin allowlist (enforced only when whitelist is enabled and non-empty; requests without `Origin` are allowed) |
-| `WHITELIST_IDENTIFIERS` | Comma-separated user identifier allowlist (`id` or `email`, enforced after authentication) |
-| `BLACKLIST_IPS` | Comma-separated IP denylist (returns `403`) |
-| `BLACKLIST_IDENTIFIERS` | Comma-separated user identifier denylist (`id` or `email`, returns `403`) |
-| `BLACKLIST_TOKENS` | Comma-separated revoked JWT denylist (returns `401`) |
-| `RATE_LIMIT_WINDOW_MS` | General API rate limit window in milliseconds (default `900000`, 15 minutes) |
-| `RATE_LIMIT_MAX` | Maximum requests per IP per general window (default `100`) |
-| `AUTH_RATE_LIMIT_WINDOW_MS` | Sensitive auth rate limit window in milliseconds (default `900000`, 15 minutes) |
-| `AUTH_RATE_LIMIT_MAX` | Maximum requests per IP per auth window for sensitive endpoints (default `10`) |
+| `JWT_SECRET_KEY` | Firma de tokens JWT (auth, verificación, reset) |
+| `PORT` | Puerto del servidor (opcional, default `8080`) |
+| `URL_BACKEND` | URL pública del backend |
+| `URL_FRONTEND` | URL pública del frontend (links en emails) |
+| `GMAIL_USER` / `GMAIL_PASSWORD` | Credenciales SMTP (usar App Password de Gmail) |
+| `WHITELIST_ENABLED` | Habilita whitelist (`true`/`false`, default `false`) |
+| `WHITELIST_IPS` | IPs permitidas (coma-separadas) |
+| `WHITELIST_ORIGINS` | Origins permitidos (coma-separados) |
+| `WHITELIST_IDENTIFIERS` | IDs/emails permitidos (coma-separados, post-auth) |
+| `BLACKLIST_IPS` | IPs bloqueadas (403) |
+| `BLACKLIST_IDENTIFIERS` | IDs/emails bloqueados (403) |
+| `BLACKLIST_TOKENS` | JWTs revocados (401) |
+| `RATE_LIMIT_WINDOW_MS` | Ventana rate limit general (ms, default `900000`) |
+| `RATE_LIMIT_MAX` | Máximo requests/IP en ventana general (default `100`) |
+| `AUTH_RATE_LIMIT_WINDOW_MS` | Ventana rate limit auth (ms, default `900000`) |
+| `AUTH_RATE_LIMIT_MAX` | Máximo requests/IP para auth sensible (default `10`) |
 
-> El proyecto incluye `vercel.json`, por lo que también puede desplegarse en Vercel como función serverless (`src/main.js`).
+## Arquitectura
 
-## 🏗️ Alcance y arquitectura
-
-El código sigue una arquitectura en capas:
-
-```
+```text
 src/
-├── main.js                  # Entry point: app Express, CORS, rutas y error middleware global
-├── Routes/                  # Definición de rutas y middlewares por endpoint
-│   ├── AuthRouter.js
-│   ├── UserRouter.js
-│   ├── WorkspaceRouter.js
-│   └── ChannelRouter.js
-├── Controllers/             # Capa HTTP "delgada": leen el request y delegan al service
-├── Services/                # Lógica de negocio (Auth, User, Workspace)
+├── main.js                  # Express app, CORS, middlewares, rutas, Socket.IO
+├── Config/                  # Mongo, Mailer, Environment
+├── Routes/                  # Auth, User, Workspace, Channel
+├── Controllers/             # Capa HTTP delgada
+├── Services/                # Lógica de negocio
 ├── Repositories/            # Acceso a datos (Mongoose)
-├── Models/                  # Esquemas Mongoose: User, WorkSpace, Member, Channel, Message
-├── Middlewares/             # Auth (JWT), autorización por roles, manejo de errores
-├── Config/                  # Mongo, Mailer (Nodemailer), variables de entorno
-└── Utils/                   # ServerError, bcrypt, plantillas de email
+├── Models/                  # User, WorkSpace, Member, Channel, Message, etc.
+├── Middlewares/             # Auth, workspace/roles, blacklist/whitelist, rate limit, errors, logger
+├── Realtime/                # SocketServer (eventos realtime)
+└── Utils/                   # ServerError, bcrypt, templates de email
 ```
 
-**Modelos de datos principales:**
-- **User**: usuarios con `verified` (verificación por email) y tokens de verificación/reset.
-- **WorkSpace**: workspaces con `name` y `description`.
-- **Member**: membresía usuario↔workspace con `role` (`User` | `Admin` | `Owner`), token de invitación, estado y expiración. Índice único por (usuario, workspace).
-- **Channel** / **Message**: definidos, con endpoints aún en construcción.
+Todos los endpoints responden con envelope JSON: `{ ok, message, data? }`. Errores controlados usan `ServerError(message, status)` y son manejados por el error middleware.
 
-Todos los endpoints responden con un envelope JSON consistente: `{ ok, message, data? }`. Los errores lanzados con `ServerError(message, status)` son convertidos a respuestas HTTP por el error middleware.
+## Middlewares globales
 
-## 🔐 Middlewares
+- **CORS**: permite `*` por defecto; si hay whitelist de origins activa, solo refleja origins permitidos.
+- **Blacklist/Whitelist**: bloqueo por IP/origin/token/identificador según configuración.
+- **Rate limit**: general en `/api` y más estricto en rutas sensibles de auth.
+- **Logger**: registra requests en MongoDB (sin body).
+- **Auth (`Authorization: Bearer <token>`)**: valida JWT, token revocado e identificadores bloqueados/whitelist.
+- **Workspace middleware**: valida workspace, membresía y rol requerido.
 
-| Middleware | Dónde aplica | Qué hace |
-|---|---|---|
-| **CORS** (inline en `main.js`) | Todos los endpoints | Permite cualquier origen por defecto. Si `WHITELIST_ENABLED=true` y `WHITELIST_ORIGINS` tiene valores, solo refleja orígenes permitidos y responde `403` en preflight para orígenes no permitidos. Responde `OPTIONS` con 200 en el caso permitido. |
-| **`blacklistMiddleware`** (`BlacklistMiddleware.js`) | Global (antes de rutas) | Bloquea IPs en `BLACKLIST_IPS` con **403**. También expone validación de auth para tokens revocados (`401`) e identificadores de usuario bloqueados (`403`). Si la lista está vacía, no bloquea. |
-| **`whitelistMiddleware`** (`WhitelistMiddleware.js`) | Global (antes de rutas) | Si `WHITELIST_ENABLED=true`, permite solo IPs/orígenes configurados. Si está deshabilitado o las listas están vacías, no bloquea tráfico normal. La whitelist de identificadores se valida después de autenticar. |
-| **`generalApiRateLimiter`** (`RateLimitMiddleware.js`) | Global en `/api` | Limita requests por IP en ventana configurable. Cuando se excede, responde **429** con el envelope estándar `{ ok: false, message }`. |
-| **`authRateLimiter`** (`RateLimitMiddleware.js`) | Rutas sensibles de `/api/auth` | Límite más estricto para register/login/forgot/reset/resend. Cuando se excede, responde **429** con el envelope estándar. |
-| **`express.json()`** | Todos los endpoints | Parsea el body JSON de las peticiones. |
-| **`loggerMiddleware`** (`LoggerMiddleware.js`) | Global (después de access control) | Registra requests en MongoDB al finalizar la respuesta (sin body). |
-| **`authMiddleware`** (`AuthMiddleware.js`) | Endpoints protegidos | Lee el header `Authorization: Bearer <token>`, verifica la firma y expiración del JWT y expone `request.user = { id, name, email }`. Devuelve **401** si falta/está malformado/inválido/expirado/revocado. Devuelve **403** si el identificador está bloqueado o no está en whitelist de identificadores activa. |
-| **`workspaceMiddleware(validRoles)`** (`WorkspaceMiddelware.js`) | Endpoints de workspace con `:workspace_id` | Valida que el workspace exista (**404**), que el usuario autenticado sea miembro (**403**) y que su rol esté dentro de `validRoles` (**403**). Expone `request.workspace` y `request.membership`. |
-| **`errorMiddleware`** (`ErrorMiddleware.js`) | Global (al final de `main.js`) | Captura errores: usa `error.status` si es un error controlado, mapea `ValidationError` de Mongoose a **400**, y cualquier otro error a **500** genérico. |
+## Endpoints REST
 
-## 📡 Rutas y Endpoints
+Prefijo global: `/api`. Los endpoints protegidos requieren `Authorization: Bearer <token>`.
 
-Prefijo global: `/api`
+### Auth (`/api/auth`)
 
-### `/api/auth` — Autenticación (público, sin token)
-
-| Método | Ruta | Middlewares | Descripción |
+| Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | CORS, JSON | Registra un nuevo usuario (`username`, `email`, `password`). Hashea la contraseña con bcrypt, genera un token de verificación y envía el email de verificación. Responde **201**. |
-| `POST` | `/api/auth/login` | CORS, JSON | Autentica con `email` + `password`. Si el usuario está verificado, devuelve un **JWT** y los datos del usuario. |
-| `GET` | `/api/auth/verify-email?verification_token=...` | CORS, JSON | Activa la cuenta validando el token que llega por querystring desde el link del email. |
-| `GET` | `/api/auth/verify-email/:email/resend` | CORS, JSON | Re-genera el token de verificación y reenvía el email. Responde siempre el mismo mensaje para no revelar si la cuenta existe. |
-| `POST` | `/api/auth/forgot-password` | CORS, JSON | Envía un email con el link de recuperación si la cuenta existe (respuesta idéntica en ambos casos). |
-| `POST` | `/api/auth/reset-password` | CORS, JSON | Restablece la contraseña usando `reset_password_token` + nueva `password` en el body. |
+| POST | `/register` | No | Registra usuario y envía email de verificación |
+| POST | `/login` | No | Login, devuelve JWT y datos de usuario |
+| GET | `/verify-email?verification_token=...` | No | Verifica email |
+| GET | `/verify-email/:email/resend` | No | Reenvía verificación (respuesta genérica) |
+| POST | `/forgot-password` | No | Envía email de reset (respuesta genérica) |
+| POST | `/reset-password` | No | Resetea contraseña con token |
 
-### `/api/user` — Usuarios
+### Users (`/api/user`)
 
-| Método | Ruta | Middlewares | Descripción |
+| Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| `GET` | `/api/user` | CORS, JSON | Devuelve la lista de usuarios registrados. |
-| `GET` | `/api/user/:user_id` | CORS, JSON | Devuelve los datos públicos de un usuario por su id. |
-| `PUT` | `/api/user/profile` | CORS, JSON, **authMiddleware** | Actualiza el perfil del usuario autenticado (`name`, `profile_photo`). El id se toma del JWT, nunca del body. |
+| GET | `/me` | Sí | Perfil del usuario autenticado |
+| PUT | `/profile` | Sí | Actualiza `name` y/o `profile_photo` |
+| PUT | `/status` | Sí | Actualiza presencia (`online`, `away`, `offline`, `do not disturb`) |
 
-### `/api/workspace` — Workspaces
+### Workspaces (`/api/workspace`)
 
-| Método | Ruta | Middlewares | Roles requeridos | Descripción |
-|---|---|---|---|---|
-| `GET` | `/api/workspace` | auth | — | Devuelve todos los workspaces a los que pertenece el usuario autenticado. |
-| `POST` | `/api/workspace` | auth | — | Crea un workspace (`name`, `description`) y genera automáticamente la membresía **Owner** para el creador. Responde **201**. |
-| `GET` | `/api/workspace/:workspace_id` | auth + workspace | `Owner`, `Admin`, `User` | Devuelve el detalle de un workspace si el usuario es miembro. |
-| `PUT` | `/api/workspace/:workspace_id` | auth + workspace | `Owner`, `Admin` | Actualiza `name` y/o `description` del workspace. |
-| `DELETE` | `/api/workspace/:workspace_id` | auth + workspace | `Owner` | Elimina el workspace. Solo el dueño puede hacerlo. |
-| `GET` | `/api/workspace/:workspace_id/members` | auth + workspace | `Owner`, `Admin`, `User` | Lista los miembros del workspace con su rol y estado de invitación. |
-| `DELETE` | `/api/workspace/:workspace_id/members/:member_id` | auth + workspace | `Owner`, `Admin` | Expulsa a un miembro del workspace. |
-| `POST` | `/api/workspace/:workspace_id/invitations` | auth + workspace | `Owner`, `Admin` | Crea invitaciones para una lista de `emails` (token + expiración por membreía) y envía los emails correspondientes. Responde **201** con un resumen del proceso. |
-| `GET` | `/api/workspace/:workspace_id/members/accept-invite/:invitation_token` | CORS, JSON (público) | — | Acepta una invitación: valida el token y su expiración y marca la membresía como aceptada. No requiere login porque el token actúa como credencial. |
-
-### `/api/workspace/:workspace_id/channels` — Canales (en construcción)
-
-| Método | Ruta | Middlewares | Descripción |
+| Método | Ruta | Roles | Descripción |
 |---|---|---|---|
-| `GET` | `/api/workspace/:workspace_id/channels` | CORS, JSON | Placeholder: responde `{ ok: true, message: 'Channel' }`. El router se monta con `mergeParams: true` y será el punto de extensión para los canales y mensajes. |
+| GET | `/` | Auth | Lista workspaces del usuario |
+| POST | `/` | Auth | Crea workspace (creador queda Owner) |
+| GET | `/:workspace_id` | Miembro | Detalle de workspace |
+| PUT | `/:workspace_id` | Owner/Admin | Actualiza workspace |
+| DELETE | `/:workspace_id` | Owner | Elimina workspace |
+| GET | `/:workspace_id/members` | Miembro | Lista miembros |
+| DELETE | `/:workspace_id/members/:member_id` | Owner/Admin | Elimina miembro |
+| PUT | `/:workspace_id/members/:member_id/role` | Owner/Admin | Cambia rol |
+| POST | `/:workspace_id/join` | Auth | Une usuario con token de invitación/link |
+| POST | `/:workspace_id/invitations` | Owner/Admin | Crea/envía invitaciones |
+| GET | `/:workspace_id/unread` | Miembro | Contadores de no leídos |
+| PUT | `/:workspace_id/reads/:conversation_key` | Miembro | Marca conversación como leída |
+| GET | `/:workspace_id/starred` | Miembro | Mensajes destacados del usuario |
+| POST | `/:workspace_id/starred/:message_id` | Miembro | Destaca mensaje |
+| DELETE | `/:workspace_id/starred/:message_id` | Miembro | Quita destacado |
+| GET | `/:workspace_id/activity` | Miembro | Actividad/menciones relevantes |
+| GET | `/:workspace_id/direct-messages` | Miembro | Resúmenes de DMs |
+| GET | `/:workspace_id/direct-messages/:user_id` | Miembro | Mensajes DM con usuario |
+| POST | `/:workspace_id/direct-messages/:user_id` | Miembro | Envía DM |
+| PUT | `/:workspace_id/messages/:message_id` | Miembro/autor-admin-owner | Edita mensaje |
+| DELETE | `/:workspace_id/messages/:message_id` | Miembro/autor-admin-owner | Elimina mensaje |
 
-## 🧭 Ejemplos rápidos
+### Channels (`/api/workspace/:workspace_id/channels`)
 
-```bash
-# Registro
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"fabri","email":"fabri@test.com","password":"secreto123"}'
+| Método | Ruta | Roles | Descripción |
+|---|---|---|---|
+| GET | `/` | Miembro | Lista canales |
+| POST | `/` | Miembro | Crea canal |
+| DELETE | `/:channel_id` | Owner/Admin | Elimina canal y sus mensajes |
+| GET | `/:channel_id/messages` | Miembro | Lista mensajes del canal |
+| POST | `/:channel_id/messages` | Miembro | Crea mensaje en canal |
 
-# Login (devuelve el JWT)
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"fabri@test.com","password":"secreto123"}'
+## Realtime (Socket.IO)
 
-# Listar mis workspaces (usando el token del login)
-curl http://localhost:8080/api/workspace \
-  -H "Authorization: Bearer <JWT>"
-```
+Socket.IO comparte el mismo servidor HTTP. El cliente se autentica con el JWT y se une a rooms por workspace. Eventos principales: creación/eliminación de mensajes y canales, typing, cambios de miembros/perfil/status y refresh por reconexión. La API REST sigue siendo la fuente de verdad.
 
-## 🗺️ Estado del proyecto
+## Documentación
 
-- ✅ Autenticación completa (registro, login, verificación y reset por email)
-- ✅ Gestión de perfiles de usuario
-- ✅ Workspaces con membresías, roles e invitaciones
-- 🚧 Canales y mensajes (modelos definidos, endpoints pendientes)
+- Swagger UI: `/api-docs`
+- Especificación OpenAPI: `Docs/openapi.js`
+- Colección Postman local: `postman/collections/Slack Clone API`
+- Reporte QA: `postman/REPORT.md`
+
+## Estado
+
+- ✅ Auth completa (registro, login, verificación, reset)
+- ✅ Perfil y estado de usuario
+- ✅ Workspaces, membresías, roles e invitaciones
+- ✅ Canales y mensajes de canal
+- ✅ Mensajes directos, unread/read, starred y activity
+- ✅ Socket.IO para eventos realtime
+- ✅ Swagger/OpenAPI y colección Postman

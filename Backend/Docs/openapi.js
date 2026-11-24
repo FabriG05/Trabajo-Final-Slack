@@ -6,7 +6,7 @@ import messagePaths from './paths/message.paths.js'
 import { bearerAuth, ErrorResponse, SuccessMessage, commonResponses } from './schemas/common.schemas.js'
 import {
     User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody,
-    UserListResponse, UserResponse, LoginResponse
+    UserResponse, LoginResponse
 } from './schemas/user.schemas.js'
 import {
     Workspace, MemberSummary, WorkspaceListItem, Member, InvitationSummary,
@@ -42,7 +42,7 @@ const openapiSpec = {
 
     tags: [
         { name: 'Auth', description: 'Registration, login, email verification and password reset.' },
-        { name: 'Users', description: 'User listing and profile management.' },
+        { name: 'Users', description: 'Authenticated user profile and presence status.' },
         { name: 'Workspaces', description: 'Workspaces, members and invitations.' },
         { name: 'Channels', description: 'Workspace channels.' },
         { name: 'Messages', description: 'Channel messages, DMs, unread/read state and activity.' }
@@ -61,7 +61,6 @@ const openapiSpec = {
             LoginBody,
             UpdateProfileBody,
             UpdateStatusBody,
-            UserListResponse,
             UserResponse,
             LoginResponse,
             Workspace,

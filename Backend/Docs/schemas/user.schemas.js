@@ -85,29 +85,12 @@ export const UpdateStatusBody = {
     }
 }
 
-/* 200 payload of GET /api/user. */
-export const UserListResponse = {
-    type: 'object',
-    required: ['message', 'ok', 'data'],
-    properties: {
-        message: { type: 'string', example: 'Get users list' },
-        ok: { type: 'boolean', example: true },
-        data: {
-            type: 'object',
-            required: ['users'],
-            properties: {
-                users: { type: 'array', items: { $ref: '#/components/schemas/User' } }
-            }
-        }
-    }
-}
-
-/* 200 payload of GET /api/user/{user_id} and PUT /api/user/profile. */
+/* 200 payload of GET /api/user/me, PUT /api/user/profile and PUT /api/user/status. */
 export const UserResponse = {
     type: 'object',
     required: ['message', 'ok', 'data'],
     properties: {
-        message: { type: 'string', example: 'Get user details successfully' },
+        message: { type: 'string', example: 'Current user retrieved successfully' },
         ok: { type: 'boolean', example: true },
         data: {
             type: 'object',
@@ -141,4 +124,4 @@ export const LoginResponse = {
     }
 }
 
-export default { User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody, UserListResponse, UserResponse, LoginResponse }
+export default { User, LoginUser, RegisterBody, LoginBody, UpdateProfileBody, UpdateStatusBody, UserResponse, LoginResponse }

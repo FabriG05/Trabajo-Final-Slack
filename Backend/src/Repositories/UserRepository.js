@@ -10,9 +10,6 @@ class UserRepository {
         return await User.create({ name: name, email: email, password: password })
     }
 
-    async get() {
-        return await User.find({ active: true }).select('-password')
-    }
 
     async getByCreationDate(min_date, max_date) {
         const result = await User.find({

@@ -5,42 +5,6 @@
 import { commonResponses } from '../schemas/common.schemas.js'
 
 export default {
-    '/api/user': {
-        get: {
-            tags: ['Users'],
-            operationId: 'getUsers',
-            summary: 'List all users',
-            description:
-                'Returns every active user in the database. Requires authentication. ' +
-                'The bcrypt password hash is stripped from every user.',
-            security: [{ bearerAuth: [] }],
-            responses: {
-                '200': {
-                    description: 'Full list of active users (possibly empty).',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/UserListResponse' }
-                        }
-                    }
-                },
-                '401': {
-                    description: 'Missing, malformed or invalid JWT (AuthMiddleware).',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/ErrorResponse' },
-                            examples: {
-                                AuthHeaderMissing: { value: { ok: false, message: 'Auth header is required.' } },
-                                AuthHeaderMalformed: { value: { ok: false, message: 'Auth token is required or malformed.' } },
-                                Unauthorized: { value: { ok: false, message: 'Auth token is invalid.' } }
-                            }
-                        }
-                    }
-                },
-                '500': { $ref: '#/components/responses/InternalServerError' }
-            }
-        }
-    },
-
     '/api/user/me': {
         get: {
             tags: ['Users'],
@@ -65,56 +29,6 @@ export default {
                 '401': { $ref: '#/components/responses/Unauthorized' },
                 '404': {
                     description: 'The token user no longer exists.',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/ErrorResponse' },
-                            example: { ok: false, message: 'User not found' }
-                        }
-                    }
-                },
-                '500': { $ref: '#/components/responses/InternalServerError' }
-            }
-        }
-    },
-
-    '/api/user/{user_id}': {
-        get: {
-            tags: ['Users'],
-            operationId: 'getUserById',
-            summary: 'Get a user by id',
-            description: 'Requires authentication.',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-                {
-                    name: 'user_id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'string' },
-                    example: '674f1c9e2b8d3a0011223344',
-                    description: 'MongoDB ObjectId of the user.'
-                }
-            ],
-            responses: {
-                '200': {
-                    description: 'User found.',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/UserResponse' }
-                        }
-                    }
-                },
-                '400': {
-                    description: 'Invalid id format.',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/ErrorResponse' },
-                            example: { ok: false, message: 'Invalid id format.' }
-                        }
-                    }
-                },
-                '401': { $ref: '#/components/responses/Unauthorized' },
-                '404': {
-                    description: 'No user with that id (UserService).',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/ErrorResponse' },

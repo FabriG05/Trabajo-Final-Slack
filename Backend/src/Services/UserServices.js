@@ -12,10 +12,6 @@ class UserService {
     // 500 KB of base64 covers the ~256px JPEG with plenty of margin.
     static MAX_PROFILE_PHOTO_LENGTH = 500 * 1024
 
-    async getUserList() {
-        return await user_repository.get()
-    }
-
     async getUserById(user_id) {
         const user = await user_repository.getById(user_id)
 
