@@ -30,8 +30,14 @@ const ENVIRONMENT = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
     GMAIL_USER: process.env.GMAIL_USER,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
-    URL_BACKEND: process.env.URL_BACKEND ? process.env.URL_BACKEND.replace(/\/$/, '') : 'http://localhost:8080',
-    URL_FRONTEND: process.env.URL_FRONTEND ? process.env.URL_FRONTEND.replace(/\/$/, '') : 'http://localhost:5173',
+    URL_BACKEND: (process.env.URL_BACKEND || process.env.BACKEND_URL || '').replace(/\/$/, '') || 'http://localhost:8080',
+    URL_FRONTEND: (
+        process.env.URL_FRONTEND ||
+        process.env.FRONTEND_URL ||
+        process.env.URL_FRONT ||
+        process.env.CLIENT_URL ||
+        ''
+    ).replace(/\/$/, '') || 'http://localhost:5173',
     WHITELIST_ENABLED: parseBoolean(process.env.WHITELIST_ENABLED, false),
     WHITELIST_IPS: parseCsvList(process.env.WHITELIST_IPS),
     WHITELIST_ORIGINS: parseCsvList(process.env.WHITELIST_ORIGINS),

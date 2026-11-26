@@ -16,10 +16,29 @@ import auth_service from "../Services/AuthServices.js";
     service are handled by the error middleware.
 */
 
+function getFrontendUrl(request) {
+    const rawOrigin = request.headers.origin
+    if (rawOrigin && typeof rawOrigin === 'string' && rawOrigin !== 'null') {
+        return rawOrigin.replace(/\/$/, '')
+    }
+
+    const rawReferer = request.headers.referer
+    if (rawReferer && typeof rawReferer === 'string') {
+        try {
+            return new URL(rawReferer).origin.replace(/\/$/, '')
+        } catch {
+            // ignore
+        }
+    }
+
+    return null
+}
+
 export async function register(request, response) {
     const { username, email, password } = request.body;
+    const frontendUrl = getFrontendUrl(request);
 
-    await auth_service.register(username, email, password);
+    await auth_service.register(username, email, password, frontendUrl);
 
     return response.status(201).send({
         ok: true,
@@ -58,7 +77,8 @@ export async function verifyEmail(request, response) {
 
 export async function resendVerificationEmail(request, response) {
     // The email travels as a route parameter: /api/auth/verify-email/:email/resend
-    await auth_service.resendVerificationEmail(request.params.email);
+    const frontendUrl = getFrontendUrl(request);
+    await auth_service.resendVerificationEmail(request.params.email, frontendUrl);
 
     // The same response is returned in every case so the endpoint gives no hints about the account.
     return response.status(200).send(
@@ -71,8 +91,9 @@ export async function resendVerificationEmail(request, response) {
 
 export async function forgotPassword(request, response) {
     const { email } = request.body;
+    const frontendUrl = getFrontendUrl(request);
 
-    await auth_service.forgotPassword(email);
+    await auth_service.forgotPassword(email, frontendUrl);
 
     // The same response is returned in every case so the endpoint gives no hints about the account.
     return response.status(200).send(

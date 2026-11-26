@@ -11,8 +11,9 @@ import ENVIRONMENT from "../../Config/Environment.config.js";
     reset. The link goes to the frontend, which sends the token back
     to the API: /reset-password?reset_token=<token>
 */
-export function buildResetPasswordEmailHtml(resetPasswordToken) {
-    const resetPasswordUrl = ENVIRONMENT.URL_FRONTEND + '/reset-password?reset_token=' + resetPasswordToken
+export function buildResetPasswordEmailHtml(resetPasswordToken, frontendUrl = null) {
+    const baseUrl = (frontendUrl || ENVIRONMENT.URL_FRONTEND || 'http://localhost:5173').replace(/\/$/, '')
+    const resetPasswordUrl = baseUrl + '/reset-password?reset_token=' + resetPasswordToken
 
     return `
         <!DOCTYPE html>
@@ -84,8 +85,9 @@ export function buildResetPasswordEmailHtml(resetPasswordToken) {
     Builds a plain-text version of the reset email, shown by mail
     clients that do not render HTML or when the user disables it.
 */
-export function buildResetPasswordEmailText(resetPasswordToken) {
-    const resetPasswordUrl = ENVIRONMENT.URL_FRONTEND + '/reset-password?reset_token=' + resetPasswordToken
+export function buildResetPasswordEmailText(resetPasswordToken, frontendUrl = null) {
+    const baseUrl = (frontendUrl || ENVIRONMENT.URL_FRONTEND || 'http://localhost:5173').replace(/\/$/, '')
+    const resetPasswordUrl = baseUrl + '/reset-password?reset_token=' + resetPasswordToken
 
     return [
         'Did you forget your password?',

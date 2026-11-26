@@ -21,7 +21,7 @@ import { buildResetPasswordEmailHtml, buildResetPasswordEmailText } from "../Uti
     Signs the verification token and sends the verification email.
     Shared by register and resend.
 */
-async function sendVerificationEmail(email) {
+async function sendVerificationEmail(email, frontendUrl = null) {
     /* When a user logs in, we must hand them a signed credential that lets us state who they are.
         The same mechanism backs the verification flow: JWT (JsonWebTokens) are Js objects turned
         into strings by an algorithm called HS256. */
@@ -40,8 +40,8 @@ async function sendVerificationEmail(email) {
             to: email,
             from: ENVIRONMENT.GMAIL_USER,
             subject: "Verify your account",
-            html: buildVerificationEmailHtml(verifyEmailToken),
-            text: buildVerificationEmailText(verifyEmailToken)
+            html: buildVerificationEmailHtml(verifyEmailToken, frontendUrl),
+            text: buildVerificationEmailText(verifyEmailToken, frontendUrl)
         }
     )
 }
@@ -54,7 +54,7 @@ async function sendVerificationEmail(email) {
     in the email points to the frontend, which sends the token back
     to the API together with the new password.
 */
-async function sendResetPasswordEmail(email) {
+async function sendResetPasswordEmail(email, frontendUrl = null) {
     const resetPasswordToken = jwt.sign(
         {
             email: email
@@ -70,14 +70,14 @@ async function sendResetPasswordEmail(email) {
             to: email,
             from: ENVIRONMENT.GMAIL_USER,
             subject: "Reset your password",
-            html: buildResetPasswordEmailHtml(resetPasswordToken),
-            text: buildResetPasswordEmailText(resetPasswordToken)
+            html: buildResetPasswordEmailHtml(resetPasswordToken, frontendUrl),
+            text: buildResetPasswordEmailText(resetPasswordToken, frontendUrl)
         }
     )
 }
 
 class AuthService {
-    async register(username, email, password) {
+    async register(username, email, password, frontendUrl = null) {
         if (
             typeof username !== "string" || //typeof tells JavaScript which data type was received.
             typeof email !== "string" ||
@@ -132,7 +132,7 @@ class AuthService {
         // The token is signed with the normalized email, which is the one
         // actually stored in the database, so verifyEmail can find the user.
         try {
-            await sendVerificationEmail(normalizedEmail)
+            await sendVerificationEmail(normalizedEmail, frontendUrl)
         } catch (error) {
             try {
                 await user_repository.deleteById(createdUser._id)
@@ -254,7 +254,7 @@ class AuthService {
         )
     }
 
-    async resendVerificationEmail(email) {
+    async resendVerificationEmail(email, frontendUrl = null) {
         if (typeof email !== 'string') {
             throw new ServerError('Email is required', 400)
         }
@@ -275,7 +275,7 @@ class AuthService {
             exists, is active and still needs verification.
         */
         if (userFound && userFound.active && !userFound.verified_email) {
-            await sendVerificationEmail(normalizedEmail)
+            await sendVerificationEmail(normalizedEmail, frontendUrl)
         }
     }
 
@@ -285,7 +285,7 @@ class AuthService {
         response does not reveal whether the account exists. We only
         send the email when the account exists and is active.
     */
-    async forgotPassword(email) {
+    async forgotPassword(email, frontendUrl = null) {
         if (!email || typeof email !== 'string') {
             throw new ServerError('Email is required', 400)
         }
@@ -301,7 +301,7 @@ class AuthService {
         const userFound = await user_repository.getByEmail(normalizedEmail) //Looks the user up by email to make sure it exists.
 
         if (userFound && userFound.active) {
-            await sendResetPasswordEmail(normalizedEmail)
+            await sendResetPasswordEmail(normalizedEmail, frontendUrl)
         }
     }
 

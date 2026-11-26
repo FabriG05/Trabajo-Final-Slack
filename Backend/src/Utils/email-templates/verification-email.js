@@ -5,8 +5,9 @@ import ENVIRONMENT from "../../Config/Environment.config.js";
     ready-to-send body. The controller/service layer only decides WHEN
     to send, the wording and styling live here.
 */
-export function buildVerificationEmailHtml(verifyEmailToken) {
-    const verifyEmailUrl = ENVIRONMENT.URL_FRONTEND + '/verify-email?verification_token=' + verifyEmailToken
+export function buildVerificationEmailHtml(verifyEmailToken, frontendUrl = null) {
+    const baseUrl = (frontendUrl || ENVIRONMENT.URL_FRONTEND || 'http://localhost:5173').replace(/\/$/, '')
+    const verifyEmailUrl = baseUrl + '/verify-email?verification_token=' + verifyEmailToken
 
     return `
         <!DOCTYPE html>
@@ -77,8 +78,9 @@ export function buildVerificationEmailHtml(verifyEmailToken) {
     Builds a plain-text version of the verification email, shown by mail
     clients that do not render HTML or when the user disables it.
 */
-export function buildVerificationEmailText(verifyEmailToken) {
-    const verifyEmailUrl = ENVIRONMENT.URL_FRONTEND + '/verify-email?verification_token=' + verifyEmailToken
+export function buildVerificationEmailText(verifyEmailToken, frontendUrl = null) {
+    const baseUrl = (frontendUrl || ENVIRONMENT.URL_FRONTEND || 'http://localhost:5173').replace(/\/$/, '')
+    const verifyEmailUrl = baseUrl + '/verify-email?verification_token=' + verifyEmailToken
 
     return [
         'Welcome to our platform!',
