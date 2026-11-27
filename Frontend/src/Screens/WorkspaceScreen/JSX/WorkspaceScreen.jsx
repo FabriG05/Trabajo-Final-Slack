@@ -18,20 +18,22 @@ import '../CSS/WorkspaceScreen.css'
     channels/DMs Sidebar, and the central ChatArea.
 */
 function WorkspaceScreenContent() {
-    const { activeNavTab, activeDm } = useWorkspace()
+    const { activeNavTab, activeDm, isMobileSidebarOpen } = useWorkspace()
 
     return (
-        <div className='workspace-layout'>
+        <div className={`workspace-layout ${isMobileSidebarOpen ? 'workspace-layout--sidebar-open' : 'workspace-layout--sidebar-closed'}`}>
             <WorkspaceTopBar />
             <div className='workspace-body'>
                 <WorkspaceNav />
                 <WorkspaceSidebar />
-                {activeNavTab === 'dms' && (activeDm ? <ChatArea /> : <DmPlaceholderView />)}
-                {activeNavTab === 'activity' && <ActivityView />}
-                {activeNavTab === 'starred' && <StarredMessagesView />}
-                {activeNavTab === 'directory' && <DirectoryView />}
-                {activeNavTab === 'profile' && <ProfileView />}
-                {!['dms', 'activity', 'starred', 'directory', 'profile'].includes(activeNavTab) && <ChatArea />}
+                <div className='workspace-main-panel'>
+                    {activeNavTab === 'dms' && (activeDm ? <ChatArea /> : <DmPlaceholderView />)}
+                    {activeNavTab === 'activity' && <ActivityView />}
+                    {activeNavTab === 'starred' && <StarredMessagesView />}
+                    {activeNavTab === 'directory' && <DirectoryView />}
+                    {activeNavTab === 'profile' && <ProfileView />}
+                    {!['dms', 'activity', 'starred', 'directory', 'profile'].includes(activeNavTab) && <ChatArea />}
+                </div>
             </div>
         </div>
     )

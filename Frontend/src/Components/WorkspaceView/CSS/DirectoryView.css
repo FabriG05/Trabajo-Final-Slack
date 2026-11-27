@@ -154,3 +154,13 @@
 .directory-view__status[data-status='do not disturb'] {
     color: #e01e5a;
 }
+
+@media (max-width: 768px) {
+    .directory-view__header {
+        padding: 16px;
+    }
+
+    .directory-view__list {
+        padding: 12px 14px;
+    }
+}

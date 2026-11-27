@@ -121,6 +121,11 @@ export function WorkspaceProvider({ children, workspaceId }) {
     // Left navigation bar selection ('home', 'dms', 'activity', 'admin')
     const [activeNavTab, setActiveNavTab] = useState('home')
 
+    // Mobile sidebar open/close state (on small screens <= 768px)
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(() => (
+        typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+    ))
+
     // Channels and active selection
     const [channels, setChannels] = useState([])
     const [activeChannelId, setActiveChannelId] = useState(null)
@@ -1181,6 +1186,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         // Any conversation opens in the chat pane, leaving overview screens
         // such as the Direct messages list.
         setActiveNavTab('home')
+        setIsMobileSidebarOpen(false)
 
         // Clicking the conversation already open would leave the loading flag on,
         // because the messages effect would not run again.
@@ -1203,6 +1209,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         }
 
         setActiveNavTab((current) => (current === 'dms' ? 'dms' : 'home'))
+        setIsMobileSidebarOpen(false)
 
         if (dmId === activeDmId) {
             return
@@ -1220,6 +1227,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         setActiveDmId(null)
         setActiveChannelId(null)
         setActiveNavTab('dms')
+        setIsMobileSidebarOpen(true)
     }
 
     async function setUserStatus(status) {
@@ -1576,7 +1584,9 @@ export function WorkspaceProvider({ children, workspaceId }) {
         goBack,
         goForward,
         goToHistoryIndex,
-        navHistory: navHistoryState
+        navHistory: navHistoryState,
+        isMobileSidebarOpen,
+        setIsMobileSidebarOpen
     }
 
     return (

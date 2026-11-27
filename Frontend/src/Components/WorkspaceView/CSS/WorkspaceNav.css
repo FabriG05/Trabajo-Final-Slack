@@ -219,11 +219,11 @@
     flex-direction: column;
     gap: 8px;
     padding: 12px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #251628;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    z-index: 30;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
 }
 
 .workspace-nav__profile-card-header {
@@ -380,4 +380,125 @@
 
 .workspace-nav__util-btn--active {
     background: var(--ws-accent);
+}
+
+@media (max-width: 768px) {
+    .workspace-nav {
+        order: 3;
+        width: 100%;
+        height: 52px;
+        min-height: 52px;
+        flex-direction: row;
+        border-right: none;
+        border-top: 1px solid var(--ws-surface-hover);
+        padding: 0 8px;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--ws-nav-bg);
+        z-index: 100;
+        position: relative;
+    }
+
+    .workspace-nav__top {
+        display: none;
+    }
+
+    .workspace-nav__list {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        width: auto;
+        flex: 3;
+        gap: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .workspace-nav__item {
+        flex: 1;
+        width: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .workspace-nav__divider {
+        display: none;
+    }
+
+    .workspace-nav__btn {
+        width: 56px;
+        max-width: 56px;
+        height: 42px;
+        border-radius: 8px;
+        padding: 3px 4px;
+        gap: 2px;
+        margin: 0 auto;
+    }
+
+    .workspace-nav__icon {
+        font-size: 18px;
+    }
+
+    .workspace-nav__label {
+        font-size: 10px;
+    }
+
+    .workspace-nav__bottom {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0;
+        padding-bottom: 0;
+        gap: 0;
+        padding-right: 0;
+        flex: 1;
+        min-width: 56px;
+    }
+
+    .workspace-nav__profile-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .workspace-nav__create-more-wrapper {
+        display: none;
+    }
+
+    .workspace-nav__profile-btn {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        padding: 2px;
+        transition: background 0.15s ease;
+    }
+
+    .workspace-nav__profile-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .workspace-nav__status-menu {
+        left: auto;
+        right: 8px;
+        bottom: calc(100% + 8px);
+        max-width: calc(100vw - 20px);
+        width: 250px;
+        z-index: 1000;
+    }
+
+    .workspace-admin-menu {
+        left: auto;
+        right: 8px;
+        bottom: calc(100% + 8px);
+        top: auto;
+        max-width: calc(100vw - 20px);
+        width: 250px;
+    }
 }

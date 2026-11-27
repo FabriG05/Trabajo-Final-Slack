@@ -39,7 +39,8 @@ function WorkspaceTopBar() {
         channels,
         directMessages,
         selectChannel,
-        selectDm
+        selectDm,
+        setIsMobileSidebarOpen
     } = useWorkspace()
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -47,8 +48,17 @@ function WorkspaceTopBar() {
     const [isSearching, setIsSearching] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchError, setSearchError] = useState(null)
+    const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 768 : false))
     const historyRef = useRef(null)
     const searchRef = useRef(null)
+
+    useEffect(() => {
+        function handleResize() {
+            setIsMobile(window.innerWidth <= 768)
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     useEffect(() => {
         function handlePointerDown(event) {
@@ -142,6 +152,19 @@ function WorkspaceTopBar() {
 
     return (
         <header className='workspace-topbar'>
+            <button
+                type='button'
+                className='workspace-topbar__mobile-menu-btn'
+                aria-label='Toggle sidebar'
+                title='Channels'
+                onClick={() => setIsMobileSidebarOpen?.((open) => !open)}
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <div className='workspace-topbar__history'>
                 <button
                     type='button'
@@ -209,7 +232,7 @@ function WorkspaceTopBar() {
                     <input
                         type='text'
                         className='workspace-topbar__search-input'
-                        placeholder='Search channels, people, or messages'
+                        placeholder={isMobile ? 'Search workspace...' : 'Search channels, people, or messages'}
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value)

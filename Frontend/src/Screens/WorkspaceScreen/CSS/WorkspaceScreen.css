@@ -32,7 +32,8 @@
     display: flex;
     flex-direction: column;
     height: 100dvh;
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     overflow: hidden;
     background: var(--ws-bg);
     color: var(--ws-text);
@@ -44,4 +45,46 @@
     display: flex;
     overflow: hidden;
     min-height: 0;
+}
+
+.workspace-main-panel {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .workspace-layout {
+        height: 100dvh;
+        width: 100vw;
+    }
+
+    .workspace-body {
+        flex-direction: column;
+        position: relative;
+    }
+
+    .workspace-layout--sidebar-open .workspace-sidebar {
+        display: flex !important;
+        width: 100% !important;
+        flex: 1 1 0% !important;
+        min-height: 0;
+    }
+
+    .workspace-layout--sidebar-open .workspace-main-panel {
+        display: none !important;
+    }
+
+    .workspace-layout--sidebar-closed .workspace-sidebar {
+        display: none !important;
+    }
+
+    .workspace-layout--sidebar-closed .workspace-main-panel {
+        display: flex !important;
+        width: 100% !important;
+        flex: 1 1 0% !important;
+        min-height: 0;
+    }
 }

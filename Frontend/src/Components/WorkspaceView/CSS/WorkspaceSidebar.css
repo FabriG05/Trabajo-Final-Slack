@@ -290,12 +290,13 @@
 }
 
 .workspace-sidebar__item-menu {
-    min-width: 104px;
-    background: #302034;
+    min-width: 0;
+    width: max-content;
+    background: #251628;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border-radius: 6px;
+    padding: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     z-index: 1200;
 }
 
@@ -304,19 +305,25 @@
 }
 
 .workspace-sidebar__item-menu-item {
+    display: block;
     width: 100%;
-    padding: 6px 8px;
+    padding: 4px 8px;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     background: transparent;
     color: rgba(255, 255, 255, 0.9);
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
     text-align: left;
     cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
 }
 
 .workspace-sidebar__item-menu-item:hover {
     background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .workspace-sidebar__item-menu-item--danger {
@@ -523,4 +530,21 @@
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .workspace-sidebar {
+        width: 100%;
+        border-right: none;
+        height: 100%;
+    }
+
+    .workspace-sidebar__header {
+        height: 48px;
+        padding: 0 14px;
+    }
+
+    .workspace-sidebar__workspace-btn {
+        max-width: 240px;
+    }
 }

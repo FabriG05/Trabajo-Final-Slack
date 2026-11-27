@@ -41,7 +41,8 @@ function WorkspaceNav() {
         currentUser,
         currentUserRole,
         userStatus,
-        setUserStatus
+        setUserStatus,
+        setIsMobileSidebarOpen
     } = useWorkspace()
 
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
@@ -151,12 +152,19 @@ function WorkspaceNav() {
 
                                     setIsAdminMenuOpen(false)
 
+                                    if (item.id === 'home') {
+                                        setActiveNavTab('home')
+                                        setIsMobileSidebarOpen?.(true)
+                                        return
+                                    }
+
                                     if (item.id === 'dms') {
                                         openDmsTab()
                                         return
                                     }
 
                                     setActiveNavTab(item.id)
+                                    setIsMobileSidebarOpen?.(false)
                                 }}
                                 aria-label={item.label}
                                 title={item.label}
