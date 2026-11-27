@@ -223,6 +223,30 @@ class MessageRepository {
             throw error;
         }
     }
+
+    async searchWorkspaceMessages(workspaceId, userId, query, limit = 20) {
+        try {
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+            return await Message.find({
+                workspace_id: workspaceId,
+                content: { $regex: escapedQuery, $options: 'i' },
+                $or: [
+                    { message_type: 'channel' },
+                    { message_type: 'direct', sender_id: userId },
+                    { message_type: 'direct', receiver_id: userId }
+                ]
+            })
+                .populate('sender_id', 'name email profile_photo')
+                .populate('receiver_id', 'name email profile_photo')
+                .populate('channel_id', 'name')
+                .sort({ created_at: -1 })
+                .limit(limit)
+        } catch (error) {
+            console.error('Error in MessageRepository.searchWorkspaceMessages:', error.message)
+            throw error
+        }
+    }
 }
 
 const messageRepository = new MessageRepository();

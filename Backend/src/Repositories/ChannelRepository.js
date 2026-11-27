@@ -62,6 +62,34 @@ class ChannelRepository {
             throw error;
         }
     }
+
+    async updateById(channelId, updateFields) {
+        try {
+            return await Channel.findByIdAndUpdate(
+                channelId,
+                updateFields,
+                { new: true, runValidators: true }
+            )
+        } catch (error) {
+            console.error('Error in ChannelRepository.updateById:', error.message)
+            throw error
+        }
+    }
+
+    async searchByWorkspaceId(workspaceId, query, limit = 10) {
+        try {
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            return await Channel.find({
+                workspace_id: workspaceId,
+                name: { $regex: escapedQuery, $options: 'i' }
+            })
+                .sort({ name: 1 })
+                .limit(limit)
+        } catch (error) {
+            console.error('Error in ChannelRepository.searchByWorkspaceId:', error.message)
+            throw error
+        }
+    }
 }
 
 const channelRepository = new ChannelRepository();

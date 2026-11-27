@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
 import ConfirmDialog from '../../Common/JSX/ConfirmDialog'
 import InvitePeopleDialog from './InvitePeopleDialog'
 import {
-    IconRocket,
     IconSearch,
     IconDirectories,
     IconSectionCollapse,
@@ -13,7 +13,8 @@ import {
     IconStar,
     IconTrash,
     IconHash,
-    IconDMs
+    IconDMs,
+    IconMore
 } from './SlackIcons'
 import slackIcon from '../../../assets/SlackHeroIcon.svg'
 import '../CSS/WorkspaceSidebar.css'
@@ -31,6 +32,7 @@ function WorkspaceSidebar() {
         activeChannel,
         selectChannel,
         addChannel,
+        renameChannel,
         deleteChannel,
         deleteWorkspace,
         canManageChannels,
@@ -48,20 +50,24 @@ function WorkspaceSidebar() {
     } = useWorkspace()
 
     const [isCreatingChannel, setIsCreatingChannel] = useState(false)
+    const [isSubmittingChannel, setIsSubmittingChannel] = useState(false)
     const [newChannelName, setNewChannelName] = useState('')
     const [filterQuery, setFilterQuery] = useState('')
     const [channelToDelete, setChannelToDelete] = useState(null)
+    const [channelMenu, setChannelMenu] = useState(null)
+    const [channelToRename, setChannelToRename] = useState(null)
+    const [renameChannelName, setRenameChannelName] = useState('')
+    const [isRenamingChannel, setIsRenamingChannel] = useState(false)
+    const [renameChannelError, setRenameChannelError] = useState(null)
     const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false)
     const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useState(false)
     const [isInviteOpen, setIsInviteOpen] = useState(false)
+    const channelMenuRef = useRef(null)
     const [collapsedSections, setCollapsedSections] = useState({
         starred: false,
         channels: false,
         dms: false
     })
-    const [promoDismissed, setPromoDismissed] = useState(
-        () => localStorage.getItem('slack_promo_dismissed') === '1'
-    )
 
     const filteredChannels = channels.filter((c) =>
         c.name.toLowerCase().includes(filterQuery.toLowerCase())
@@ -86,14 +92,79 @@ function WorkspaceSidebar() {
         }
     }
 
+    useEffect(() => {
+        if (!channelMenu) return undefined
+
+        function handlePointerDown(event) {
+            if (channelMenuRef.current?.contains(event.target)) return
+            if (event.target.closest?.('.workspace-sidebar__item-menu-btn')) return
+            setChannelMenu(null)
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                setChannelMenu(null)
+            }
+        }
+
+        function closeMenu() {
+            setChannelMenu(null)
+        }
+
+        document.addEventListener('mousedown', handlePointerDown)
+        document.addEventListener('keydown', handleKeyDown)
+        window.addEventListener('resize', closeMenu)
+        document.querySelector('.workspace-sidebar__sections')?.addEventListener('scroll', closeMenu)
+
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown)
+            document.removeEventListener('keydown', handleKeyDown)
+            window.removeEventListener('resize', closeMenu)
+            document.querySelector('.workspace-sidebar__sections')?.removeEventListener('scroll', closeMenu)
+        }
+    }, [channelMenu])
+
+    function openRenameChannelDialog(channel) {
+        setChannelMenu(null)
+        setRenameChannelError(null)
+        setRenameChannelName(channel.name)
+        setChannelToRename(channel)
+    }
+
+    async function handleRenameChannel(event) {
+        event.preventDefault()
+        if (!channelToRename || isRenamingChannel) return
+
+        setIsRenamingChannel(true)
+        setRenameChannelError(null)
+        try {
+            await renameChannel(channelToRename.id, renameChannelName)
+            setChannelToRename(null)
+            setRenameChannelName('')
+        } catch (error) {
+            setRenameChannelError(error.message || 'Could not rename channel.')
+        } finally {
+            setIsRenamingChannel(false)
+        }
+    }
+
     async function handleCreateChannel(e) {
         e.preventDefault()
 
-        const created = await addChannel(newChannelName)
+        if (isSubmittingChannel) {
+            return
+        }
 
-        if (created) {
-            setNewChannelName('')
-            setIsCreatingChannel(false)
+        setIsSubmittingChannel(true)
+        try {
+            const created = await addChannel(newChannelName)
+
+            if (created) {
+                setNewChannelName('')
+                setIsCreatingChannel(false)
+            }
+        } finally {
+            setIsSubmittingChannel(false)
         }
     }
 
@@ -212,30 +283,6 @@ function WorkspaceSidebar() {
                 </div>
             ) : (
                 <>
-                    {/* Promo card */}
-                    {!promoDismissed && (
-                        <div className='workspace-sidebar__promo'>
-                            <button
-                                type='button'
-                                className='workspace-sidebar__promo-close'
-                                aria-label='Dismiss promotion'
-                                title='Dismiss'
-                                onClick={() => {
-                                    setPromoDismissed(true)
-                                    localStorage.setItem('slack_promo_dismissed', '1')
-                                }}
-                            >
-                                ×
-                            </button>
-                            <div className='workspace-sidebar__promo-icon' aria-hidden='true'>
-                                <IconRocket size={20} />
-                            </div>
-                            <div className='workspace-sidebar__promo-content'>
-                                <p className='workspace-sidebar__promo-title'>Get 50% off paid subscriptions</p>
-                                <p className='workspace-sidebar__promo-subtitle'>Offer valid for 3 days</p>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Quick find */}
                     <div className='workspace-sidebar__search'>
@@ -333,15 +380,32 @@ function WorkspaceSidebar() {
                                                     </button>
 
                                                     {canManageChannels && channel.name !== 'general' && (
-                                                        <button
-                                                            type='button'
-                                                            className='workspace-sidebar__item-delete'
-                                                            title={`Delete #${channel.name}`}
-                                                            aria-label={`Delete #${channel.name}`}
-                                                            onClick={() => setChannelToDelete(channel)}
-                                                        >
-                                                            <IconTrash size={13} />
-                                                        </button>
+                                                        <div className='workspace-sidebar__item-menu-wrap'>
+                                                            <button
+                                                                type='button'
+                                                                className='workspace-sidebar__item-menu-btn'
+                                                                title={`Channel options for #${channel.name}`}
+                                                                aria-label={`Channel options for #${channel.name}`}
+                                                                aria-haspopup='menu'
+                                                                aria-expanded={channelMenu?.channelId === channel.id}
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation()
+                                                                    const rect = event.currentTarget.getBoundingClientRect()
+                                                                    setChannelMenu((current) => (
+                                                                        current?.channelId === channel.id
+                                                                            ? null
+                                                                            : {
+                                                                                channelId: channel.id,
+                                                                                channel,
+                                                                                top: rect.bottom + 4,
+                                                                                left: Math.min(Math.max(8, rect.right - 104), window.innerWidth - 112)
+                                                                            }
+                                                                    ))
+                                                                }}
+                                                            >
+                                                                <IconMore size={14} />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </li>
                                             )
@@ -359,7 +423,7 @@ function WorkspaceSidebar() {
                                                 autoFocus
                                             />
                                             <div className='workspace-sidebar__add-actions'>
-                                                <button type='submit' className='workspace-sidebar__add-save'>Add</button>
+                                                <button type='submit' className='workspace-sidebar__add-save' disabled={isSubmittingChannel}>{isSubmittingChannel ? 'Adding...' : 'Add'}</button>
                                                 <button
                                                     type='button'
                                                     className='workspace-sidebar__add-cancel'
@@ -508,6 +572,66 @@ function WorkspaceSidebar() {
                         await deleteWorkspace()
                     }}
                 />
+            )}
+
+            {channelMenu && createPortal(
+                <div
+                    ref={channelMenuRef}
+                    className='workspace-sidebar__item-menu workspace-sidebar__item-menu--portal'
+                    role='menu'
+                    style={{ top: `${channelMenu.top}px`, left: `${Math.max(8, channelMenu.left)}px` }}
+                >
+                    <button
+                        type='button'
+                        className='workspace-sidebar__item-menu-item'
+                        role='menuitem'
+                        onClick={() => openRenameChannelDialog(channelMenu.channel)}
+                    >
+                        Rename channel
+                    </button>
+                    <button
+                        type='button'
+                        className='workspace-sidebar__item-menu-item workspace-sidebar__item-menu-item--danger'
+                        role='menuitem'
+                        onClick={() => {
+                            setChannelToDelete(channelMenu.channel)
+                            setChannelMenu(null)
+                        }}
+                    >
+                        Delete channel
+                    </button>
+                </div>,
+                document.body
+            )}
+
+            {channelToRename && (
+                <div
+                    className='workspace-admin-dialog__overlay'
+                    onMouseDown={(event) => event.target === event.currentTarget && !isRenamingChannel && setChannelToRename(null)}
+                >
+                    <div className='workspace-admin-dialog' role='dialog' aria-modal='true' aria-label='Rename channel'>
+                        <h2 className='workspace-admin-dialog__title'>Rename channel</h2>
+                        <form onSubmit={handleRenameChannel}>
+                            <label className='workspace-admin-dialog__label' htmlFor='rename-channel-name'>Channel name</label>
+                            <input
+                                id='rename-channel-name'
+                                className='workspace-admin-dialog__input'
+                                value={renameChannelName}
+                                onChange={(event) => setRenameChannelName(event.target.value)}
+                                placeholder='channel-name'
+                                disabled={isRenamingChannel}
+                                autoFocus
+                            />
+                            {renameChannelError && <p className='workspace-admin-dialog__error' role='alert'>{renameChannelError}</p>}
+                            <div className='workspace-admin-dialog__actions'>
+                                <button type='button' className='workspace-admin-dialog__btn' onClick={() => setChannelToRename(null)} disabled={isRenamingChannel}>Cancel</button>
+                                <button type='submit' className='workspace-admin-dialog__btn workspace-admin-dialog__btn--primary' disabled={isRenamingChannel || !renameChannelName.trim()}>
+                                    {isRenamingChannel ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
 
             {isInviteOpen && <InvitePeopleDialog onClose={() => setIsInviteOpen(false)} />}

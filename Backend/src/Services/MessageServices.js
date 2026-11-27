@@ -2,6 +2,7 @@ import messageRepository from "../Repositories/MessageRepository.js";
 import memberRepository from "../Repositories/MemberRepository.js";
 import userRepository from "../Repositories/UserRepository.js";
 import channelService from "./ChannelServices.js";
+import channelRepository from "../Repositories/ChannelRepository.js";
 import ServerError from "../Utils/Error.Utils.js";
 
 /*
@@ -245,6 +246,83 @@ class MessageService {
 
         if (!user || !user.active) {
             throw new ServerError("User is not active.", 404)
+        }
+    }
+
+    async searchWorkspace(workspaceId, userId, rawQuery) {
+        const query = typeof rawQuery === 'string' ? rawQuery.trim() : ''
+
+        if (query.length < 2) {
+            throw new ServerError("Search query must be at least 2 characters.", 400)
+        }
+
+        const normalizedQuery = query.toLowerCase()
+        const [channels, memberships, messages] = await Promise.all([
+            channelRepository.searchByWorkspaceId(workspaceId, query, 8),
+            memberRepository.getAllMembershipsByWorkspaceId(workspaceId),
+            messageRepository.searchWorkspaceMessages(workspaceId, userId, query, 20)
+        ])
+
+        const channelResults = channels.map((channel) => ({
+            id: String(channel._id),
+            name: channel.name,
+            type: 'channel'
+        }))
+
+        const memberResults = memberships
+            .filter((member) => member?.invitation_accepted && member?.FK_id_user?._id)
+            .map((member) => {
+                const user = member.FK_id_user
+                return {
+                    id: String(user._id),
+                    name: user.name || user.email || 'Unknown user',
+                    email: user.email || '',
+                    photo: user.profile_photo || null,
+                    status: user.status || 'offline',
+                    role: member.role || 'User',
+                    type: 'member'
+                }
+            })
+            .filter((member) => {
+                const haystack = `${member.name} ${member.email}`.toLowerCase()
+                return haystack.includes(normalizedQuery)
+            })
+            .slice(0, 8)
+
+        const messageResults = messages.map((message) => {
+            const sender = message.sender_id || {}
+            const receiver = message.receiver_id || {}
+            const channel = message.channel_id || null
+            const senderId = String(sender._id || message.sender_id || '')
+            const receiverId = String(receiver._id || message.receiver_id || '')
+            const isDirect = message.message_type === 'direct'
+            const dmPartnerId = isDirect ? (senderId === String(userId) ? receiverId : senderId) : null
+            const dmPartnerName = isDirect
+                ? (senderId === String(userId)
+                    ? (receiver.name || receiver.email || 'Direct message')
+                    : (sender.name || sender.email || 'Direct message'))
+                : null
+
+            return {
+                id: String(message._id),
+                content: message.content || '',
+                created_at: message.created_at,
+                type: 'message',
+                message_type: message.message_type,
+                sender: {
+                    id: senderId,
+                    name: sender.name || sender.email || 'Unknown user',
+                    photo: sender.profile_photo || null
+                },
+                channel: channel ? { id: String(channel._id), name: channel.name } : null,
+                dm: isDirect && dmPartnerId ? { user_id: dmPartnerId, name: dmPartnerName } : null
+            }
+        })
+
+        return {
+            channels: channelResults,
+            members: memberResults,
+            messages: messageResults
         }
     }
 }

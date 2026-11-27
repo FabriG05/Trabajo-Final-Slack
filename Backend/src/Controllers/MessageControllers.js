@@ -217,3 +217,19 @@ export async function updateMessage(request, response) {
         }
     });
 }
+
+export async function searchWorkspace(request, response) {
+    const { q } = request.query;
+
+    const results = await message_service.searchWorkspace(
+        request.workspace._id,
+        request.user.id,
+        q
+    );
+
+    return response.status(200).send({
+        ok: true,
+        message: "Search results retrieved successfully.",
+        data: results
+    });
+}

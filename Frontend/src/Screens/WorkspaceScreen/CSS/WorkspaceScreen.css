@@ -2,12 +2,40 @@
     WorkspaceScreen shell layout: full viewport height flex container.
 */
 .workspace-layout {
+    --ws-bg: #1a1d21;
+    --ws-surface: #222529;
+    --ws-surface-2: #2c2f33;
+    --ws-surface-3: #36393f;
+    --ws-surface-hover: rgba(255, 255, 255, 0.08);
+    --ws-surface-active: rgba(255, 255, 255, 0.12);
+    --ws-border: rgba(255, 255, 255, 0.12);
+    --ws-border-strong: rgba(255, 255, 255, 0.2);
+    --ws-text: #f8f8f8;
+    --ws-text-muted: rgba(255, 255, 255, 0.72);
+    --ws-text-subtle: rgba(255, 255, 255, 0.55);
+    --ws-accent: #522f57;
+    --ws-accent-soft: rgba(82, 47, 87, 0.28);
+    --ws-danger: #e01e5a;
+    --ws-success: #2bac76;
+    --ws-input-bg: rgba(255, 255, 255, 0.06);
+    --ws-input-border: rgba(255, 255, 255, 0.16);
+    --ws-shadow: rgba(0, 0, 0, 0.35);
+    --ws-topbar-bg: #350d36;
+    --ws-nav-bg: #3f0e40;
+    --ws-sidebar-bg: #3f0e40;
+    --ws-sidebar-hover: rgba(255, 255, 255, 0.08);
+    --ws-sidebar-active: #522f57;
+    --ws-sidebar-text: rgba(255, 255, 255, 0.86);
+    --ws-sidebar-muted: rgba(255, 255, 255, 0.65);
+    color-scheme: dark;
+
     display: flex;
     flex-direction: column;
     height: 100dvh;
     width: 100vw;
     overflow: hidden;
-    background: #1a1d21;
+    background: var(--ws-bg);
+    color: var(--ws-text);
     font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
 }
 

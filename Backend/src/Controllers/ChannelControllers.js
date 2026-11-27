@@ -1,7 +1,8 @@
 import channel_service from "../Services/ChannelServices.js";
 import {
     publishChannel,
-    publishChannelDeleted
+    publishChannelDeleted,
+    publishChannelUpdated
 } from "../Realtime/SocketServer.js";
 
 /*
@@ -37,6 +38,27 @@ export async function createChannel(request, response) {
     return response.status(201).send({
         ok: true,
         message: "Channel created successfully.",
+        data: {
+            channel
+        }
+    });
+}
+
+export async function updateChannel(request, response) {
+    const { channel_id } = request.params;
+    const { name } = request.body;
+
+    const channel = await channel_service.updateChannel(
+        request.workspace._id,
+        channel_id,
+        name
+    );
+
+    publishChannelUpdated(request.workspace._id, channel);
+
+    return response.status(200).send({
+        ok: true,
+        message: "Channel updated successfully.",
         data: {
             channel
         }

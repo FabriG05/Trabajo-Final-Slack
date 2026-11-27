@@ -4,6 +4,7 @@ import workspaceMiddleware from '../Middlewares/WorkspaceMiddelware.js'
 import {
     getChannels,
     createChannel,
+    updateChannel,
     deleteChannel
 } from '../Controllers/ChannelControllers.js'
 import {
@@ -27,6 +28,8 @@ channelRouter.use(authMiddleware)
 channelRouter.get('/', workspaceMiddleware(memberRoles), getChannels)
 
 channelRouter.post('/', workspaceMiddleware(memberRoles), createChannel)
+
+channelRouter.put('/:channel_id', workspaceMiddleware(managerRoles), updateChannel)
 
 // Only owners and admins can delete a channel (and its messages).
 channelRouter.delete('/:channel_id', workspaceMiddleware(managerRoles), deleteChannel)

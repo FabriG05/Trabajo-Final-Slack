@@ -4,8 +4,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1a1d21;
-    color: #fff;
+    background: var(--ws-bg);
+    color: var(--ws-text);
     padding: 24px;
 }
 

@@ -4,7 +4,7 @@
     bottom: 80px;
     min-width: 220px;
     background: #302034;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--ws-surface-active);
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     padding: 8px;
@@ -16,7 +16,7 @@
     padding: 8px 10px;
     font-size: 12px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--ws-text-subtle);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -35,7 +35,7 @@
 
 .create-more-menu__item:hover {
     background: #422e48;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .create-more-menu__people {
@@ -57,8 +57,8 @@
     padding: 8px 10px;
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+    background: var(--ws-surface-hover);
+    color: var(--ws-text);
     cursor: pointer;
     text-align: left;
 }
@@ -90,7 +90,7 @@
 
 .create-more-menu__empty {
     padding: 10px;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--ws-text-subtle);
     font-size: 13px;
 }
 

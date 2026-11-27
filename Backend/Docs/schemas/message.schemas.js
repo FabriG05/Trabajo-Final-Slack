@@ -172,4 +172,61 @@ export const DMSummariesResponse = {
     }
 }
 
-export default { MessageSender, Message, MessageListResponse, MessageResponse, DeleteMessageResponse, SendMessageBody, UnreadCountsResponse, MarkReadBody, MarkReadResponse, ActivityResponse, DMSummariesResponse }
+export const WorkspaceSearchResponse = {
+    type: 'object',
+    required: ['ok', 'message', 'data'],
+    properties: {
+        ok: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Search results retrieved successfully.' },
+        data: {
+            type: 'object',
+            required: ['channels', 'members', 'messages'],
+            properties: {
+                channels: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            type: { type: 'string', example: 'channel' }
+                        }
+                    }
+                },
+                members: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            email: { type: 'string' },
+                            photo: { type: 'string', nullable: true },
+                            status: { type: 'string' },
+                            role: { type: 'string' },
+                            type: { type: 'string', example: 'member' }
+                        }
+                    }
+                },
+                messages: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            content: { type: 'string' },
+                            created_at: { type: 'string', format: 'date-time' },
+                            type: { type: 'string', example: 'message' },
+                            message_type: { type: 'string', enum: ['channel', 'direct'] },
+                            sender: { type: 'object' },
+                            channel: { type: 'object', nullable: true },
+                            dm: { type: 'object', nullable: true }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export default { MessageSender, Message, MessageListResponse, MessageResponse, DeleteMessageResponse, SendMessageBody, UnreadCountsResponse, MarkReadBody, MarkReadResponse, ActivityResponse, DMSummariesResponse, WorkspaceSearchResponse }

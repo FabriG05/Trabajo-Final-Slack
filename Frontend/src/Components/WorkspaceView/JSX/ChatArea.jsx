@@ -3,18 +3,15 @@ import { useWorkspace } from '../../../Context/WorkspaceContext'
 import useWorkspaceMemberCount from '../../../Hooks/useWorkspaceMemberCount'
 import { formatDayLabel, getDayKey } from '../../../Utils/formatDate'
 import { readFileAsAttachment, formatFileSize } from '../../../Utils/fileAttachment'
+import { renderMessageMarkdown } from '../../../Utils/renderMessageMarkdown'
+import InvitePeopleDialog from './InvitePeopleDialog'
 import {
     IconStar,
     IconMembers,
-    IconHuddle,
     IconFiles,
-    IconBell,
-    IconSearch,
-    IconMore,
     IconSend,
     IconUser,
     IconChevronDown,
-    IconDMs,
     IconTrash
 } from './SlackIcons'
 import '../CSS/ChatArea.css'
@@ -40,6 +37,8 @@ function formatTypingNames(names) {
     return 'Several people are typing…'
 }
 
+const COMMON_EMOJIS = ['😀', '😂', '😍', '👍', '🎉', '🔥', '✅', '👀', '🙏', '💡', '🚀', '❤️']
+
 function ChatArea() {
     const {
         activeChannel,
@@ -60,7 +59,7 @@ function ChatArea() {
     } = useWorkspace()
     const { memberCount } = useWorkspaceMemberCount(workspaceId)
     const [composerText, setComposerText] = useState('')
-    const [activeTab, setActiveTab] = useState('messages')
+    const [isSending, setIsSending] = useState(false)
     const [deletingMessageId, setDeletingMessageId] = useState(null)
     const [editingMessageId, setEditingMessageId] = useState(null)
     const [editingText, setEditingText] = useState('')
@@ -68,7 +67,11 @@ function ChatArea() {
     const [collapsedDays, setCollapsedDays] = useState({})
     const [selectedAttachment, setSelectedAttachment] = useState(null)
     const [attachmentError, setAttachmentError] = useState(null)
+    const [isInviteOpen, setIsInviteOpen] = useState(false)
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
     const fileInputRef = useRef(null)
+    const composerInputRef = useRef(null)
+    const emojiPickerRef = useRef(null)
 
     // Auto-scroll state: the feed sticks to the bottom unless the user
     // scrolled up to read older messages.
@@ -234,17 +237,22 @@ function ChatArea() {
     }
 
     async function handleSend() {
-        if ((!composerText.trim() && !selectedAttachment) || !isConversationOpen) {
+        if (isSending || (!composerText.trim() && !selectedAttachment) || !isConversationOpen) {
             return
         }
 
-        // The input is only cleared once the server stored the message.
-        const sent = await sendMessage(composerText, selectedAttachment)
+        setIsSending(true)
+        try {
+            // The input is only cleared once the server stored the message.
+            const sent = await sendMessage(composerText, selectedAttachment)
 
-        if (sent) {
-            setComposerText('')
-            setSelectedAttachment(null)
-            setAttachmentError(null)
+            if (sent) {
+                setComposerText('')
+                setSelectedAttachment(null)
+                setAttachmentError(null)
+            }
+        } finally {
+            setIsSending(false)
         }
     }
 
@@ -284,67 +292,92 @@ function ChatArea() {
         }
     }
 
+    useEffect(() => {
+        if (!isEmojiPickerOpen) return undefined
+
+        function handlePointerDown(event) {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+                setIsEmojiPickerOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handlePointerDown)
+        return () => document.removeEventListener('mousedown', handlePointerDown)
+    }, [isEmojiPickerOpen])
+
+    function applyComposerFormat(prefix, suffix = prefix, placeholder = 'text') {
+        const input = composerInputRef.current
+        if (!input) return
+
+        const start = input.selectionStart ?? composerText.length
+        const end = input.selectionEnd ?? composerText.length
+        const selected = composerText.slice(start, end) || placeholder
+        const nextValue = `${composerText.slice(0, start)}${prefix}${selected}${suffix}${composerText.slice(end)}`
+
+        setComposerText(nextValue)
+        setIsEmojiPickerOpen(false)
+
+        requestAnimationFrame(() => {
+            input.focus()
+            const selectionStart = start + prefix.length
+            const selectionEnd = selectionStart + selected.length
+            input.setSelectionRange(selectionStart, selectionEnd)
+        })
+    }
+
+    function insertComposerText(text) {
+        const input = composerInputRef.current
+        const start = input?.selectionStart ?? composerText.length
+        const end = input?.selectionEnd ?? composerText.length
+        const nextValue = `${composerText.slice(0, start)}${text}${composerText.slice(end)}`
+        setComposerText(nextValue)
+        setIsEmojiPickerOpen(false)
+        requestAnimationFrame(() => {
+            if (!input) return
+            const cursor = start + text.length
+            input.focus()
+            input.setSelectionRange(cursor, cursor)
+        })
+    }
+
+    function insertNumberedList() {
+        const input = composerInputRef.current
+        const start = input?.selectionStart ?? composerText.length
+        const end = input?.selectionEnd ?? composerText.length
+        const before = composerText.slice(0, start)
+        const selected = composerText.slice(start, end) || 'item'
+        const previousLine = before.split('\n').pop() || ''
+        const match = previousLine.match(/^(\d+)\.\s+/)
+        const nextNumber = match ? Number(match[1]) + 1 : 1
+        const prefix = before.length > 0 && !before.endsWith('\n') ? `\n${nextNumber}. ` : `${nextNumber}. `
+        const nextValue = `${before}${prefix}${selected}${composerText.slice(end)}`
+
+        setComposerText(nextValue)
+        setIsEmojiPickerOpen(false)
+        requestAnimationFrame(() => {
+            if (!input) return
+            const selectionStart = before.length + prefix.length
+            const selectionEnd = selectionStart + selected.length
+            input.focus()
+            input.setSelectionRange(selectionStart, selectionEnd)
+        })
+    }
+
     return (
         <main className='chat-area' aria-label={`Conversation: ${displayName}`}>
             {/* Header: Title, Tabs and Channel actions */}
             <header className='chat-header'>
                 <div className='chat-header__top'>
                     <div className='chat-header__title-group'>
-                        <button type='button' className='chat-header__star-btn' title='Star'>
-                            <IconStar size={16} />
-                        </button>
                         <h1 className='chat-header__title'>{displayName}</h1>
                     </div>
 
                     <div className='chat-header__actions'>
-                        <button type='button' className='chat-header__members-btn' title='Members'>
+                        <div className='chat-header__members-btn' title='Members' aria-label={`${memberCount} members`}>
                             <IconMembers size={15} />
                             <span>{memberCount}</span>
-                        </button>
-                        <button type='button' className='chat-header__huddle-btn'>
-                            <IconHuddle size={15} />
-                            <span>Huddle</span>
-                            <IconChevronDown size={10} className='chat-header__caret' />
-                        </button>
-                        <button type='button' className='chat-header__icon-btn' title='Canvas'>
-                            <IconFiles size={15} />
-                        </button>
-                        <button type='button' className='chat-header__icon-btn' title='Notifications'>
-                            <IconBell size={15} />
-                        </button>
-                        <button type='button' className='chat-header__icon-btn' title='Search in conversation'>
-                            <IconSearch size={15} />
-                        </button>
-                        <button type='button' className='chat-header__icon-btn' title='More options'>
-                            <IconMore size={16} />
-                        </button>
+                        </div>
                     </div>
-                </div>
-
-                <div className='chat-header__tabs'>
-                    <button
-                        type='button'
-                        className={`chat-header__tab${activeTab === 'messages' ? ' chat-header__tab--active' : ''}`}
-                        onClick={() => setActiveTab('messages')}
-                    >
-                        <IconDMs size={14} />
-                        <span>Messages</span>
-                    </button>
-                    <button
-                        type='button'
-                        className={`chat-header__tab${activeTab === 'canvas' ? ' chat-header__tab--active' : ''}`}
-                        onClick={() => setActiveTab('canvas')}
-                    >
-                        <IconFiles size={14} />
-                        <span>Add canvas</span>
-                    </button>
-                    <button
-                        type='button'
-                        className='chat-header__tab-add'
-                        title='Add tab'
-                    >
-                        +
-                    </button>
                 </div>
             </header>
 
@@ -374,36 +407,11 @@ function ChatArea() {
                     </p>
 
                     <div className='chat-welcome__cards'>
-                        <div className='chat-welcome__card chat-welcome__card--template'>
-                            <div className='chat-welcome__card-header'>
-                                <p className='chat-welcome__card-title'>Start from a template</p>
-                                <p className='chat-welcome__card-desc'>Browse channel templates</p>
-                            </div>
-                            <div className='chat-welcome__card-graphic chat-welcome__card-graphic--template'>
-                                <div className='chat-welcome__mini-sheet'>
-                                    <span className='chat-welcome__check'>✓</span>
-                                    <div className='chat-welcome__lines'>
-                                        <div className='chat-welcome__line' />
-                                        <div className='chat-welcome__line' />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='chat-welcome__card chat-welcome__card--apps'>
-                            <div className='chat-welcome__card-header'>
-                                <p className='chat-welcome__card-title'>Connect your apps</p>
-                                <p className='chat-welcome__card-desc'>Bring your work into Slack</p>
-                            </div>
-                            <div className='chat-welcome__card-graphic chat-welcome__card-graphic--apps'>
-                                <div className='chat-welcome__mini-isometric'>
-                                    <span className='chat-welcome__app-badge'>📊</span>
-                                    <span className='chat-welcome__app-badge'>📁</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='chat-welcome__card chat-welcome__card--invite'>
+                        <button
+                            type='button'
+                            className='chat-welcome__card chat-welcome__card--invite'
+                            onClick={() => setIsInviteOpen(true)}
+                        >
                             <div className='chat-welcome__card-header'>
                                 <p className='chat-welcome__card-title'>Invite teammates</p>
                                 <p className='chat-welcome__card-desc'>Add your whole team</p>
@@ -415,7 +423,7 @@ function ChatArea() {
                                     <span className='chat-welcome__avatar'>🧑</span>
                                 </div>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -491,7 +499,7 @@ function ChatArea() {
                                             </div>
                                         </div>
                                     ) : (
-                                        msg.text && <p className='chat-message__content'>{msg.text}</p>
+                                        msg.text && <p className='chat-message__content'>{renderMessageMarkdown(msg.text)}</p>
                                     )}
                                     {msg.attachment && (
                                         msg.attachment.mimeType?.startsWith('image/') ? (
@@ -617,19 +625,20 @@ function ChatArea() {
                 <div className='chat-composer__box'>
                     {/* Formatting bar */}
                     <div className='chat-composer__toolbar'>
-                        <button type='button' className='chat-composer__tool' title='Bold'><b>B</b></button>
-                        <button type='button' className='chat-composer__tool' title='Italic'><i>I</i></button>
-                        <button type='button' className='chat-composer__tool' title='Strikethrough'><s>S</s></button>
+                        <button type='button' className='chat-composer__tool' title='Bold' onClick={() => applyComposerFormat('**')}><b>B</b></button>
+                        <button type='button' className='chat-composer__tool' title='Italic' onClick={() => applyComposerFormat('*')}><i>I</i></button>
+                        <button type='button' className='chat-composer__tool' title='Strikethrough' onClick={() => applyComposerFormat('~~')}><s>S</s></button>
                         <span className='chat-composer__separator' />
-                        <button type='button' className='chat-composer__tool' title='Link'>🔗</button>
-                        <button type='button' className='chat-composer__tool' title='Bullet list'>•</button>
-                        <button type='button' className='chat-composer__tool' title='Numbered list'>1.</button>
+                        <button type='button' className='chat-composer__tool' title='Link' onClick={() => applyComposerFormat('[', '](url)', 'link text')}>🔗</button>
+                        <button type='button' className='chat-composer__tool' title='Bullet list' onClick={() => applyComposerFormat('\n- ', '', 'item')}>•</button>
+                        <button type='button' className='chat-composer__tool' title='Numbered list' onClick={insertNumberedList}>1.</button>
                         <span className='chat-composer__separator' />
-                        <button type='button' className='chat-composer__tool' title='Code'>&lt;/&gt;</button>
+                        <button type='button' className='chat-composer__tool' title='Code' onClick={() => applyComposerFormat('`')}>&lt;/&gt;</button>
                     </div>
 
                     {/* Text area */}
                     <textarea
+                        ref={composerInputRef}
                         className='chat-composer__input'
                         placeholder={isConversationOpen ? `Message ${displayName}` : 'Select a conversation to write'}
                         rows={2}
@@ -691,19 +700,40 @@ function ChatArea() {
                                 tabIndex={-1}
                                 aria-hidden='true'
                             />
-                            <button type='button' className='chat-composer__action-btn' title='Format'>Aa</button>
-                            <button type='button' className='chat-composer__action-btn' title='Emoji'>☺</button>
-                            <button type='button' className='chat-composer__action-btn' title='Mention'>@</button>
-                            <button type='button' className='chat-composer__action-btn' title='Record video'>📹</button>
-                            <button type='button' className='chat-composer__action-btn' title='Record audio'>🎤</button>
+                            <button type='button' className='chat-composer__action-btn' title='Mention' onClick={() => insertComposerText('@')} disabled={!isConversationOpen}>@</button>
+                            <div className='chat-composer__emoji-wrap' ref={emojiPickerRef}>
+                                <button
+                                    type='button'
+                                    className='chat-composer__action-btn'
+                                    title='Emoji'
+                                    onClick={() => setIsEmojiPickerOpen((open) => !open)}
+                                    disabled={!isConversationOpen}
+                                >
+                                    ☺
+                                </button>
+                                {isEmojiPickerOpen && (
+                                    <div className='chat-composer__emoji-picker' role='dialog' aria-label='Emoji picker'>
+                                        {COMMON_EMOJIS.map((emoji) => (
+                                            <button
+                                                key={emoji}
+                                                type='button'
+                                                className='chat-composer__emoji-btn'
+                                                onClick={() => insertComposerText(emoji)}
+                                            >
+                                                {emoji}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className='chat-composer__actions-right'>
                             <button
                                 type='button'
-                                className={`chat-composer__send-btn${(composerText.trim() || selectedAttachment) && isConversationOpen ? ' chat-composer__send-btn--active' : ''}`}
+                                className={`chat-composer__send-btn${(composerText.trim() || selectedAttachment) && isConversationOpen && !isSending ? ' chat-composer__send-btn--active' : ''}`}
                                 onClick={handleSend}
-                                disabled={(!composerText.trim() && !selectedAttachment) || !isConversationOpen}
+                                disabled={isSending || (!composerText.trim() && !selectedAttachment) || !isConversationOpen}
                                 aria-label='Send message'
                             >
                                 <IconSend size={14} />
@@ -712,6 +742,8 @@ function ChatArea() {
                     </div>
                 </div>
             </div>
+
+            {isInviteOpen && <InvitePeopleDialog onClose={() => setIsInviteOpen(false)} />}
         </main>
     )
 }

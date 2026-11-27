@@ -40,6 +40,23 @@ export default {
             }
         }
     },
+    '/api/workspace/{workspace_id}/search': {
+        get: {
+            tags: ['Messages'],
+            operationId: 'searchWorkspace',
+            summary: 'Search channels, members and messages in a workspace',
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                workspaceIdParam,
+                { name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 2 }, description: 'Search query (minimum 2 characters).' }
+            ],
+            responses: {
+                '200': { description: 'Search results.', content: { 'application/json': { schema: { $ref: '#/components/schemas/WorkspaceSearchResponse' } } } },
+                '400': { description: 'Invalid query.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+                ...auth401, ...forbiddenMember, '500': { $ref: '#/components/responses/InternalServerError' }
+            }
+        }
+    },
     '/api/workspace/{workspace_id}/activity': {
         get: {
             tags: ['Messages'],

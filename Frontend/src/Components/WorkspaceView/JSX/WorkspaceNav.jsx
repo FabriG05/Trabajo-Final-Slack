@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useWorkspace } from '../../../Context/WorkspaceContext'
-import { compressPhoto } from '../../../Utils/compressPhoto'
 import WorkspaceAdminMenu from './WorkspaceAdminMenu'
 import CreateMoreMenu from './CreateMoreMenu'
 import {
@@ -8,7 +7,6 @@ import {
     IconDMs,
     IconActivity,
     IconAdmin,
-    IconMoon,
     IconUser
 } from './SlackIcons'
 import '../CSS/WorkspaceNav.css'
@@ -31,7 +29,7 @@ const NAV_ITEMS = [
     { id: 'dms', label: 'DMs', Icon: IconDMs },
     { id: 'activity', label: 'Activity', Icon: IconActivity },
     { id: 'divider', isDivider: true },
-    { id: 'admin', label: 'Admin', Icon: IconAdmin, badge: true }
+    { id: 'admin', label: 'Admin', Icon: IconAdmin }
 ]
 
 function WorkspaceNav() {
@@ -43,19 +41,16 @@ function WorkspaceNav() {
         currentUser,
         currentUserRole,
         userStatus,
-        setUserStatus,
-        changeProfilePhoto
+        setUserStatus
     } = useWorkspace()
 
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false)
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
-    const [photoError, setPhotoError] = useState(null)
     const [statusError, setStatusError] = useState(null)
     const [savingStatus, setSavingStatus] = useState(null)
     const profileMenuRef = useRef(null)
     const profileButtonRef = useRef(null)
-    const photoInputRef = useRef(null)
 
     // Workspace badge abbreviation (e.g. "NW" for "New Workspace")
     const workspaceInitials = (workspace?.name || 'NW')
@@ -98,31 +93,8 @@ function WorkspaceNav() {
     function toggleStatusMenu() {
         setIsAdminMenuOpen(false)
         setIsCreateMenuOpen(false)
-        setPhotoError(null)
         setStatusError(null)
         setIsStatusMenuOpen((open) => !open)
-    }
-
-    async function handlePhotoChange(event) {
-        const file = event.target.files?.[0]
-        event.target.value = ''
-
-        if (!file) {
-            return
-        }
-
-        if (!file.type.startsWith('image/')) {
-            setPhotoError('Please choose an image file.')
-            return
-        }
-
-        try {
-            const compressedPhoto = await compressPhoto(file)
-            setPhotoError(null)
-            await changeProfilePhoto(compressedPhoto)
-        } catch {
-            setPhotoError('The image could not be read. Please try again.')
-        }
     }
 
     async function handleStatusChange(status) {
@@ -148,6 +120,7 @@ function WorkspaceNav() {
                     type='button'
                     className='workspace-nav__workspace-badge'
                     title={workspace?.name || 'Workspace'}
+                    onClick={() => setActiveNavTab('profile')}
                 >
                     {workspaceInitials}
                 </button>
@@ -190,7 +163,6 @@ function WorkspaceNav() {
                             >
                                 <span className='workspace-nav__icon-wrapper'>
                                     <IconComponent size={20} className='workspace-nav__icon' />
-                                    {item.badge && <span className='workspace-nav__dot' />}
                                 </span>
                                 <span className='workspace-nav__label'>{item.label}</span>
                             </button>
@@ -224,14 +196,7 @@ function WorkspaceNav() {
                         )}
                     </div>
                 )}
-                <button
-                    type='button'
-                    className='workspace-nav__util-btn'
-                    aria-label='Toggle theme'
-                    title='Theme'
-                >
-                    <IconMoon size={18} />
-                </button>
+
 
                 <div className='workspace-nav__profile-wrapper'>
                     <button
@@ -338,22 +303,6 @@ function WorkspaceNav() {
                             >
                                 Profile
                             </button>
-
-                            <input
-                                ref={photoInputRef}
-                                type='file'
-                                accept='image/*'
-                                onChange={handlePhotoChange}
-                                tabIndex={-1}
-                                aria-hidden='true'
-                                className='workspace-nav__photo-input'
-                            />
-
-                            {photoError && (
-                                <p className='workspace-nav__photo-error' role='alert'>
-                                    {photoError}
-                                </p>
-                            )}
 
                             {statusError && (
                                 <p className='workspace-nav__photo-error' role='alert'>

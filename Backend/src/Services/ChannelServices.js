@@ -83,6 +83,42 @@ class ChannelService {
         return channel
     }
 
+    async updateChannel(workspaceId, channelId, name) {
+        const channel = await this.getChannelById(workspaceId, channelId)
+
+        if (channel.name === 'general') {
+            throw new ServerError("The #general channel cannot be renamed.", 400)
+        }
+
+        const normalizedName = this.normalizeName(name)
+
+        if (normalizedName === channel.name) {
+            return channel
+        }
+
+        const existingChannel = await channelRepository.getByWorkspaceAndName(workspaceId, normalizedName)
+
+        if (existingChannel && String(existingChannel._id) !== String(channelId)) {
+            throw new ServerError(
+                "A channel with that name already exists in this workspace.",
+                409
+            )
+        }
+
+        try {
+            return await channelRepository.updateById(channelId, { name: normalizedName })
+        } catch (error) {
+            if (error.code === 11000) {
+                throw new ServerError(
+                    "A channel with that name already exists in this workspace.",
+                    409
+                )
+            }
+
+            throw error
+        }
+    }
+
     async deleteChannel(workspaceId, channelId) {
         const channel = await this.getChannelById(workspaceId, channelId)
 

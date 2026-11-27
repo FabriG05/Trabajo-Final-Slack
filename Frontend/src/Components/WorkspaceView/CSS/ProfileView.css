@@ -1,7 +1,7 @@
 .profile-view {
     flex: 1;
     min-width: 0;
-    background: #1a1d21;
+    background: var(--ws-bg);
     color: #f8f8f8;
     display: flex;
     flex-direction: column;
@@ -10,14 +10,14 @@
 
 .profile-view__header {
     padding: 20px 28px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--ws-surface-hover);
 }
 
 .profile-view__title {
     margin: 0;
     font-size: 22px;
     font-weight: 700;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .profile-view__subtitle {
@@ -38,7 +38,7 @@
 
 .profile-view__card {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--ws-input-bg);
     border-radius: 12px;
     padding: 20px;
 }
@@ -67,7 +67,7 @@
     align-items: center;
     justify-content: center;
     background: #3a2a3f;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--ws-text-muted);
 }
 
 .profile-view__status-dot {
@@ -77,7 +77,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 3px solid #1a1d21;
+    border: 3px solid var(--ws-bg);
     background: #616061;
 }
 
@@ -97,13 +97,13 @@
     margin: 0;
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .profile-view__status {
     margin: 0 0 8px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--ws-text-subtle);
 }
 
 .profile-view__status[data-status='online'] { color: #2bac76; }
@@ -115,9 +115,9 @@
     width: fit-content;
     padding: 8px 14px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+    border: 1px solid var(--ws-input-border);
+    background: var(--ws-surface-hover);
+    color: var(--ws-text);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -125,7 +125,7 @@
 
 .profile-view__photo-btn:hover:not(:disabled),
 .profile-view__save-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--ws-border);
 }
 
 .profile-view__photo-btn:disabled,
@@ -161,8 +161,8 @@
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+    background: var(--ws-surface-hover);
+    color: var(--ws-text);
     font-size: 14px;
 }
 

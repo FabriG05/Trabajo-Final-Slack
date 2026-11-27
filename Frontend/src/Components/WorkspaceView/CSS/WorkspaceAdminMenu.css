@@ -4,7 +4,7 @@
     top: 0;
     min-width: 220px;
     background: #302034;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--ws-surface-active);
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     padding: 8px;
@@ -16,7 +16,7 @@
     padding: 8px 10px;
     font-size: 12px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--ws-text-subtle);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -35,7 +35,7 @@
 
 .workspace-admin-menu__item:hover {
     background: #422e48;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .workspace-admin-menu__item--danger {
@@ -61,10 +61,10 @@
 .workspace-admin-dialog {
     width: min(100%, 480px);
     background: #1f1022;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--ws-surface-active);
     border-radius: 12px;
     padding: 20px;
-    color: #fff;
+    color: var(--ws-text);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
@@ -96,7 +96,7 @@
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: #2b1830;
-    color: #fff;
+    color: var(--ws-text);
     font-size: 14px;
 }
 
@@ -121,15 +121,15 @@
 .workspace-admin-dialog__btn {
     padding: 9px 14px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: 1px solid var(--ws-input-border);
     background: transparent;
-    color: #fff;
+    color: var(--ws-text);
     cursor: pointer;
     font-size: 13px;
 }
 
 .workspace-admin-dialog__btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--ws-surface-hover);
 }
 
 .workspace-admin-dialog__btn:disabled {
@@ -164,7 +164,7 @@
     gap: 12px;
     padding: 10px 12px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--ws-surface-hover);
 }
 
 .workspace-admin-members__info {
@@ -175,7 +175,7 @@
 
 .workspace-admin-members__name {
     font-size: 14px;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .workspace-admin-members__email {
@@ -194,9 +194,9 @@
 .workspace-admin-members__role {
     padding: 7px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: 1px solid var(--ws-input-border);
     background: #2b1830;
-    color: #fff;
+    color: var(--ws-text);
 }
 
 .workspace-admin-members__remove {

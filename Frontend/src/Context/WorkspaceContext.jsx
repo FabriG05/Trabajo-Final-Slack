@@ -4,6 +4,7 @@ import {
     getWorkspaceById,
     getChannels,
     createChannel,
+    updateChannel as updateChannelRequest,
     deleteChannel as deleteChannelRequest,
     deleteMessage as deleteMessageRequest,
     updateMessage as updateMessageRequest,
@@ -168,8 +169,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
     const isHistoryNavRef = useRef(false)
     const [navHistoryState, setNavHistoryState] = useState({ index: -1, length: 0, entries: [] })
 
-    // Global search input
-    const [searchQuery, setSearchQuery] = useState('')
+
 
     // Current logged-in user, loaded from the API with the auth token.
     const [currentUser, setCurrentUser] = useState({
@@ -821,6 +821,20 @@ export function WorkspaceProvider({ children, workspaceId }) {
             ))
         }
 
+        function handleChannelUpdated(payload) {
+            const channel = payload?.channel
+
+            if (!channel) {
+                return
+            }
+
+            const mappedChannel = mapChannel(channel)
+
+            setChannels((previous) => previous.map((item) => (
+                String(item.id) === String(mappedChannel.id) ? { ...item, ...mappedChannel } : item
+            )))
+        }
+
         function handleMessageDeleted(payload) {
             const message = payload?.message
 
@@ -1065,6 +1079,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         socket.on('message:updated', handleMessageUpdated)
         socket.on('message:deleted', handleMessageDeleted)
         socket.on('channel:created', handleChannelCreated)
+        socket.on('channel:updated', handleChannelUpdated)
         socket.on('channel:deleted', handleChannelDeleted)
         socket.on('workspace:deleted', handleWorkspaceDeleted)
         socket.on('workspace:members-changed', handleMembersChanged)
@@ -1079,6 +1094,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
             socket.off('message:updated', handleMessageUpdated)
             socket.off('message:deleted', handleMessageDeleted)
             socket.off('channel:created', handleChannelCreated)
+            socket.off('channel:updated', handleChannelUpdated)
             socket.off('channel:deleted', handleChannelDeleted)
             socket.off('workspace:deleted', handleWorkspaceDeleted)
             socket.off('workspace:members-changed', handleMembersChanged)
@@ -1100,6 +1116,8 @@ export function WorkspaceProvider({ children, workspaceId }) {
             clearTimeout(typingStopTimerRef.current)
         }
     }, [])
+
+
 
     function clearUnread(conversationKey) {
         if (!conversationKey) {
@@ -1342,6 +1360,26 @@ export function WorkspaceProvider({ children, workspaceId }) {
         }
     }
 
+    async function renameChannel(channelId, name) {
+        const trimmedName = name?.trim()
+
+        if (!workspaceId || !channelId || !trimmedName) {
+            throw new Error('Channel name is required.')
+        }
+
+        const response = await updateChannelRequest(workspaceId, channelId, trimmedName)
+        const updatedChannel = response?.data?.channel
+
+        if (updatedChannel) {
+            const mappedChannel = mapChannel(updatedChannel)
+            setChannels((previous) => previous.map((channel) => (
+                String(channel.id) === String(mappedChannel.id) ? { ...channel, ...mappedChannel } : channel
+            )))
+        }
+
+        return updatedChannel
+    }
+
     /*
         Deletes a channel and everything cached for it. Throws on failure so
         the confirmation dialog can show the server message.
@@ -1434,7 +1472,11 @@ export function WorkspaceProvider({ children, workspaceId }) {
 
             stopTyping()
             clearUnread(String(mappedChannel.id))
-            setChannels((previous) => [...previous, mappedChannel])
+            setChannels((previous) => (
+                previous.some((channel) => String(channel.id) === String(mappedChannel.id))
+                    ? previous
+                    : [...previous, mappedChannel]
+            ))
             setActiveChannelId(mappedChannel.id)
             setActiveDmId(null)
             setChannelError(null)
@@ -1507,6 +1549,7 @@ export function WorkspaceProvider({ children, workspaceId }) {
         sendMessage,
         editMessage,
         deleteMessage,
+        renameChannel,
         deleteChannel,
         deleteWorkspace,
         renameWorkspace,
@@ -1528,8 +1571,6 @@ export function WorkspaceProvider({ children, workspaceId }) {
         setUserStatus,
         changeProfilePhoto,
         updateProfileName,
-        searchQuery,
-        setSearchQuery,
         canGoBack: navHistoryState.index > 0,
         canGoForward: navHistoryState.index < navHistoryState.length - 1,
         goBack,

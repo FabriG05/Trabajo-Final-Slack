@@ -246,6 +246,33 @@ export async function createChannel(workspaceId, name) {
     return responseBody
 }
 
+export async function updateChannel(workspaceId, channelId, name) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/channels/${channelId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ name })
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
 export async function deleteChannel(workspaceId, channelId) {
     const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
     const responseHttp = await fetch(
@@ -716,6 +743,32 @@ export async function sendDirectMessage(workspaceId, userId, content, attachment
 
     if (!responseHttp.ok) {
         throw new Error(`Server error (HTTP ${responseHttp.status})`)
+    }
+
+    const responseBody = await responseHttp.json()
+
+    if (!responseBody.ok) {
+        throw new Error(responseBody.message)
+    }
+
+    return responseBody
+}
+
+export async function searchWorkspace(workspaceId, query) {
+    const authToken = localStorage.getItem('auth_token') || localStorage.getItem('authToken')
+    const params = new URLSearchParams({ q: query })
+    const responseHttp = await fetch(
+        API_URL + `/api/workspace/${workspaceId}/search?${params.toString()}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    if (!responseHttp.ok) {
+        throw await buildResponseError(responseHttp)
     }
 
     const responseBody = await responseHttp.json()

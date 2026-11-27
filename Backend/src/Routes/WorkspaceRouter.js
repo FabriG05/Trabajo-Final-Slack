@@ -20,7 +20,8 @@ import {
     getDirectMessages,
     createDirectMessage,
     deleteMessage,
-    updateMessage
+    updateMessage,
+    searchWorkspace
 } from '../Controllers/MessageControllers.js'
 import {
     markConversationRead,
@@ -136,6 +137,16 @@ workspaceRouter.delete(
     authMiddleware,
     workspaceMiddleware(['Owner', 'Admin', 'User']),
     unstarMessage
+)
+
+/*
+    Workspace search: channels, members and messages visible to the user.
+*/
+workspaceRouter.get(
+    "/:workspace_id/search",
+    authMiddleware,
+    workspaceMiddleware(['Owner', 'Admin', 'User']),
+    searchWorkspace
 )
 
 /*

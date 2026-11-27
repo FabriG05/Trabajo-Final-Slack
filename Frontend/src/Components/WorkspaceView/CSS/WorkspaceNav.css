@@ -3,8 +3,8 @@
 */
 .workspace-nav {
     width: 66px;
-    background: #270629;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--ws-nav-bg);
+    border-right: 1px solid var(--ws-surface-hover);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -21,7 +21,7 @@
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: #522653;
+    background: rgba(255,255,255,0.12);
     border: 2px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
     font-weight: 700;
@@ -73,13 +73,13 @@
 }
 
 .workspace-nav__btn:hover {
-    background: #302034;
+    background: rgba(255,255,255,0.12);
     color: #ffffff;
 }
 
 .workspace-nav__btn--active,
 .workspace-nav__btn--active:hover {
-    background: #7d3986;
+    background: var(--ws-accent);
     color: #ffffff;
 }
 
@@ -93,17 +93,6 @@
 .workspace-nav__icon {
     font-size: 18px;
     line-height: 1;
-}
-
-.workspace-nav__dot {
-    position: absolute;
-    top: -2px;
-    right: -4px;
-    width: 8px;
-    height: 8px;
-    background: #ecb22e;
-    border-radius: 50%;
-    border: 2px solid #270629;
 }
 
 .workspace-nav__label {
@@ -136,7 +125,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--ws-surface-hover);
     border: none;
     color: #ffffff;
     font-size: 18px;
@@ -148,7 +137,7 @@
 }
 
 .workspace-nav__util-btn:hover {
-    background: #302034;
+    background: rgba(255,255,255,0.12);
 }
 
 .workspace-nav__profile-wrapper {
@@ -172,7 +161,7 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    background: #7d3986;
+    background: var(--ws-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,7 +186,7 @@
     height: 9px;
     background: #2bac76;
     border-radius: 50%;
-    border: 2px solid #270629;
+    border: 2px solid var(--ws-nav-bg);
 }
 
 .workspace-nav__status-dot[data-status='away'],
@@ -230,7 +219,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 12px;
-    background: #302034;
+    background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
@@ -371,10 +360,6 @@
     color: rgba(255, 255, 255, 0.45);
 }
 
-.workspace-nav__photo-input {
-    display: none;
-}
-
 .workspace-nav__photo-error {
     margin: 0;
     padding: 0 6px;
@@ -394,5 +379,5 @@
 }
 
 .workspace-nav__util-btn--active {
-    background: #7d3986;
+    background: var(--ws-accent);
 }

@@ -246,6 +246,15 @@ export function publishChannel(workspaceId, channel) {
     io.to(workspaceRoom(workspaceId)).emit("channel:created", { channel });
 }
 
+/* Publishes a channel update to the members of its workspace. */
+export function publishChannelUpdated(workspaceId, channel) {
+    if (!io || !workspaceId || !channel) {
+        return;
+    }
+
+    io.to(workspaceRoom(workspaceId)).emit("channel:updated", { channel });
+}
+
 /* Tells every reader that a message was deleted, so it disappears live. */
 export function publishMessageDeleted(message) {
     if (!io || !message) {
