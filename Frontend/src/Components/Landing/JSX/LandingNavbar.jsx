@@ -286,7 +286,8 @@ function LandingNavbar({ signedIn = false, onSignOut, theme = 'light' }) {
                     <>
                         {location.pathname !== '/home' && (
                             <Link to='/home' className='landing-navbar__get-started'>
-                                Go to workspaces
+                                <span className='landing-navbar__btn-text--full'>Go to workspaces</span>
+                                <span className='landing-navbar__btn-text--short'>Workspaces</span>
                             </Link>
                         )}
 

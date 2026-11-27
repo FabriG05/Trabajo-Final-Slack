@@ -312,6 +312,10 @@
     background: rgba(255, 255, 255, 0.15);
 }
 
+.landing-navbar__btn-text--short {
+    display: none;
+}
+
 /* Tablets and below: keep brand + auth actions, drop the menu. */
 @media (max-width: 1024px) {
     .landing-navbar__menu {
@@ -319,12 +323,74 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .landing-navbar {
         padding: 10px 16px;
+        gap: 12px;
+    }
+
+    .landing-navbar__left {
+        gap: 12px;
+        flex-shrink: 0;
+    }
+
+    .landing-navbar__logo {
+        height: 28px;
+    }
+
+    .landing-navbar__right {
+        gap: 8px;
+        flex-shrink: 0;
     }
 
     .landing-navbar__demo {
         display: none;
+    }
+
+    .landing-navbar__get-started,
+    .landing-navbar__signout {
+        padding: 9px 12px;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-navbar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .landing-navbar__left {
+        gap: 6px;
+    }
+
+    .landing-navbar__logo {
+        height: 24px;
+    }
+
+    .landing-navbar__right {
+        gap: 6px;
+    }
+
+    .landing-navbar__btn-text--full {
+        display: none;
+    }
+
+    .landing-navbar__btn-text--short {
+        display: inline;
+    }
+
+    .landing-navbar__signin {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+
+    .landing-navbar__get-started,
+    .landing-navbar__signout {
+        padding: 7px 10px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        border-radius: 6px;
     }
 }
